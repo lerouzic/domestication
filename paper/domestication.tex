@@ -1,0 +1,54 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{bm}
+
+\title{Consequences of the domestication process on gene network evolution}
+\author{Ewen Burban, Maud I.\ Tenaillon, Arnaud Le~Rouzic}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+Domestication is the result of human-driven selective breeding in species of interest. Domesticated species generally display substantial differences compared to their wild counterparts, and domestication has often been considered as an interesting process to study, both for applied purposes (e.g. identifying genes involved in economically-relevant phenotypic changes) and fundamental issues (domestication being considered as a model to study rapid adaptation).
+
+Even if the domestication process has been carried on independently on many species, it has long been noticed that domestication is often associated with convergent phenotypic changes. For instance, domesticated species tend to converge on obviously selected characters (e.g. size of edible organs in plants), but also on characters that are more difficult to associate with direct targets of artificial selection (e.g. neoteny in domesticated mammals), and which might evolve as correlated characters. This convergence phenomenon is generally refered to as the phenotypic domestication syndrome. 
+
+More recently, progress in genotyping and sequencing methods revealed that domestication was also associated with systematic molecular changes. This includes a drop in genetic diversity, presumably due to strong directional selection and/or genetic drift associated with a population bottleneck, as well as an increase in the recombination rate, as a consequence of polygenic response to selection. Moreover, recent transcriptomic approaches suggest that domestication might be associated to gene regulatory network rewiring; (+ refs and literature survey).
+
+So far, there has not been any substantial effort at providing a theoretical basis to the molecular domestication syndrome beyond verbal models. Here, we propose to simulate the evolution of the transcriptome in a population submitted to domestication-like pressures. We used a gene network model (the 'Wagner' model, after Wagner 1994) to represent the complex genetic architecture of gene expression regulation, and tracked the evolution of genetic diversity, of gene expression plasticity, and of network topology in scenarios featuring (i) a temporary drop in the population size (bottleneck), and (ii) a substantial change in the selection pattern. 
+
+\section{Models and methods}
+\paragraph{Gene network model}
+
+The gene network model was directly inspired from Wagner 1994, with minor changes detailed below. Individual genotypes were stored as $n \times n$ interaction matrices $\bm{\mathrm W}$, representing the strength and the direction of regulatory interactions between $n$ transcription factors or regulatory genes. Each element of the matrix $w_{i,j}$ stands for the effect of gene $j$ on the expression of gene $i$; interactions can be positive (transcription activation), negative (inhibition), or zero (no direct interaction). Each line of the $\bm{\mathrm W}$ matrix can be interpreted as an allele (the set of \emph{cis}-regulatory sites of the transcription factor). The model considered discrete regulatory time steps, and the expression of the $n$ genes, stored in a vector $\bm{\mathrm P}$, changes as $\bm{\mathrm P}_{t+1} = F(\bm{\mathrm W} \cdot \bm{\mathrm P}_t)$, where $F(x_1, \dots, x_n)$ applied a sigmoid scaling function $f(x)$ to all elements to ensure that gene expression ranges between 0 (no expression) and 1 (full expression). We used an asymmetric scaling function as in \cite{RL16, ORL18}, defined as $f(x) = 
+...$, where $a = 0.2$ stands for the constitutive expression (in absence of regulation, all genes are expressed to 20\% of their maximal expression). 
+
+The kinetics of the gene network was simulated for 24 time steps in each individual, starting from $P_0 = (a, \dots, a)$. The simulation program reports, for each gene $i$, the mean $\bar p_i$ and the variance $V_i$ of its expression level over the four last time steps. A non-null variance features an unstable gene network, which is generally considered as non-viable in equivalent models. 
+
+In addition to this traditional framework, we considered that one of the network genes was a "sensor" gene influenced by the environment. This makes it possible for the network to react to an environmental signal, and evolve expression plasticity. In practice, the environmental signal at generation $g$ was $0 < e_g < 1$, and the value of the sensor gene was replaced by $e_g$ at each time step (the sensor gene had no regulator and was not influenced by the internal state of the network).  
+
+\paragraph{Population model}
+
+The gene network model was coupled with a traditional individual-based population genetics model. Individuals were diploid and hermaphrodite, and generations were non-overlapping. Reproduction consisted in drawing for each of the $N$ offspring two parents randomly with a probability proportional to their fitness. Each parent gave a gamete, i.e.\ a random allele at each of the $n$ loci (free recombination). There was no recombinations between \emph{cis}-regulatory sites at a given locus. The genotype of an individual (the $\bm{\mathrm W}$ matrix from which the expression phenotype was calculated) was obtained by averaging out maternal and paternal haplotypes. 
+
+Individual fitness $\omega$ was calculated as the product of two components, $\omega = \omega_I \times \omega_S$. $\omega_I$ corresponds to the penalty for unstable networks ($\omega_I = \prod_{i=1}^n \exp(s^\prime V_i$), and $\omega_S$ to the stabilizing selection component, which depends on the distance between the expression phenotype and a selection target: $\omega_S = \prod_{i=1}^n \exp(-s_i (\bar p_i - \theta_i)^2)$. As detailed below, some genes were not selected (in which case $s_i = 0$), some genes were selected for a constant optimum $\theta_i$ ("stable" genes), while a last set of genes were selected for optima that changed every generation $g$ ("plastic genes", half of them being selected for $\theta_{i,g} = e_g$, and the other half for $\theta_{i,g} = 1-e_g$).
+
+Mutations occurred during gametogenesis with a rate $\mu$, expressed as the mutation probability per haploid genome. A mutation consists in replacing a random element of the $\bm{\mathrm W}$ matrix by a new value drawn in a Gaussian distribution centered on the former value $w_{i,j}^\prime \sim \mathcal N (w_{i,j}, \sigma_m)$, where $\sigma_m$ stands for the standard deviation of mutational effects. 
+
+\paragraph{Domestication scenario and parameterization}
+
+Domestication was associated with two independent changes in the simulation parameters: a temporary demographic bottleneck (decrease in population size), and a change in the gene expression optima (modification of the selection pressure). Simulations were split in three stages: (i) a long ($T_a$ generations) "burn-in" stage aiming to simulate pre-domestication conditions, after which the large population size ($N_a$) "ancestral" species is expected to harbor a genotype adapted to wild conditions (selection optima $\theta_a$), (ii) a $T_b$-generation long bottleneck, during which the population size is reduced to $N_b$ individuals, and selection optima switched to $\theta_b$, and (iii) a $T_c$ generation expansion of the domesticated species (population size back to $N_a$), while the selection optima remain to the "domestication" conditions $\theta_b$. 
+
+In order to calibrate simulations with realistic parameters, we used the well-known maize domestication scenario as a reference. This scenario is rather typical of domestication, and this choice s unlikely to affect the generality of our results. 
+
+\paragraph{Measurements} 
+
+\paragraph{Implementation} The simulation model was implemented in C++ and compiled with gcc version ???. Simulation runs were automated via bash scripts, replicates being launched in parallel, and simulation results were analyzed with R version 3.  Simulations were run on a xxx Intel processors server (160 logical cores), on which the computation of an individual's network dynamics and reproduction --- the most critical sections of the algorithm --- took about 50µs, i.e.\ about 6 hours for a standard simulation. 
+
+\section{Results}
+
+\section{Discussion}
+
+\end{document}
