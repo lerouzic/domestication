@@ -1,0 +1,41 @@
+TYPE_ARCHI              m2
+SIMUL_GENER             1
+GENET_NBLOC             25
+GENET_PLOIDY			2
+GENET_MUTTYPE		individual
+GENET_MUTSD             0.1
+GENET_RECRATES          0.5
+GENET_SELFING		0.0
+GENET_CLONAL        0.0
+GENET_EPIGENET			0.0
+INIT_ALLELES            0    0.0001
+TYPE_ALLELES            zero
+INIT_CLONAL            	clonal
+ENVIRO_PLASTICITY	1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ENVIRO_SDINIT           0
+ENVIRO_SDDYNAM		0
+ENVIRO_SDFINAL		0 
+FITNESS_TYPE            gaussian
+FITNESS_STRENGTH        0 10 10 10 0 0 0 0 0 10 10 10 0 0 0 0 0 0 0 0 0 0 0 0 0
+FITNESS_OPTIMUM         0.5
+FITNESS_FLUCT           no_fluctuation
+FITNESS_STRENGTH2       0
+FITNESS_OPTIMUM2        0.0
+FITNESS_PERIOD          0
+OUT_CANAL_TESTS         0
+OUT_CANAL_MUTSD         0.1
+OUT_CANAL_SDINIT		0.1
+OUT_CANAL_SDDYNAM		0.01
+OUT_HERIT_TESTS        	0
+OUT_DIREPI_TESTS        0
+OUT_UNSTAB				yes
+OUT_GENO				yes
+INIT_CONDIAG            0
+TYPE_SO         		basal
+INIT_BASAL              0.2
+INIT_RECURRENCE         0
+DEV_TIMESTEPS           16
+DEV_CALCSTEPS           4
+FITNESS_STAB            exponential_stab
+FITNESS_STABSTR         46000
+SCALE					combined
