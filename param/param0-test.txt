@@ -39,4 +39,4 @@ DEV_CALCSTEPS           4
 FITNESS_STAB            exponential_stab
 FITNESS_STABSTR         46000
 SCALE					combined
-INIT_PSIZE		10000
+INIT_PSIZE				100
