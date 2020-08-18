@@ -10,7 +10,7 @@ DIR_ROOT=../
 DIR_SRC=$DIR_ROOT/src/
 DIR_SIM=$DIR_ROOT/cache/
 DIR_PAR=$DIR_ROOT/param/
-PATH_GENERATOR=$DIR_SRC/SimFiles_generator.R
+PATH_GENERATOR=$DIR_SRC/createsimfiles.R
 
 ###########_variables_####################
 BASE_NAME=Simul
