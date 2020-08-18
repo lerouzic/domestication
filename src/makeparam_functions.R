@@ -67,7 +67,7 @@ make.selstr <- function(pattern) {
 	ans
 }
 
-create.paramseries <- function(param.template.file, extparam.file, simul.dir=dirname(param.template.file))
+create.paramseries <- function(param.template.file, extparam.file, simul.dir, overwrite=FALSE)
 	 {
 		
 	.repID <- function(rep, ndigits=4)
@@ -125,53 +125,66 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir=dir
 		myparam$FITNESS_OPTIMUM <- optim
 		myparam$FITNESS_STR <- sel.strength*make.selstr(extparam$SCENARIO_PART1)
 		myparam$FILE_NEXTPAR <- normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, 2)))
-		write.param(file.path(simul.dir, .repDir(rep), .repFile(rep, 1)), myparam)
+		par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, 1))
+		if (!file.exists(par.file.name) || overwrite)
+			write.param(par.file.name, myparam)
 		
 		# From here, just update what is necessary
 		if (bo.b > 2)
 		for (gen in 2:(bo.b-1)) {
 			optim <- make.randopt(optim, extparam$SCENARIO_PART1)
-			write.param(file.path(simul.dir, .repDir(rep), .repFile(rep, gen)),
-				list(FITNESS_OPTIMUM = optim, 
-					 FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, gen+1)))))
+			par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, gen))
+			if (!file.exists(par.file.name) || overwrite)
+				write.param(par.file.name,
+					list(FITNESS_OPTIMUM = optim, 
+						 FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, gen+1)))))
 		}
 
 		# first bottleneck generation
 		optim <- make.randopt(optim, extparam$SCENARIO_PART2, begin.bottleneck=TRUE)
-		write.param(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b)),
-				list(INIT_PSIZE = round(bo.d*extparam$BOTTLENECK_STRENGTH/2),
-					 FITNESS_OPTIMUM = optim, 
-					 FITNESS_STR     = sel.strength*make.selstr(extparam$SCENARIO_PART2),
-					 FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b+1)))))
+		par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b))
+		if (!file.exists(par.file.name) || overwrite)
+			write.param(par.file.name,
+					list(INIT_PSIZE = round(bo.d*extparam$BOTTLENECK_STRENGTH/2),
+						FITNESS_OPTIMUM = optim, 
+						FITNESS_STR     = sel.strength*make.selstr(extparam$SCENARIO_PART2),
+						FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b+1)))))
 					 
 		if (bo.d > 1)
 		for (gen in ((bo.b+1):(bo.b+bo.d))) {
 			optim <- make.randopt(optim, extparam$SCENARIO_PART2)
-			write.param(file.path(simul.dir, .repDir(rep), .repFile(rep, gen)),
-				list(FITNESS_OPTIMUM = optim, 
-					 FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, gen+1)))))
+			par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, gen))
+			if (!file.exists(par.file.name) || overwrite)
+				write.param(par.file.name,
+					list(FITNESS_OPTIMUM = optim, 
+						FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, gen+1)))))
 		}
 		
 		# First generation after the bottleneck
 		if (bo.a > 1){
 		optim <- make.randopt(optim, extparam$SCENARIO_PART2)
-		write.param(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b + bo.d)),
-			list(FITNESS_OPTIMUM = optim, 
-			     INIT_PSIZE      = myparam$INIT_PSIZE,
-				 FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b + bo.d + 1)))))
+		par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b + bo.d))
+		if (!file.exists(par.file.name) || overwrite)
+			write.param(par.file.name,
+				list(FITNESS_OPTIMUM = optim, 
+					INIT_PSIZE      = myparam$INIT_PSIZE,
+					FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b + bo.d + 1)))))
 		}
 		
 		# Domestication after bottleneck
 		if (bo.a > 2)
 		for (gen in ((bo.b+bo.d+1):(bo.b+bo.d+bo.a-1))) {
 			optim <- make.randopt(optim, extparam$SCENARIO_PART2)
-			write.param(file.path(simul.dir, .repDir(rep), .repFile(rep, gen)),
-				list(FITNESS_OPTIMUM = optim, 
-					 FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, gen+1)))))
+			par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, gen))
+			if (!file.exists(par.file.name) || overwrite)
+				write.param(file.path(simul.dir, .repDir(rep), .repFile(rep, gen)),
+					list(FITNESS_OPTIMUM = optim, 
+						FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, gen+1)))))
 		}
 		
 		# Very last generation (no NEXTPAR)
 		optim <- make.randopt(optim, extparam$SCENARIO_PART2)
+		
 		write.param(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b+bo.d+bo.a)),
 				list(FITNESS_OPTIMUM = optim))
 	}
