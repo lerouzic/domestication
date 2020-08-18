@@ -132,14 +132,14 @@ OPTION=$OPTION" -mu $MUT_RATE"
 # Creating the directory including the simulation pipeline + input/output files
 
 
-if [ ! -d "$DIRSIM" ] ; then
-mkdir $DIRSIM
+if [ ! -d "$DIR_SIM" ] ; then
+mkdir $DIR_SIM
 fi
 
 
 while [ -d "$NEWSIM" ] ; do
 Compt=$(($Compt +1 ))
-NEWSIM=$DIRSIM/$BASE_NAME-$TYPE-${DATE}-$Compt
+NEWSIM=$DIR_SIM/$BASE_NAME-$TYPE-${DATE}-$Compt
 done
 
 SIMPARAM=$NEWSIM/param.txt
