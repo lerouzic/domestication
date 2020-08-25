@@ -1,6 +1,6 @@
 # To be "Sourced" from a R script file
 
-Rutils <- require(R.utils, warn.conflicts=FALSE, quietly=TRUE) # Path manipulation 
+Rutils <- suppressPackageStartupMessages(require(R.utils)) # Path manipulation 
 
 create.launchfile <- function(prog.path, param.files, output.files, launch.file="./launchfile.sh", relative.paths=TRUE) {
 	# relative.paths sets all paths relative to the launch.file directory
@@ -158,7 +158,7 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 		# First generation: use the full template file
 		optim <- make.randopt(runif(myparam$GENET_NBLOC), extparam$SCENARIO_PART1)
 		myparam$FITNESS_OPTIMUM <- optim
-		myparam$FITNESS_STR <- sel.strength*make.selstr(extparam$SCENARIO_PART1)
+		myparam$FITNESS_STRENGTH <- sel.strength*make.selstr(extparam$SCENARIO_PART1)
 		myparam$FILE_NEXTPAR <- normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, 2)))
 		par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, 1))
 		if (!file.exists(par.file.name) || overwrite)
@@ -182,7 +182,7 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 			write.param(par.file.name,
 					list(INIT_PSIZE = round(bo.d*extparam$BOTTLENECK_STRENGTH/2),
 						FITNESS_OPTIMUM = optim, 
-						FITNESS_STR     = sel.strength*make.selstr(extparam$SCENARIO_PART2),
+						FITNESS_STRENGTH     = sel.strength*make.selstr(extparam$SCENARIO_PART2),
 						FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b+1)))))
 					 
 		# The rest of the bottleneck
