@@ -1,3 +1,5 @@
+# To be "Sourced" from a R script file
+
 Rutils <- require(R.utils, warn.conflicts=FALSE, quietly=TRUE) # Path manipulation 
 
 create.launchfile <- function(prog.path, param.files, output.files, launch.file="./launchfile.sh", relative.paths=TRUE) {
@@ -47,6 +49,8 @@ write.param <- function(param.file, param) {
 }
 
 make.randopt <- function(oldopt, pattern, begin.bottleneck=FALSE) {
+	# Returns a vector of random optima according to the provided pattern
+	# (constant vs fluctuating optima)
 	stopifnot(length(oldopt) == length(pattern),
 			all(pattern %in% 0:5))
 	newopt <- oldopt
@@ -62,12 +66,39 @@ make.randopt <- function(oldopt, pattern, begin.bottleneck=FALSE) {
 }
 
 make.selstr <- function(pattern) {
+	# Mirrors the make.random function, but for the selection strength. 
+	# The algorithm is trivial, just sets zero for non-selected genes
+	# (including the first one = signal). 
+	
 	ans <- pattern != 0
 	ans[1] <- 0
 	ans
 }
 
 create.paramseries <- function(param.template.file, extparam.file, simul.dir, overwrite=FALSE)
+	# This is the main algorithm that create the simulation structure. 
+	# The function retruns the necessary information to make a launchfile
+	# (it does not write the launchfile, because all information is not available here)
+	# Two parameter files are necessary : 
+	#  - the parameter template, which is a regular parameter file that will be used for the default settings
+	#  - the "extended" parameter file, which provides "meta" information to run the simulation program
+	#    this is specific for the domestication project, and involves three simulation stages:
+	#     . before the bottleneck (burn-in)
+	#     . during the bottleneck
+	#     . after the bottleneck
+	# It is expected that the information from the two parameter files match (e.g. number of genes), 
+	# consequences of a non-matching pattern are undefined. 
+	# The algorithm reads the two parameter files and create the necessary files for simulations
+	# For each simulation replicate (REPLICATES variable in the ext.par file), a simulation directory
+	# is created, and as many parameter files as generations are created within each directory
+	#  Note: this represents a very large number of (small) files, which can represent a burder for 
+	#  the system, especially when creating the files or compressing the directory
+	# The first parameter file of a simulation is complete, the next ones only change what is necessary:
+	#   . every generation: the environmental variable and the fluctuating optima
+	#   . before and after the bottleneck: the population size
+	#   . at the beginning of the bottleneck: the "domestication" selection pattern
+	# The directory and parameter naming pattern is specified in a few internal functions. 
+
 	 {
 		
 	.repID <- function(rep, ndigits=4)
@@ -117,6 +148,10 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 	# Now the parameter files:
 	dir.create(file.path(simul.dir), showWarnings = FALSE)
 	
+	# It looks difficult to make it simpler: parameter files need to be updated
+	# on a case-by-case basis, as the parameters to change depend on the 
+	# simulation stage (before, during, of after the bottleneck)
+	
 	for (rep in 1:extparam$REPLICATES) {
 		dir.create(file.path(simul.dir, .repDir(rep)), showWarnings = FALSE)
 		
@@ -150,6 +185,7 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 						FITNESS_STR     = sel.strength*make.selstr(extparam$SCENARIO_PART2),
 						FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b+1)))))
 					 
+		# The rest of the bottleneck
 		if (bo.d > 1)
 		for (gen in ((bo.b+1):(bo.b+bo.d))) {
 			optim <- make.randopt(optim, extparam$SCENARIO_PART2)
