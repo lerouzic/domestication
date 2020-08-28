@@ -154,19 +154,22 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 	
 	for (rep in 1:extparam$REPLICATES) {
 		dir.create(file.path(simul.dir, .repDir(rep)), showWarnings = FALSE)
+		if (overwrite) { # This is quite powerful, use with caution (simulation results are deleted prior to launching a new sim)
+			unlink(list.files(path=file.path(simul.dir, .repDir(rep)), full.names=TRUE))
+		}
 		
 		# First generation: use the full template file
 		optim <- make.randopt(runif(myparam$GENET_NBLOC), extparam$SCENARIO_PART1)
 		myparam$FITNESS_OPTIMUM <- optim
 		myparam$FITNESS_STRENGTH <- sel.strength*make.selstr(extparam$SCENARIO_PART1)
-		myparam$FILE_NEXTPAR <- normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, 2)))
-		par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, 1))
+		myparam$FILE_NEXTPAR <- normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, 1)))
+		par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, 0))
 		if (!file.exists(par.file.name) || overwrite)
 			write.param(par.file.name, myparam)
 		
 		# From here, just update what is necessary
 		if (bo.b > 2)
-		for (gen in 2:(bo.b-1)) {
+		for (gen in 1:(bo.b-1)) {
 			optim <- make.randopt(optim, extparam$SCENARIO_PART1)
 			par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, gen))
 			if (!file.exists(par.file.name) || overwrite)
@@ -180,7 +183,7 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 		par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b))
 		if (!file.exists(par.file.name) || overwrite)
 			write.param(par.file.name,
-					list(INIT_PSIZE = round(bo.d*extparam$BOTTLENECK_STRENGTH/2),
+					list(INIT_PSIZE = round(bo.d*extparam$BOTTLENECK_STRENGTH/2), # Maize is diploid, so the strenght k = 2N/t
 						FITNESS_OPTIMUM = optim, 
 						FITNESS_STRENGTH     = sel.strength*make.selstr(extparam$SCENARIO_PART2),
 						FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b+1)))))

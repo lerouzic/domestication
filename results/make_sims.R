@@ -7,6 +7,8 @@
 use.cache <- TRUE # Don't run the simulation if already there in the cache
 overwrite <- TRUE
 
+options(warn=1)
+
 cl <- commandArgs(trailingOnly = FALSE)
 script.dir <- dirname(strsplit(split="=", cl[grep(cl, pattern="--file")])[[1]][2])
 user.dir  <- getwd()
@@ -19,7 +21,7 @@ prog.path <- file.path(src.dir, "Simul_Prog") # This relies on a symbolic link, 
 
 source(file.path(src.dir, "makeparam_functions.R"))
 
-all.sims <- rbind(simTest=c("param0-test.txt", "extparam0-test.txt"))
+all.sims <- rbind(simDefault=c("param0.txt", "extparam0.txt"))
 
 for (sim.name in rownames(all.sims)) {
 	pars <- create.paramseries(
