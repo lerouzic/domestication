@@ -14,14 +14,16 @@ script.dir <- dirname(strsplit(split="=", cl[grep(cl, pattern="--file")])[[1]][2
 user.dir  <- getwd()
 
 param.dir <- file.path(script.dir, "../param")
-cache.dir <- file.path(script.dir, "../cache")
+cache.dir <- normalizePath(file.path(script.dir, "../cache"))
 src.dir   <- file.path(script.dir, "../src")
 
 prog.path <- file.path(src.dir, "Simul_Prog") # This relies on a symbolic link, give the full path otherwise
 
 source(file.path(src.dir, "makeparam_functions.R"))
 
-all.sims <- rbind(simDefault=c("param0.txt", "extparam0.txt"))
+all.sims <- rbind(
+	simTest=c("param0-test.txt", "extparam0-test.txt"))
+#~ 	simDefault=c("param0.txt", "extparam0.txt"))
 
 for (sim.name in rownames(all.sims)) {
 	pars <- create.paramseries(
