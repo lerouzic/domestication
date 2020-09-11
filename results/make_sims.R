@@ -3,6 +3,8 @@
 # Generate all simulations and run them if not in cache
 
 # A simulation is characterized by a name, a parameter file, and an extended parameter file with bottleneck etc. information
+# Simulations involve the creation of many small files (new parameters every generation due to plasticity). This is largely
+# sub-optimal, but difficult to change given the way the simulation program works -- we have to deal with it. 
 
 use.cache <- TRUE # Don't run the simulation if already there in the cache
 overwrite <- TRUE
@@ -30,6 +32,7 @@ all.sims <- rbind(
 )
 
 for (sim.name in rownames(all.sims)) {
+	cat("Setting up simulation", sim.name, "...\n")
 	pars <- create.paramseries(
 		file.path(param.dir, all.sims[sim.name, 1]), 
 		file.path(param.dir, all.sims[sim.name, 2]), 
