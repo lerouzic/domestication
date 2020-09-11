@@ -162,7 +162,7 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 		optim <- make.randopt(runif(myparam$GENET_NBLOC), extparam$SCENARIO_PART1)
 		myparam$FITNESS_OPTIMUM <- optim
 		myparam$FITNESS_STRENGTH <- sel.strength*make.selstr(extparam$SCENARIO_PART1)
-		myparam$FILE_NEXTPAR <- normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, 1)))
+		myparam$FILE_NEXTPAR <- suppressWarnings(normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, 1))))
 		par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, 0))
 		if (!file.exists(par.file.name) || overwrite)
 			write.param(par.file.name, myparam)
@@ -175,7 +175,7 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 			if (!file.exists(par.file.name) || overwrite)
 				write.param(par.file.name,
 					list(FITNESS_OPTIMUM = optim, 
-						 FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, gen+1)))))
+						 FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, gen+1))))))
 		}
 
 		# first bottleneck generation
@@ -186,7 +186,7 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 					list(INIT_PSIZE = round(bo.d*extparam$BOTTLENECK_STRENGTH/2), # Maize is diploid, so the strenght k = 2N/t
 						FITNESS_OPTIMUM = optim, 
 						FITNESS_STRENGTH     = sel.strength*make.selstr(extparam$SCENARIO_PART2),
-						FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b+1)))))
+						FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b+1))))))
 					 
 		# The rest of the bottleneck
 		if (bo.d > 1)
@@ -196,7 +196,7 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 			if (!file.exists(par.file.name) || overwrite)
 				write.param(par.file.name,
 					list(FITNESS_OPTIMUM = optim, 
-						FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, gen+1)))))
+						FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, gen+1))))))
 		}
 		
 		# First generation after the bottleneck
@@ -207,7 +207,7 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 			write.param(par.file.name,
 				list(FITNESS_OPTIMUM = optim, 
 					INIT_PSIZE      = myparam$INIT_PSIZE,
-					FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b + bo.d + 1)))))
+					FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b + bo.d + 1))))))
 		}
 		
 		# Domestication after bottleneck
@@ -218,7 +218,7 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 			if (!file.exists(par.file.name) || overwrite)
 				write.param(file.path(simul.dir, .repDir(rep), .repFile(rep, gen)),
 					list(FITNESS_OPTIMUM = optim, 
-						FILE_NEXTPAR    = normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, gen+1)))))
+						FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, gen+1))))))
 		}
 		
 		# Very last generation (no NEXTPAR)
@@ -229,6 +229,6 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 	}
 	
 	# Returns the parameter (and output) file names that will be necessary to make the launchfile
-	return(list(param=file.path(simul.dir, .repDir(1:extparam$REPLICATES), .repFile(1:extparam$REPLICATES, 1)), 
+	return(list(param=file.path(simul.dir, .repDir(1:extparam$REPLICATES), .repFile(1:extparam$REPLICATES, 0)), 
 	            out =file.path(simul.dir, .repDir(1:extparam$REPLICATES), .outFile(1:extparam$REPLICATES))))
 }
