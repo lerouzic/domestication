@@ -38,19 +38,27 @@ bottleneck.detect <- function(Ndyn) {
 	list(begin=as.numeric(names(Ndyn)[bottle.begin]), end=as.numeric(names(Ndyn)[bottle.end]))
 }
 
+# Tries to estimate the selection regime for each gene. The output code is s for stabilizing, p for plastic, n for neutral (non-selected). In addition, c is 
+# used for constant (i.e. stable genes which optimum does not change during domestication). 
+# The output is two characters, one before and one after domestication (even for constant genes, which are cc for consistency). 
+selectionregime.detect <- function(out.table) {
+	# Assumes only one change in the selection regime
+	opts <- out.table[,grepl(rownames(out.table), pattern="theta")]
+	stopifnot (length(opts) > 0)
+	
+	stability <- lapply(opts function(x) { ans <- ifelse(diff(x) == 0, "s", "p"); ans[x[-1] == 0] <- "n"; paste(rle(ans)$values, collapse="") } 
+	category <- sapply(stability, function(x) if (x == "s") "cc" else if (x == "p") "pp" else if (x == "n") "n" else x)
+	return(category)
+}
+
 # Detects the generation number(s?) at which the selection regime changes
 selectionchange.detect <- function(out.table) {
 	# The task is difficult, has to rely on some assumptions 
 	# The algo looks for stable optima that changes from time to time
 	# out.file can be the mean over replicates or a single file. Probably works better with a single file
 	
-	opts <- out.table[,grepl(rownames(out.table), pattern="theta")]
-	stopifnot (length(opts) > 0)
-	
-	numdiffs <- apply(as.matrix(opts), 2, function(x) sum(diff(x) != 0))
-	# Genes with zero numdiffs: constant. Genes with many numdiffs: plastic. Looking for the ones with a few numdiffs
-	roles <- sapply(numdiffs, function(nm) if (nm == 0) "constant" else if (nb >= nrow(opts)/10) "plastic" else if (nb < nrow(opts)/10) "domestic" else "unknown")
-	changes.domestic <- lapply(opts, function(x) which(diff(x)!=0))
+	selcat <- selectionregime.detect(out.table)
+	changes.domestic <- lapply(opts[selcat == ss], function(x) which(diff(x)!=0))
 	if (!do.call(all.equal, changes.domestic)) stop("The selection change history looks different for domestic genes.")
 	return(out.table$Gen[changes.domestic[[1]]])
 }
