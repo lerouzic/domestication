@@ -26,14 +26,16 @@ get.N.dyn <- function(repdir) {
 
 if (is.na(target.rep)) {
 	rep.dirs <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	if (length(rep.dirs) == 0) stop("Unable to find the results in ", out.dir, ".")
 	target.rep <- sample(rep.dirs, 1)
 }
 
-out.file <- list.files(pattern="out.*", path=target.rep, full.names=TRUE)[1]
+out.files <- list.files(pattern="out.*", path=target.rep, full.names=TRUE)
 
-stopifnot(length(out.file)==1)
+stopifnot(length(out.files)>0)
 
-out <- read.table(out.file, header=TRUE)
+out.mean <- replicate.apply(out.files, mean)
+out.var  <- replicate.apply(out.files, var)
 
 mfit <- out[,"MFit"]
 vfit <- out[,"VFit"]
