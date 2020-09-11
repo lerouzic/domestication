@@ -98,3 +98,16 @@ selectionchange.plot <- function(out.table, y=0, pch=25, col="black", bg="red", 
 	sel <- selectionchange.detect(out.table)
 	points(x=sel, y=y, pch=pch, col=col, bg=bg, ...)
 }
+
+# Phenotypic (expression) variation
+pheno.variation <- function(out.table) {
+	genes <- colnames(out.table)[grep(colnames(out.table), pattern="VPhen")]
+	out.table[,genes]
+}
+
+# Molecular (gene network) variation
+molec.variation <- function(out.table) {
+	allvar <- colnames(out.table)[grep(colnames(out.table), pattern="VarAll")]
+	n.genes <- sqrt(length(allvar))
+	t(apply(out.table[,allvar], 1, function(x) { rowMeans(matrix(x, ncol=n.genes, byrow=TRUE)) }))
+}

@@ -22,8 +22,12 @@ prog.path <- file.path(src.dir, "Simul_Prog") # This relies on a symbolic link, 
 source(file.path(src.dir, "makeparam_functions.R"))
 
 all.sims <- rbind(
-	simTest=c("param0-test.txt", "extparam0-test.txt"))
-#~ 	simDefault=c("param0.txt", "extparam0.txt"))
+	simTest    = c("param0-test.txt", "extparam0-test.txt"),
+	simDefault = c("param0.txt", "extparam0.txt"),
+	simNobot   = c("param0.txt", "extparam-nobot.txt"),
+	simNoselc  = c("param0.txt", "extparam-noselc.txt"),
+	simNosel   = c("param0.txt", "extparam-nosel.txt")
+)
 
 for (sim.name in rownames(all.sims)) {
 	pars <- create.paramseries(
