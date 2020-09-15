@@ -68,11 +68,15 @@ bottleneck.detect <- function(Ndyn) {
 # used for constant (i.e. stable genes which optimum does not change during domestication). 
 # The output is two characters, one before and one after domestication (even for constant genes, which are cc for consistency). 
 selectionregime.detect <- function(out.table) {
-	# Assumes only one change in the selection regime
+	# Assumes only one change max in the selection regime
 	opts <- out.table[,grepl(colnames(out.table), pattern="FitOpt")]
 	stopifnot (length(opts) > 0)
 	stability <- lapply(as.data.frame(opts), function(x) { ans <- ifelse(diff(x) == 0, "s", "p"); ans[x[-1] == 0] <- "n"; paste(rle(ans)$values, collapse="") } )
-	category <- sapply(stability, function(x) if (x == "s") "cc" else if (x == "p") "pp" else if (x == "n") "nn" else if (x=="nps") "ns" else if (x == "sps") "ss" else x)
+	if (all(nchar(stability)==1)) { # No change in selection regime
+		category <- unlist(stability)
+	} else {
+		category <- sapply(stability, function(x) if (x == "s") "cc" else if (x == "p") "pp" else if (x == "n") "nn" else if (x=="nps") "ns" else if (x == "sps") "ss" else x)
+	}
 	return(category)
 }
 
@@ -88,7 +92,7 @@ selectionchange.detect <- function(out.table) {
 }
 
 # Adds the bottleneck mark in a figure
-bottleneck.plot <- function(Ndyn, y=0, code=3, angle=90, length=0.1, ...) {
+bottleneck.plot <- function(Ndyn, y=0, code=3, angle=90, length=0.05, ...) {
 	bttl <- bottleneck.detect(Ndyn)
 	arrows(x0=bttl$begin, x1=bttl$end, y0=y, code=code, angle=angle, length=length, ...)
 }
