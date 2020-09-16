@@ -58,7 +58,7 @@ lines(as.numeric(rownames(mean.norm.nobottle)), yy.nobottle.pn, col=col["n"], lt
 bottleneck.plot(Ndyn.default, y=0, lwd=2)
 selectionchange.plot(mean.sim.default, y=0, cex=1.5)
 
-legend("topright", pch=22, col=col, pt.bg=col, legend=c("Plastic->Pastic", "Plastic->Neutral", "Pastic->Stable"), bty="n", cex=0.8)
+legend("topright", pch=22, col=col, pt.bg=col, legend=c("Plastic->Plastic", "Plastic->Neutral", "Plastic->Stable"), bty="n", cex=0.8)
 legend("topleft", lty=c(1,2), col="darkgray", legend=c("Bottleneck", "No bottleneck"), bty="n", cex=0.8)
 
 dev.off()
