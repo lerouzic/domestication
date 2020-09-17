@@ -3,8 +3,9 @@
 
 source("../src/analysis_tools.R")
 
+suppressWarnings(library(igraph, quietly=TRUE))
 library(Rcpp)
-suppressWarnings(library(inline))
+suppressWarnings(library(inline, quietly=TRUE))
 
 cppFunction('
 	List internal_loop_cpp(const NumericMatrix &W, const NumericVector &S0, double a, double env, unsigned int steps, unsigned int measure) {
@@ -122,5 +123,32 @@ mean.connect <- function(out.dir, env=0.5, epsilon=NULL, max.reps=Inf, mc.cores=
 	return(ans)
 }
 
+# Returns a list of complex community objects according to several igraph algorithms
+communities <- function(W, epsilon=NULL, env=0.5, directed=FALSE, ...) {
+	cW <- cleanW(W, epsilon=epsilon, env=env, ...)
+	
+	Wgraph <- igraph::graph_from_adjacency_matrix(sign(cW))
+	if (!directed) 
+		Wgraph <- igraph::as.undirected(Wgraph)
 
+	list(
+#~ 		edge     = igraph::edge.betweenness.community(Wgraph),
+		walktrap = igraph::walktrap.community(Wgraph),
+		fastgreedy= igraph::fastgreedy.community(Wgraph),
+		labelprop= igraph::label.propagation.community(Wgraph))
+}
 
+# Returns the communities algorithm for all generations of a data dable. Beware, the returned object is complex and needs to be further processed
+communities.dyn <- function(out.table, epsilon=NULL, env=0.5, directed=FALSE, mc.cores=1) { # if env == NULL, MPhen1 is used instead
+	W.table <- out.table[,grepl(colnames(out.table), pattern="MeanAll")]
+	env <- if(is.null(env)) out.table[,"MPhen1"] else rep(env, nrow(out.table))
+	
+	net.size <- sqrt(ncol(W.table))
+	comm <- mclapply(1:nrow(W.table), function(i) { 
+			W <- matrix(unlist(W.table[i,]), ncol=net.size, byrow=TRUE)
+			stopifnot(nrow(W) == ncol(W))
+			communities(W, epsilon=epsilon, env=env[i], directed=directed)
+		}, mc.cores=mc.cores)
+	names(comm) <- as.character(out.table[,"Gen"])
+	comm
+}
