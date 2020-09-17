@@ -23,8 +23,6 @@ inoutgen <- function(files, gen)
 mean.inout <- function(x)
 	list(connect.in = rowMeans(sapply(x, "[[", "connect.in")), connect.out=rowMeans(sapply(x, "[[", "connect.out")))
 
-onerep <- function(out.dir) list.dirs(out.dir, full.names=TRUE, recursive=FALSE)[1]
-
 out.dir.default  <- "../cache/simDefault"
 out.dir.noselc   <- "../cache/simNoselc"
 
