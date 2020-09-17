@@ -4,7 +4,7 @@
 source("../src/analysis_tools.R")
 
 library(Rcpp)
-library(inline, quietly=TRUE)
+suppressWarnings(library(inline))
 
 cppFunction('
 	List internal_loop_cpp(const NumericMatrix &W, const NumericVector &S0, double a, double env, unsigned int steps, unsigned int measure) {
@@ -49,19 +49,39 @@ model.M2 <- function(W, S0=rep(a, nrow(W)), a=0.2, env=0.5, steps=20, measure=4,
 	return(ans)
 }
 
-cleanW <- function(W, epsilon=NULL, env=0.5, ...) {
+cleanW <- function(W, epsilon=NULL, env=0.5, cache.dir = "../cache/distW", ...) {
+	# The cache system is based on a hash of the W matrix and env. Collisions are expected to be very rare,
+	# hopefully without consequences. 
 	if (is.null(epsilon)) epsilon <- sqrt((nrow(W)-1)*0.01^2)
-	cleanW <- matrix(0, nrow=nrow(W), ncol=ncol(W))
-	ref.expr <- model.M2(W, env=env, ...)$mean
-	for (i in 1:nrow(W))
-		for (j in 1:ncol(W)) {
-			myW <- W
-			myW[i,j] <- 0
-			new.expr <- model.M2(myW, env=env, ...)$mean
-			dd <- sqrt(sum((ref.expr[-1]-new.expr[-1])^2))
-			if (dd > epsilon)
-				cleanW[i,j] <- W[i,j]
+	if (!is.null(cache.dir) && !dir.exists(cache.dir)) dir.create(cache.dir)
+	
+	distMat <- matrix(0, ncol=ncol(W), nrow=nrow(W))
+	recompute <- TRUE
+	
+	if (!is.null(cache.dir)) {
+		library(digest)
+		hh <- digest(list(env, W))
+		pp <- file.path(cache.dir, paste0(hh, ".rds"))
+		if (file.exists(pp)) {
+			distMat <- readRDS(pp)
+			recompute <- FALSE
 		}
+	}
+	if (recompute) {
+		ref.expr <- model.M2(W, env=env, ...)$mean
+		for (i in 1:nrow(W))
+			for (j in 1:ncol(W)) {
+				myW <- W
+				myW[i,j] <- 0
+				new.expr <- model.M2(myW, env=env, ...)$mean
+				dd <- sqrt(sum((ref.expr[-1]-new.expr[-1])^2))
+				distMat[i,j] <- dd
+			}
+		if (!is.null(cache.dir))
+			saveRDS(distMat, pp)
+	}
+	cleanW <- matrix(0, ncol=ncol(W), nrow=nrow(W))
+	cleanW[distMat > epsilon] <- W[distMat > epsilon]
 	cleanW
 }
 
@@ -84,6 +104,11 @@ number.connections.dyn <- function(out.table, epsilon=NULL, env=0.5) { # if env 
 	nb.conn
 }
 
+inout.connections <- function(W, epsilon=NULL, env=0.5, ...) {
+	cW <- cleanW(W=W, epsilon=epsilon, env=env, ...)
+	list(in=rowSums(cW != 0), out=colsums(cW != 0))
+}
+
 # Average out all network connections from a directory 
 mean.connect <- function(out.dir, env=0.5, epsilon=NULL, max.reps=Inf, mc.cores=detectCores()-1) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
@@ -96,4 +121,6 @@ mean.connect <- function(out.dir, env=0.5, epsilon=NULL, max.reps=Inf, mc.cores=
 	gc()
 	return(ans)
 }
+
+
 
