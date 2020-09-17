@@ -5,7 +5,7 @@ source("../src/analysis_tools.R")
 library(parallel)
 mc.cores <- min(12, detectCores()-1)
 
-mean.sim <- function(x) mean.sim(x, max.reps=if (detectCores() > 23 Inf) else 5) # For tests 
+my.mean.sim <- function(x) mean.sim(x, max.reps=if (detectCores() > 23) Inf else 5) # For tests 
 
 onerep <- function(out.dir) list.dirs(out.dir, full.names=TRUE, recursive=FALSE)[1]
 
@@ -14,10 +14,10 @@ out.dir.nobottle <- "../cache/simNobot"
 out.dir.noselc   <- "../cache/simNoselc"
 out.dir.nosel    <- "../cache/simNosel"
 
-mean.sim.default  <- mean.sim(out.dir.default)
-mean.sim.nobottle <- mean.sim(out.dir.nobottle)
-mean.sim.noselc   <- mean.sim(out.dir.noselc)
-mean.sim.nosel    <- mean.sim(out.dir.nosel)
+mean.sim.default  <- my.mean.sim(out.dir.default)
+mean.sim.nobottle <- my.mean.sim(out.dir.nobottle)
+mean.sim.noselc   <- my.mean.sim(out.dir.noselc)
+mean.sim.nosel    <- my.mean.sim(out.dir.nosel)
 
 selpattern.default  <- selectionregime.detect(mean.sim.default)[-1] # The first gene is the environmental signal
 selpattern.nobottle <- selectionregime.detect(mean.sim.nobottle)[-1]
