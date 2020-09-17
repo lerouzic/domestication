@@ -106,7 +106,7 @@ number.connections.dyn <- function(out.table, epsilon=NULL, env=0.5) { # if env 
 
 inout.connections <- function(W, epsilon=NULL, env=0.5, ...) {
 	cW <- cleanW(W=W, epsilon=epsilon, env=env, ...)
-	list(in=rowSums(cW != 0), out=colsums(cW != 0))
+	list(connect.in=rowSums(cW != 0), connect.out=colSums(cW != 0))
 }
 
 # Average out all network connections from a directory 
