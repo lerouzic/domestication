@@ -6,7 +6,6 @@
 # Simulations involve the creation of many small files (new parameters every generation due to plasticity). This is largely
 # sub-optimal, but difficult to change given the way the simulation program works -- we have to deal with it. 
 
-use.cache <- TRUE # Don't run the simulation if already there in the cache
 overwrite <- TRUE
 
 options(warn=1)
@@ -24,7 +23,7 @@ prog.path <- file.path(src.dir, "Simul_Prog") # This relies on a symbolic link, 
 source(file.path(src.dir, "makeparam_functions.R"))
 
 all.sims <- rbind(
-	simTest    = c("param0-test.txt", "extparam0-test.txt"),
+#~ 	simTest    = c("param0-test.txt", "extparam0-test.txt"),
 	simDefault = c("param0.txt", "extparam0.txt"),
 	simNobot   = c("param0.txt", "extparam-nobot.txt"),
 	simNoselc  = c("param0.txt", "extparam-noselc.txt"),
@@ -37,6 +36,6 @@ for (sim.name in rownames(all.sims)) {
 		file.path(param.dir, all.sims[sim.name, 1]), 
 		file.path(param.dir, all.sims[sim.name, 2]), 
 		file.path(cache.dir, sim.name), 
-		overwrite=overwrite)
+		overwrite=overwrite, verbose=TRUE)
 	create.launchfile(prog.path, pars$param, pars$out, file.path(user.dir, paste0(sim.name, "-launch.sh")))
 }

@@ -75,7 +75,7 @@ make.selstr <- function(pattern) {
 	ans
 }
 
-create.paramseries <- function(param.template.file, extparam.file, simul.dir, overwrite=FALSE)
+create.paramseries <- function(param.template.file, extparam.file, simul.dir, overwrite=FALSE, verbose=FALSE)
 	# This is the main algorithm that create the simulation structure. 
 	# The function retruns the necessary information to make a launchfile
 	# (it does not write the launchfile, because all information is not available here)
@@ -152,7 +152,11 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 	# on a case-by-case basis, as the parameters to change depend on the 
 	# simulation stage (before, during, of after the bottleneck)
 	
+	if (verbose)
+		pb <- txtProgressBar(min = 1, max = extparam$REPLICATES, style = 3)
 	for (rep in 1:extparam$REPLICATES) {
+		if (verbose) setTxtProgressBar(pb, rep)
+		
 		dir.create(file.path(simul.dir, .repDir(rep)), showWarnings = FALSE)
 		if (overwrite) { # This is quite powerful, use with caution (simulation results are deleted prior to launching a new sim)
 			unlink(list.files(path=file.path(simul.dir, .repDir(rep)), full.names=TRUE))
