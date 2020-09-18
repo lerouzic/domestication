@@ -1,4 +1,4 @@
-REPLICATES   10
+REPLICATES   100
 # Coding rules :
 # 1 = Stable gene, same optimum before/after domestication
 # 2 = Plastic gene, x=environmental value
