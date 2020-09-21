@@ -117,6 +117,18 @@ mean.sim <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1) {
 	return(ans)
 }
 
+# variance of all data tables from a directory
+var.sim <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+
+	tt <- mclapply(out.files[1:(min(max.reps, length(out.files)))], read.table, header=TRUE, mc.cores=min(mc.cores, 4)) # read.tables on many cores is useless, probably limited by disk speed
+	ans <- replicate.var(tt)
+	rm(tt)
+	gc()
+	return(ans)
+}
+
 # Phenotypic (expression) variation
 pheno.variation <- function(out.table) {
 	genes <- colnames(out.table)[grep(colnames(out.table), pattern="VPhen")]

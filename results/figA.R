@@ -5,37 +5,24 @@
 library(parallel)
 mc.cores <- min(12, detectCores()-1)
 
+# The analysis is restricted to 5 files when not on the server
+my.mean.sim <- function(x) mean.sim(x, max.reps=if (detectCores() > 23) Inf else 5)
+my.var.sim  <- function(x) var.sim (x, max.reps=if (detectCores() > 23) Inf else 5)
+
+onerep <- function(out.dir) list.dirs(out.dir, full.names=TRUE, recursive=FALSE)[1]
+
 source("../src/analysis_tools.R")
 
 out.dir <- "../cache/simDefault"
-target.reps <- NA # If NA, pick all replicates
-random.rep <- NA # If NA, chose a random rep (otherwise specify it)
 
-if (is.na(target.reps)) {
-	target.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	target.reps <- target.reps[grep(basename(target.reps), pattern="rep-\\d+")]
-}
+mean.sim  <- my.mean.sim(out.dir)
+var.sim   <- my.var.sim(out.dir)
 
-if (length(target.reps %in% list.dirs(out.dir, full.names=TRUE, recursive=FALSE)) == 0) stop("Unable to find the results in ", out.dir, ".")
+mfit <- mean.sim[,"MFit"]
+vfit <- mean.sim[,"VFit"]
+gen <-  mean.sim[,"Gen"]
 
-if (is.na(random.rep)) {
-	random.rep <- sample(target.reps, 1)
-}
-
-out.files <- list.files(pattern="out.*", path=target.reps, full.names=TRUE)
-
-stopifnot(length(out.files)>0)
-
-tt <- mclapply(out.files, read.table, header=TRUE, mc.cores=4) # read.tables on many cores is useless, probably limited by disk speed
-out.mean <- replicate.mean(tt)
-out.var  <- replicate.var(tt)
-
-mfit <- out.mean[,"MFit"]
-vfit <- out.mean[,"VFit"]
-gen <- out.mean[,"Gen"]
-
-N <- get.Ndyn(random.rep)[gen]
-N <- c(N[1], N) # just to deal in a bug in the naming of the parameter files
+N <- get.Ndyn(onerep(out.dir))
 
 pdf("figA.pdf", width=8, height=4)
 
