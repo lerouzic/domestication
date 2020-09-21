@@ -4,7 +4,6 @@ Rutils <- suppressPackageStartupMessages(require(R.utils)) # Path manipulation
 
 create.launchfile <- function(prog.path, param.files, output.files, launch.file="./launchfile.sh", relative.paths=TRUE) {
 	# relative.paths sets all paths relative to the launch.file directory
-	print(param.files)
 	stopifnot(
 		length(param.files) > 0, 
 		length(param.files) == length(output.files),
