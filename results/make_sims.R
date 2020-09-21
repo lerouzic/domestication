@@ -42,6 +42,6 @@ for (sim.name in rownames(all.sims)) {
 		file.path(param.dir, all.sims[sim.name, 1]), 
 		file.path(param.dir, all.sims[sim.name, 2]), 
 		file.path(cache.dir, sim.name), 
-		overwrite=overwrite)
+		overwrite=overwrite, verbose=TRUE)
 	create.launchfile(prog.path, pars$param, pars$out, file.path(user.dir, paste0(sim.name, "-launch.sh")))
 }

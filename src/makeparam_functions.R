@@ -154,7 +154,7 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 	# It looks difficult to make it simpler: parameter files need to be updated
 	# on a case-by-case basis, as the parameters to change depend on the 
 	# simulation stage (before, during, of after the bottleneck)
-	
+		
 	if (verbose)
 		pb <- txtProgressBar(min = 1, max = extparam$REPLICATES, style = 3)
 	for (rep in 1:extparam$REPLICATES) {
@@ -224,16 +224,17 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 			optim <- make.randopt(optim, extparam$SCENARIO_PART2)
 			par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, gen))
 			if (!file.exists(par.file.name) || overwrite)
-				write.param(file.path(simul.dir, .repDir(rep), .repFile(rep, gen)),
+				write.param(par.file.name,
 					list(FITNESS_OPTIMUM = optim, 
 						FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, gen+1))))))
 		}
 		
 		# Very last generation (no NEXTPAR)
 		optim <- make.randopt(optim, extparam$SCENARIO_PART2)
-		
-		write.param(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b+bo.d+bo.a)),
-				list(FITNESS_OPTIMUM = optim))
+		par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b+bo.d+bo.a))
+		if (!file.exists(par.file.name) || overwrite)		
+			write.param(par.file.name,
+					list(FITNESS_OPTIMUM = optim))
 	}
 	
 	# Returns the parameter (and output) file names that will be necessary to make the launchfile
