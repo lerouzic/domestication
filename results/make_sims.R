@@ -29,7 +29,8 @@ all.sims <- rbind(
 	simNobot   = c("param0.txt", "extparam-nobot.txt"),
 	simNoselc  = c("param0.txt", "extparam-noselc.txt"),
 	simNosel   = c("param0.txt", "extparam-nosel.txt"),
-	simLargenet= c("param-largenet.txt", "extparam-largenet.txt")
+	simLargenet= c("param-largenet.txt", "extparam-largenet.txt"),
+	simSmallsel= c("param-smallsel.txt", "extparam-smallsel.txt")
 )
 
 for (sim.name in rownames(all.sims)) {
