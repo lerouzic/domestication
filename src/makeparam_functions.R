@@ -176,7 +176,7 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 		
 		myparam$FITNESS_OPTIMUM <- optim
 		myparam$FITNESS_STRENGTH <- sel.strength*make.selstr(extparam$SCENARIO_PART1)
-		myparam$FILE_NEXTPAR <- suppressWarnings(normalizePath(file.path(simul.dir, repdir, .repFile(rep, 1))))
+		myparam$FILE_NEXTPAR <- suppressWarnings(normalizePath(file.path(repdir, .repFile(rep, 1))))
 		
 		par.file.name <- file.path(repdir, .repFile(rep, 0))
 		if (!file.exists(par.file.name) || overwrite)
