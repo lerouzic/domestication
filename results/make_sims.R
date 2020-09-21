@@ -32,7 +32,7 @@ all.sims <- rbind(
 	simLargenet= c("param-largenet.txt", "extparam-largenet.txt"),
 	simSmallsel= c("param-smallsel.txt", "extparam-smallsel.txt"),
 	simStrongbot=c("param0.txt", "extparam-strongbot.txt"),
-	simNomut   = (c"param0.txt", "extparam-nomut.txt"),
+	simNomut   = c("param0.txt", "extparam-nomut.txt"),
 	simStrsel  = c("param0.txt", "extparam-strongsel.txt")
 )
 

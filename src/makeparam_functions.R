@@ -123,7 +123,7 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 	
 	myparam <- param.template
 	
-	extrapar <- extparam[allowed.extrapar]
+	extrapar <- extparam[allow.extrapar]
 	
 	# A few shortcuts to make the code more readable
 	bo.b <- extparam$BOTTLENECK_BEGIN 
