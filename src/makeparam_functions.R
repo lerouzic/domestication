@@ -75,7 +75,7 @@ make.selstr <- function(pattern) {
 	ans
 }
 
-create.paramseries <- function(param.template.file, extparam.file, simul.dir, overwrite=FALSE, verbose=FALSE)
+create.paramseries <- function(param.template.file, extparam.file, simul.dir, overwrite=FALSE, verbose=FALSE, allow.extrapar=c("GENET_MUTRATES")) 
 	# This is the main algorithm that create the simulation structure. 
 	# The function retruns the necessary information to make a launchfile
 	# (it does not write the launchfile, because all information is not available here)
@@ -123,12 +123,15 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 	
 	myparam <- param.template
 	
+	extrapar <- extparam[allowed.extrapar]
+	
 	# A few shortcuts to make the code more readable
 	bo.b <- extparam$BOTTLENECK_BEGIN 
 	bo.d <- extparam$BOTTLENECK_DURATION
 	bo.a <- extparam$BOTTLENECK_AFTER
 	totgen <- bo.b + bo.d + bo.a
 	sel.strength <- max(myparam$FITNESS_STRENGTH)
+	sel.strength2 <- if ("FITNESS_STRENGTH" %in% names(extparam)) max(extparam$FITNESS_STRENGTH) else sel.strength
 	
 	# Checks for the consistency of both parameter files
 	if (!"SIMUL_MAXGEN" %in% names(myparam)) 
@@ -187,10 +190,11 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 		par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b))
 		if (!file.exists(par.file.name) || overwrite)
 			write.param(par.file.name,
-					list(INIT_PSIZE = round(bo.d*extparam$BOTTLENECK_STRENGTH/2), # Maize is diploid, so the strenght k = 2N/t
+					c(list(INIT_PSIZE = round(bo.d*extparam$BOTTLENECK_STRENGTH/2), # Maize is diploid, so the strenght k = 2N/t
 						FITNESS_OPTIMUM = optim, 
-						FITNESS_STRENGTH     = sel.strength*make.selstr(extparam$SCENARIO_PART2),
-						FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b+1))))))
+						FITNESS_STRENGTH     = sel.strength2*make.selstr(extparam$SCENARIO_PART2),
+						FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b+1))))),
+						extrapar))
 					 
 		# The rest of the bottleneck
 		if (bo.d > 1)
