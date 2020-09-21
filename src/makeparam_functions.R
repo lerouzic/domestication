@@ -99,13 +99,17 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 	#   . at the beginning of the bottleneck: the "domestication" selection pattern
 	# The directory and parameter naming pattern is specified in a few internal functions. 
 
-	 {
+	{
+	ndigits.rep <- 4
+	ndigits.gen <- 5
+	sf.format.rep <- paste0("%0", ndigits.rep, "d")
+	sf.format.gen <- paste0("%0", ndigits.gen, "d")
 		
-	.repID <- function(rep, ndigits=4)
-		formatC(rep, width = ndigits, format = "d", flag = "0")
+	.repID <- function(rep) #, ndigits=4)
+		sprintf(sf.format.rep, rep)
 		
-	.genID <- function(gen, ndigits=5)
-		formatC(gen, width = ndigits, format = "d", flag = "0")
+	.genID <- function(gen) #, ndigits=5)
+		sprintf(sf.format.gen, rep)
 		
 	.repDir  <- function(rep, rep.template = "rep") 
 		paste0(rep.template, "-", .repID(rep))
@@ -160,81 +164,91 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 	for (rep in 1:extparam$REPLICATES) {
 		if (verbose) setTxtProgressBar(pb, rep)
 		
-		dir.create(file.path(simul.dir, .repDir(rep)), showWarnings = FALSE)
+		repdir <- file.path(simul.dir, .repDir(rep))
+		
+		dir.create(repdir, showWarnings = FALSE)
 		if (overwrite) { # This is quite powerful, use with caution (simulation results are deleted prior to launching a new sim)
-			unlink(list.files(path=file.path(simul.dir, .repDir(rep)), full.names=TRUE))
+			unlink(list.files(path=repdir, full.names=TRUE))
 		}
 		
 		# First generation: use the full template file
 		optim <- make.randopt(runif(myparam$GENET_NBLOC), extparam$SCENARIO_PART1)
+		
 		myparam$FITNESS_OPTIMUM <- optim
 		myparam$FITNESS_STRENGTH <- sel.strength*make.selstr(extparam$SCENARIO_PART1)
-		myparam$FILE_NEXTPAR <- suppressWarnings(normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, 1))))
-		par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, 0))
+		myparam$FILE_NEXTPAR <- suppressWarnings(normalizePath(file.path(simul.dir, repdir, .repFile(rep, 1))))
+		
+		par.file.name <- file.path(repdir, .repFile(rep, 0))
 		if (!file.exists(par.file.name) || overwrite)
 			write.param(par.file.name, myparam)
 		
 		# From here, just update what is necessary
 		if (bo.b > 2)
 		for (gen in 1:(bo.b-1)) {
-			optim <- make.randopt(optim, extparam$SCENARIO_PART1)
-			par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, gen))
-			if (!file.exists(par.file.name) || overwrite)
+			par.file.name <- file.path(repdir, .repFile(rep, gen))
+			if (!file.exists(par.file.name) || overwrite) {
+				optim <- make.randopt(optim, extparam$SCENARIO_PART1)
 				write.param(par.file.name,
 					list(FITNESS_OPTIMUM = optim, 
-						 FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, gen+1))))))
+						 FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(repdir, .repFile(rep, gen+1))))))
+			}
 		}
 
 		# first bottleneck generation
 		optim <- make.randopt(optim, extparam$SCENARIO_PART2, begin.bottleneck=TRUE)
-		par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b))
+		par.file.name <- file.path(repdir, .repFile(rep, bo.b))
 		if (!file.exists(par.file.name) || overwrite)
 			write.param(par.file.name,
 					c(list(INIT_PSIZE = round(bo.d*extparam$BOTTLENECK_STRENGTH/2), # Maize is diploid, so the strenght k = 2N/t
 						FITNESS_OPTIMUM = optim, 
 						FITNESS_STRENGTH     = sel.strength2*make.selstr(extparam$SCENARIO_PART2),
-						FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b+1))))),
+						FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(repdir, .repFile(rep, bo.b+1))))),
 						extrapar))
 					 
 		# The rest of the bottleneck
 		if (bo.d > 1)
 		for (gen in ((bo.b+1):(bo.b+bo.d))) {
-			optim <- make.randopt(optim, extparam$SCENARIO_PART2)
-			par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, gen))
-			if (!file.exists(par.file.name) || overwrite)
+			par.file.name <- file.path(repdir, .repFile(rep, gen))
+			if (!file.exists(par.file.name) || overwrite) {
+				optim <- make.randopt(optim, extparam$SCENARIO_PART2)
 				write.param(par.file.name,
 					list(FITNESS_OPTIMUM = optim, 
-						FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, gen+1))))))
+						FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(repdir, .repFile(rep, gen+1))))))
+			}
 		}
 		
 		# First generation after the bottleneck
 		if (bo.a > 1){
-		optim <- make.randopt(optim, extparam$SCENARIO_PART2)
-		par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b + bo.d))
-		if (!file.exists(par.file.name) || overwrite)
+		par.file.name <- file.path(repdir, .repFile(rep, bo.b + bo.d))
+		if (!file.exists(par.file.name) || overwrite) {
+			optim <- make.randopt(optim, extparam$SCENARIO_PART2)
 			write.param(par.file.name,
 				list(FITNESS_OPTIMUM = optim, 
 					INIT_PSIZE      = myparam$INIT_PSIZE,
-					FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b + bo.d + 1))))))
+					FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(repdir, .repFile(rep, bo.b + bo.d + 1))))))
+			}
 		}
 		
 		# Domestication after bottleneck
 		if (bo.a > 2)
 		for (gen in ((bo.b+bo.d+1):(bo.b+bo.d+bo.a-1))) {
-			optim <- make.randopt(optim, extparam$SCENARIO_PART2)
-			par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, gen))
-			if (!file.exists(par.file.name) || overwrite)
+			par.file.name <- file.path(repdir, .repFile(rep, gen))
+			if (!file.exists(par.file.name) || overwrite) {
+				optim <- make.randopt(optim, extparam$SCENARIO_PART2)
 				write.param(par.file.name,
 					list(FITNESS_OPTIMUM = optim, 
-						FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(simul.dir, .repDir(rep), .repFile(rep, gen+1))))))
+						FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(repdir, .repFile(rep, gen+1))))))
+			}
 		}
 		
 		# Very last generation (no NEXTPAR)
-		optim <- make.randopt(optim, extparam$SCENARIO_PART2)
-		par.file.name <- file.path(simul.dir, .repDir(rep), .repFile(rep, bo.b+bo.d+bo.a))
-		if (!file.exists(par.file.name) || overwrite)		
+		par.file.name <- file.path(repdir, .repFile(rep, bo.b+bo.d+bo.a))
+
+		if (!file.exists(par.file.name) || overwrite) {
+			optim <- make.randopt(optim, extparam$SCENARIO_PART2)
 			write.param(par.file.name,
 					list(FITNESS_OPTIMUM = optim))
+		}
 	}
 	
 	# Returns the parameter (and output) file names that will be necessary to make the launchfile
