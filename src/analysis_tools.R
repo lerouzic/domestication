@@ -5,7 +5,6 @@ library(parallel)
 
 source("../src/makeparam_functions.R") # dubious path management...
 
-
 # Applies the function FUN (typically, mean or var) to each element of the list of matrix/data.frames 
 replicate.apply <- function(tt, FUN=mean, ...) {
 	# better checking if the data base is consistent
@@ -41,7 +40,14 @@ replicate.var <- function(tt) {
 # Reconstructs the dynamics of the population size N from a replicate directory 
 # (takes a bit of time due to the number of files)
 get.Ndyn <- function(repdir) {
+
 	ll <- list.files(path=repdir, pattern="^param.*\\.txt$", full.names=TRUE)
+	if (length(ll) == 0) {
+		cc <- list.files(path=repdir, pattern="^param.\\.tar*", full.names=TRUE)
+		stopifnot(length(cc) == 1)
+		untar.param(cc)
+		ll <- list.files(path=repdir, pattern="^param.*\\.txt$", full.names=TRUE)
+	}
 	myN <- sapply(ll, function(ff) { 
 		if (length(grep("INIT_PSIZE", readLines(ff))) == 0) 
 			return(NA)

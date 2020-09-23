@@ -7,12 +7,13 @@
 # sub-optimal, but difficult to change given the way the simulation program works -- we have to deal with it. 
 
 use.cache <- TRUE # Don't run the simulation if already there in the cache // Not functional
-overwrite <- FALSE
+overwrite <- TRUE
 
 options(warn=1)
 
 cl <- commandArgs(trailingOnly = FALSE)
-script.dir <- dirname(strsplit(split="=", cl[grep(cl, pattern="--file")])[[1]][2])
+script.dir <- if (grepl (cl[1], pattern="/R")) "." else dirname(strsplit(split="=", cl[grep(cl, pattern="--file")])[[1]][2])
+
 user.dir  <- getwd()
 
 param.dir <- file.path(script.dir, "../param")
@@ -24,7 +25,7 @@ prog.path <- file.path(src.dir, "Simul_Prog") # This relies on a symbolic link, 
 source(file.path(src.dir, "makeparam_functions.R"))
 
 all.sims <- rbind(
-#~ 	simTest    = c("param0-test.txt", "extparam0-test.txt"),
+#~ 	simTest    = c("param0-test.txt", "extparam0-test.txt")
 	simDefault = c("param0.txt", "extparam0.txt"),
 	simNobot   = c("param0.txt", "extparam-nobot.txt"),
 	simNoselc  = c("param0.txt", "extparam-noselc.txt"),
@@ -37,11 +38,11 @@ all.sims <- rbind(
 )
 
 for (sim.name in rownames(all.sims)) {
-	cat("\nSetting up simulation", sim.name, "...\n")
+	cat("Setting up simulation", sim.name, "...\n")
 	pars <- create.paramseries(
 		file.path(param.dir, all.sims[sim.name, 1]), 
 		file.path(param.dir, all.sims[sim.name, 2]), 
 		file.path(cache.dir, sim.name), 
 		overwrite=overwrite, verbose=TRUE)
-	create.launchfile(prog.path, pars$param, pars$out, file.path(user.dir, paste0(sim.name, "-launch.sh")))
+	create.launchfile(prog.path, pars$param, pars$out, pars$compressed, file.path(user.dir, paste0(sim.name, "-launch.sh")))
 }

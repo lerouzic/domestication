@@ -2,22 +2,50 @@
 
 Rutils <- suppressPackageStartupMessages(require(R.utils)) # Path manipulation 
 
-create.launchfile <- function(prog.path, param.files, output.files, launch.file="./launchfile.sh", relative.paths=TRUE) {
+library(parallel)
+
+tar.param <- function(param.files, compressed.file, compression="gzip") {
+#~ 	tar(compressed.file, files=param.files, compression=compression)
+	# There can be many param files. just store the list in a file to avoid too long command lines
+	pfile <- file.path(dirname(param.files[1]), "allfiles.txt")
+	cat(basename(param.files), file=pfile, sep="\n")
+	command <- paste0("cd ", dirname(param.files[1]), "&& tar cfz ", path.expand(compressed.file), " -T ", basename(pfile))
+	system(command)
+	unlink(param.files)
+	unlink(pfile)
+}
+
+untar.param <- function(compressed.file) {
+#~ 	untar(compressed.file)
+	system(paste0("cd ", dirname(compressed.file), "; tar xfz ", basename(compressed.file)))
+	unlink(compressed.file)
+}
+
+create.launchfile <- function(prog.path, param.files, output.files, compressed.files, launch.file="./launchfile.sh", relative.paths=TRUE) {
 	# relative.paths sets all paths relative to the launch.file directory
 	stopifnot(
 		length(param.files) > 0, 
 		length(param.files) == length(output.files),
 		file.exists(prog.path), 
-		all(file.exists(param.files)))
+		all(file.exists(param.files) | file.exists(compressed.files)))
+		
 		
 	if (Rutils && relative.paths) {
 		launch.dir <- dirname(launch.file)
 		prog.path   <- getRelativePath(prog.path, launch.dir)
 		param.files <- getRelativePath(param.files, launch.dir)
 		output.files<- getRelativePath(output.files, launch.dir) 
+		compressed.files<- getRelativePath(compressed.files, launch.dir)
 	}
 	
-	commands <- paste0(prog.path, " -p ", param.files, " -o ", output.files)
+	uncompress.command <- ifelse(is.na(compressed.files), "", paste0("tar xfz ", compressed.files, " -C ", dirname(compressed.files), " && "))
+#~ 	compress.command <- ifelse(is.na(compressed.files), "", paste0("tar cfz ", compressed.files, " ", dirname(compressed.files), "/param*.txt;"))
+	compress.command <- ifelse(is.na(compressed.files), "", paste0("rm -f ", dirname(compressed.files), "/param*.txt;"))
+	
+	commands <- paste0(
+		uncompress.command,
+		prog.path, " -p ", param.files, " -o ", output.files, " && " ,
+		compress.command)
 	writeLines(commands, launch.file)
 }
 
@@ -75,7 +103,7 @@ make.selstr <- function(pattern) {
 	ans
 }
 
-create.paramseries <- function(param.template.file, extparam.file, simul.dir, overwrite=FALSE, verbose=FALSE, allow.extrapar=c("GENET_MUTRATES")) 
+create.paramseries <- function(param.template.file, extparam.file, simul.dir, overwrite=FALSE, verbose=FALSE, allow.extrapar=c("GENET_MUTRATES"), tar.param=TRUE, mc.cores=detectCores()-2) 
 	# This is the main algorithm that create the simulation structure. 
 	# The function retruns the necessary information to make a launchfile
 	# (it does not write the launchfile, because all information is not available here)
@@ -117,6 +145,9 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 	.repFile <- function(rep, gen, rep.template = "rep", gen.template="gen")
 		paste0("param-", rep.template, .repID(rep), "-", gen.template, .genID(gen), ".txt")
 		
+	.repTarFile <- function(rep, rep.template = "rep")
+		paste0("param-", rep.template, .repID(rep), ".tar.gz")
+		
 	.outFile <- function(rep, rep.template = "rep")
 		paste0("out-", rep.template, .repID(rep), ".txt")
 	
@@ -127,7 +158,7 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 	
 	myparam <- param.template
 	
-	extrapar <- extparam[allow.extrapar]
+	extrapar <- extparam[names(extparam) %in% allow.extrapar]
 	
 	# A few shortcuts to make the code more readable
 	bo.b <- extparam$BOTTLENECK_BEGIN 
@@ -161,10 +192,13 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 		
 	if (verbose)
 		pb <- txtProgressBar(min = 1, max = extparam$REPLICATES, style = 3)
-	for (rep in 1:extparam$REPLICATES) {
-		if (verbose) setTxtProgressBar(pb, rep)
+		
+	mclapply(1:extparam$REPLICATES, function(rep) {
 		
 		repdir <- file.path(simul.dir, .repDir(rep))
+		compressed.file.name <- file.path(repdir, .repTarFile(rep))
+		if (exists(compressed.file.name))
+			untar.param(compressed.file.name)
 		
 		dir.create(repdir, showWarnings = FALSE)
 		if (overwrite) { # This is quite powerful, use with caution (simulation results are deleted prior to launching a new sim)
@@ -179,16 +213,16 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 		myparam$FILE_NEXTPAR <- suppressWarnings(normalizePath(file.path(repdir, .repFile(rep, 1))))
 		
 		par.file.name <- file.path(repdir, .repFile(rep, 0))
-		if (!file.exists(par.file.name) || overwrite)
-			write.param(par.file.name, myparam)
+		if (!file.exists(par.file.name[1]) || overwrite)
+			write.param(par.file.name[1], myparam)
 		
 		# From here, just update what is necessary
 		if (bo.b > 2)
 		for (gen in 1:(bo.b-1)) {
-			par.file.name <- file.path(repdir, .repFile(rep, gen))
-			if (!file.exists(par.file.name) || overwrite) {
+			par.file.name <- c(par.file.name, file.path(repdir, .repFile(rep, gen)))
+			if (!file.exists(par.file.name[gen+1]) || overwrite) {
 				optim <- make.randopt(optim, extparam$SCENARIO_PART1)
-				write.param(par.file.name,
+				write.param(par.file.name[gen+1],
 					list(FITNESS_OPTIMUM = optim, 
 						 FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(repdir, .repFile(rep, gen+1))))))
 			}
@@ -196,9 +230,9 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 
 		# first bottleneck generation
 		optim <- make.randopt(optim, extparam$SCENARIO_PART2, begin.bottleneck=TRUE)
-		par.file.name <- file.path(repdir, .repFile(rep, bo.b))
-		if (!file.exists(par.file.name) || overwrite)
-			write.param(par.file.name,
+		par.file.name <- c(par.file.name, file.path(repdir, .repFile(rep, bo.b)))
+		if (!file.exists(par.file.name[bo.b+1]) || overwrite)
+			write.param(par.file.name[bo.b+1],
 					c(list(INIT_PSIZE = round(bo.d*extparam$BOTTLENECK_STRENGTH/2), # Maize is diploid, so the strenght k = 2N/t
 						FITNESS_OPTIMUM = optim, 
 						FITNESS_STRENGTH     = sel.strength2*make.selstr(extparam$SCENARIO_PART2),
@@ -208,10 +242,10 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 		# The rest of the bottleneck
 		if (bo.d > 1)
 		for (gen in ((bo.b+1):(bo.b+bo.d))) {
-			par.file.name <- file.path(repdir, .repFile(rep, gen))
-			if (!file.exists(par.file.name) || overwrite) {
+			par.file.name <- c(par.file.name, file.path(repdir, .repFile(rep, gen)))
+			if (!file.exists(par.file.name[gen+1]) || overwrite) {
 				optim <- make.randopt(optim, extparam$SCENARIO_PART2)
-				write.param(par.file.name,
+				write.param(par.file.name[gen+1],
 					list(FITNESS_OPTIMUM = optim, 
 						FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(repdir, .repFile(rep, gen+1))))))
 			}
@@ -219,39 +253,51 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 		
 		# First generation after the bottleneck
 		if (bo.a > 1){
-		par.file.name <- file.path(repdir, .repFile(rep, bo.b + bo.d))
-		if (!file.exists(par.file.name) || overwrite) {
+		gen <- bo.b+bo.d + 1
+		par.file.name <- c(par.file.name, file.path(repdir, .repFile(rep, gen)))
+		if (!file.exists(par.file.name[gen + 1]) || overwrite) {
 			optim <- make.randopt(optim, extparam$SCENARIO_PART2)
-			write.param(par.file.name,
+			write.param(par.file.name[gen + 1],
 				list(FITNESS_OPTIMUM = optim, 
 					INIT_PSIZE      = myparam$INIT_PSIZE,
-					FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(repdir, .repFile(rep, bo.b + bo.d + 1))))))
+					FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(repdir, .repFile(rep, gen + 1))))))
 			}
 		}
 		
 		# Domestication after bottleneck
 		if (bo.a > 2)
-		for (gen in ((bo.b+bo.d+1):(bo.b+bo.d+bo.a-1))) {
-			par.file.name <- file.path(repdir, .repFile(rep, gen))
-			if (!file.exists(par.file.name) || overwrite) {
+		for (gen in ((bo.b+bo.d+2):(bo.b+bo.d+bo.a-1))) {
+			par.file.name <- c(par.file.name, file.path(repdir, .repFile(rep, gen)))
+			if (!file.exists(par.file.name[gen+1]) || overwrite) {
 				optim <- make.randopt(optim, extparam$SCENARIO_PART2)
-				write.param(par.file.name,
+				write.param(par.file.name[gen+1],
 					list(FITNESS_OPTIMUM = optim, 
 						FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(repdir, .repFile(rep, gen+1))))))
 			}
 		}
 		
 		# Very last generation (no NEXTPAR)
-		par.file.name <- file.path(repdir, .repFile(rep, bo.b+bo.d+bo.a))
+		gen <- bo.b+bo.d+bo.a
+		par.file.name <- c(par.file.name, file.path(repdir, .repFile(rep, gen)))
 
-		if (!file.exists(par.file.name) || overwrite) {
+		if (!file.exists(par.file.name[gen+1]) || overwrite) {
 			optim <- make.randopt(optim, extparam$SCENARIO_PART2)
-			write.param(par.file.name,
+			write.param(par.file.name[gen+1],
 					list(FITNESS_OPTIMUM = optim))
 		}
-	}
+		
+		stopifnot(all(!duplicated(par.file.name))) # just to check if everything is all right... 
+		
+		if (tar.param)
+			tar.param(par.file.name, compressed.file.name)
+			
+		if (verbose) setTxtProgressBar(pb, mc.cores * (rep %/% mc.cores))
+	}, mc.cores=mc.cores)
+	
+	if (verbose) cat("\n")
 	
 	# Returns the parameter (and output) file names that will be necessary to make the launchfile
 	return(list(param=file.path(simul.dir, .repDir(1:extparam$REPLICATES), .repFile(1:extparam$REPLICATES, 0)), 
-	            out =file.path(simul.dir, .repDir(1:extparam$REPLICATES), .outFile(1:extparam$REPLICATES))))
+	            out =file.path(simul.dir, .repDir(1:extparam$REPLICATES), .outFile(1:extparam$REPLICATES)), 
+	            compressed = if (tar.param) file.path(simul.dir,  .repDir(1:extparam$REPLICATES), .repTarFile(1:extparam$REPLICATES)) else NA))
 }
