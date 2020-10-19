@@ -18,7 +18,9 @@ inoutgen <- function(files, gen)
 		W <- tt[tt[,"Gen"] == gen, grepl(colnames(tt), pattern="MeanAll")]
 		rm(tt); gc()
 		W <- matrix(unlist(W), ncol=sqrt(length(W)), byrow=TRUE)
-		inout.connections(W, env=env, epsilon=connect.threshold)
+		ans <- try(inout.connections(W, env=env, epsilon=connect.threshold))
+		if (class(ans) == "try-error") browser()
+		ans
 	}, mc.cores=mc.cores)
 mean.inout <- function(x)
 	list(connect.in = rowMeans(sapply(x, "[[", "connect.in")), connect.out=rowMeans(sapply(x, "[[", "connect.out")))
