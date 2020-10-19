@@ -1,6 +1,7 @@
 # Various functions to analyse the simulation results
 
-library(abind)
+suppressMessages(library(abind))
+
 library(parallel)
 
 source("../src/makeparam_functions.R") # dubious path management...

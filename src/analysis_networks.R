@@ -3,9 +3,10 @@
 
 source("../src/analysis_tools.R")
 
-suppressWarnings(library(igraph, quietly=TRUE))
-library(Rcpp)
-suppressWarnings(library(inline, quietly=TRUE))
+suppressMessages(library(igraph))
+suppressMessages(library(Rcpp))
+suppressMessages(library(inline))
+suppressMessages(library(digest))
 
 cppFunction('
 	List internal_loop_cpp(const NumericMatrix &W, const NumericVector &S0, double a, double env, unsigned int steps, unsigned int measure) {
@@ -60,7 +61,6 @@ cleanW <- function(W, epsilon=NULL, env=0.5, cache.dir = "../cache/distW", ...) 
 	recompute <- TRUE
 	
 	if (!is.null(cache.dir)) {
-		library(digest)
 		hh <- digest(list(env, W))
 		pp <- file.path(cache.dir, paste0(hh, ".rds"))
 		if (file.exists(pp)) {
