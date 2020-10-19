@@ -2,29 +2,37 @@
 
 \usepackage{bm}
 
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{lmodern}
+\fontfamily{lmss}\selectfont
+
 \title{Overview, Design concepts, and Details (ODD) protocol}
 
 \begin{document}
 
 \maketitle
 
+\section*{ODD protocol}
+
 \section{Purpose}
 
-The model aims at simulating the evolution of a gene regulatory network in a population-genetic context. 
+The model aims at simulating the evolution of a gene regulatory network in a population undergoing a domestication process. The model is individual-based and features sexual reproduction, mutations, selection, and genetic drift. 
+
+The simulated scenario mimics a domestication process, in three stages: (i) the "wild" species, reaching mutation - drift - selection equilibirum at a large population size, (ii) the domestication event, involving both a population bottleneck and a change in the selection conditions, and (iii) the spread of the domesticated species, with an increase in population size.
 
 \section{Entities, state variales, and scales}
 
-The model is individual-based. Individuals are characterized by their genotype (their gene network) and their phenotype (the expression level of each network gene when the network is at equilibrium. 
+The model is individual-based. Individuals are characterized by their genotype (their gene network), their phenotype (the expression level of each network gene), which is a function of the genotype, and their fitness (which is a function of the phenotype). 
 
-Generations are non-overlapping, and at a given generation, the state of the model is defined by the $N$ individuals of the population. The model defines explicilty two time scales. 
+At a given generation, the state of the model is defined by the $N$ individuals of the population. The model defines explicilty two time scales. 
 
 At the network time scale, the kinetics of an individual's gene network is calculated, resulting in the expression phenotype for this individual. The network kinetics is a discrete process, featured by 16 cycles of gene expression update. Each time step roughly corresponds to the life time of a gene product, i.e. it correpsonds in real life to several hours.
 
-Evolution happens at the population time scale. The population scale is also discrete, with non-overlapping generations. A generation consists in generating new individuals from parents, accounting for selection (differential reproduction probability depending on the phenotype) and mutation (random change in the genotype). Genetic drift arise spontaneously as the consequence of sampling genotypes in a finite population size. The time scale of generations can span weeks to years according to the species. 
+Evolution happens at the population time scale. The population scale is also discrete, with non-overlapping generations. A generation consists in generating new individuals from parents, accounting for selection (differential reproduction probability depending on the phenotype) and mutation (random change in the genotype). Genetic drift arise spontaneously as the consequence of sampling genotypes in a finite population. The time scale of generations can span weeks to years according to the species. 
 
 \paragraph{Agents and Individuals}
 
-Each individual has a fitness $w$, which stands for its propensity to reproduce. 
+Individuals are characterized  by their genotype (their gene network, a $n \times n$ matrix $\bm{\mathrm W}$), their expression phenotype (a vector $\bm{\mathrm P}$ of size $n$), and a fitness $w$ (the individual propensity to reproduce), a function of the phenotype $\bm{\mathrm P}$. When reproducting, individuals transfer their genotype to their offspring. 
 
 \paragraph{Spatial units}
 
@@ -32,7 +40,7 @@ The model does not consider spatial dimensions, mating probability only depends 
 
 \paragraph{Environment}
 
-The state of the environment at each generation $g$ is represented by a single variable $0 < e_g < 1$. The environment variable is sampled in a uniform distribution every generation, and is uncorrelated across generations (white noise process: $\cov (e_g, e_{g+1}) = 0$). 
+The state of the environment at each generation $g$ is represented by a single variable $0 < e_g < 1$. The environment variable is sampled in a uniform distribution every generation, and is uncorrelated across generations (white noise process: $\mathrm{cov} (e_g, e_{g+1}) = 0$). 
 
 The environment has two distinct (although totally correlated) effects in our model: (i) it affects the expression level of a "signal" gene in the network (this gene is expressed at level $e_g$ throughout the whole network kinetics), and (ii) it affects the fitness optimum of a subset of the gene networks (the "plastic genes"). In practice, the optimal expression level for half of the plastic genes is $e_g$, and $1-e_g$ for the other half. 
 
@@ -40,17 +48,46 @@ The model does not include within-generation environmental stochasticity, so tha
 
 \section{Process overview and scheduling}
 
+A simulation consists in a series of generations. The domestication scenario features three stages:
+\begin{enumerate}
+\item A burn-in stage ($22,000$ generations) in a large $N=20,000$ population, in order to reach the mutation - drift- selection equilibrium.
+\item An early domestication stage featured by a population bottleneck ($N=$) and a change in the selection regime.
+\item A late domestication stage featured by an expansion of the population ($N=20,000$) under the new selection regime. 
+\end{enumerate}
+
+A generation consists in a series of successive steps:
+\begin{enumerate}
+\item For each of the $N$ offspring, two parents are drawn with a probability $p_i = w_i / \sum_j w_j$ proportional to their fitness. 
+\item Each parent generate a haploid gamete, which is a $n \times n$ matrix $W_\gamma$ obtained by sampling lines from the gametes they recieved from their own parents $\bm{\mathrm W}_m$ and $\bm{\mathrm W}_m$ (each line of the matrix stands for a gene, and the model assumes free recombination --- no genetic linkage --- between genes). 
+\item Mutations occur (with a rate $\mu$ per gamete) and consist in adding a random deviate drawn in a Gaussian $\mathcal N(0,\sigma_m)$ to a random element of the gamete.
+\item Both gametes are averaged out, $\bm{\mathrm W} = \frac{1}{2} \bm{\mathrm W}_m + \frac{1}{2} \bm{\mathrm W}_p$. 
+\item The expression phenotype $\bm{\mathrm P}$ is calculated from the genotype $W$.
+\item The fitness $w$ is calculated from the phenotype $\bm{\mathrm P}$. 
+\end{enumerate}
+
 \section{Design concepts}
 
 \subsection{Basic principles}
 
+The model relies on the coupling between a population genetics model and a gene network model. 
+
+Population genetics follow a traditional Wright-Fisher model, with several traits co-evolving (one trait corresponding to the expression of a gene). 
+
+The gene network model follows Wagner (1994) and Wagner (1996), and has been widely used since then in evolutionary biology. Although simplistic, the regulation model is tractable in large-scale computer simulations, and accounts for most features of the regulation process. 
+
 \subsection{Emergence}
+
+Each trait (i.e., every gene expression) is expected to evolve as a quantitative trait (e.g. to respond to selection for traits under direct selection, or to respond to indirect selection due to genetic correlations otherwise). Gene-gene interactions (epistasis) and phenotypic correlations (pleiotropy) emerge from the model. The structure of the network (number and pattern of connections) is also an emergent property of the system. 
 
 \subsection{Adaptation and objectives}
 
 Adaptation is driven by selection. Each individual $j$ is attributed a fitness score $w_j$, which is proportional to the probability to be picked as a parent. The model implements "soft selection", i.e. fitnesses are relative and the population size does not depend on the mean fitness value. 
 
 The fitness function has two components: $w = w_I \cdot w_S$. The first component $w_I$ corresponds to the penalty for unstable networks, $w_I = \prod_{i=1}^n \exp(-s^\prime V_i)$, where $s^\prime$ is the selection coefficient against unstability, and $V_i$ the variance in gene $i$ expression over the four last cycles of the network kinetics. The coefficient $s^\prime$ was set to a large value ($s^\prime=46000$) to make unstable networks virtually unviable; this (disputable) assumption being generally made in the litterature. The second component $w_S = \prod_{i=1}^n exp(-s_i(p_i-\theta_i)^2)$ is the stabilizing selection component, providing a reproductive advantage to individuals close to the optimal phenotype $\theta$ for all genes. The selection coefficient $s_i$ scales with the inverse variance of this Gaussian function, it was set to 10 for "selected" genes (which ensures a gentle, but substantial, stabilizing selection), and 0 for non-selected genes. 
+
+The expected effect of adaptation is to bring the expression level of selected genes close to their fitness optimum. For genes that are under stabilizing selection, the fitness optimum is stable, and gene expression is expected to evolve towards robustness to various sources of disturbance (environmental noise and mutations). For genes under fluctuating selection, gene expression is expected to evolve towards phenotypic plasticity, i.e. sensitivity to the environment (through the signal gene) so that gene expression matches every generation the fluctuating optimum. 
+
+Genes that are not under direct adaptive constraints are neutral (their expression does not influence fitness), and are expected to evolve as a consequence of genetic drift and genetic correlations to selected genes that emerge as a consequence of the gene network structure. 
 
 \subsection{Learning}
 
@@ -117,7 +154,7 @@ The fixed optima were randomly drawn for each simulation in uniform (0,1) distri
 Parameter & Symbol & Code & Default value \\ \hline
 Total number of loci & $n$ & \texttt{GENET\_NBLOC} & 25 \\
 Recombination rate & $r$ & \texttt{GENET\_RECRATE} & 0.5 \\
-Mutation rate (per haplotype per generation) & $\mu$ & \texttt{GENET\_MUTRATES} & ? \\
+Mutation rate (per haplotype per generation) & $\mu$ & \texttt{GENET\_MUTRATES} & 0.0001 \\
 Standard deviation of mutational effects & $\sigma_m$ & \texttt{GENET\_MUTSD} & 0.1 \\
 Ploidy level & &  \texttt{GENET\_PLOIDY} & 2 \\
 Probability of self-fertilization & & \texttt{GENET\_SELFING} & 0 \\
@@ -135,10 +172,26 @@ Selection optimum & $\theta$ & \texttt{FITNESS\_OPTIMUM} & variable \\
 
 \paragraph{Domestication scenario} 
 
-
+The domestication scenario is inspired form the maize domestication, one of the best-characterized domestication example. 
 
 \section{Submodels}
 
+\paragraph{Gene network model}
+
+The gene network model was directly inspired from Wagner 1994, with minor changes detailed below. Individual genotypes were stored as $n \times n$ interaction matrices $\bm{\mathrm W}$, representing the strength and the direction of regulatory interactions between $n$ transcription factors or regulatory genes. Each element of the matrix $W_{i,j}$ stands for the effect of gene $j$ on the expression of gene $i$; interactions can be positive (transcription activation), negative (inhibition), or zero (no direct interaction). Each line $\bm{\mathrm W}_i$ of the matrix can be interpreted as an allele (the set of \emph{cis}-regulatory sites of the transcription factor). The model considers discrete regulatory time steps, and the expression of the $n$ genes, stored in a vector $\bm{\mathrm P}$, changes as:
+
+$$\bm{\mathrm P}_{t+1} = F(\bm{\mathrm W} \cdot \bm{\mathrm P}_t),
+$$ 
+\noindent where $F(x_1, \dots, x_n)$ applies a sigmoid scaling function $f(x)$ to all elements to ensure that gene expression ranges between 0 (no expression) and 1 (full expression). We used an asymmetric scaling function as in \cite{RL16, ORL18}, defined as:
+
+$$
+f(x) = \frac{1}{1+ \lambda_a e ^{- \mu_a x}}, 
+$$
+\noindent where $\lambda_a = (1-a)/a$ and $\mu_a = 1/a(1-a)$. The function $f$ is scaled such that $f(0) = a$ and $df/dx|_{x=0}=1$; the parameter $a$ thus stands for the constitutive gene expression (the expression of a gene in absence of regulators), and this function defines the scale of the matrix $\bm{\mathrm W}$: $W_{i,j} = \delta$ (with $|\delta| \ll 1$) means that the expression of gene $i$ at the next time step will tend to $P_{i,t+1} = a + \delta$ if $i$ is regulated by a single, fully expressed gene $j$ ($P_{j,t} = 1$). 
+
+The kinetics of the gene network was simulated for 24 time steps in each individual, starting from $P_0 = (a, \dots, a)$. The simulation program reports, for each gene $i$, the mean $\bar p_i$ and the variance $V_i$ of its expression level over the four last time steps. A non-null variance features an unstable gene network, which is generally considered as non-viable in equivalent models. 
+
+In addition to this traditional framework, we considered that one of the network genes was a "sensor" gene influenced by the environment. This makes it possible for the network to react to an environmental signal, and evolve expression plasticity. In practice, the environmental signal at generation $g$ was $0 < e_g < 1$, and the value of the sensor gene was replaced by $e_g$ at each time step (the sensor gene had no regulator and was not influenced by the internal state of the network).  
 
 
 
