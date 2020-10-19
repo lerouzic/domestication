@@ -22,7 +22,7 @@ mfit <- mean.sim[,"MFit"]
 vfit <- mean.sim[,"VFit"]
 gen <-  mean.sim[,"Gen"]
 
-N <- get.Ndyn(onerep(out.dir))
+N <- get.Ndyn(onerep(out.dir))[gen+1] 
 
 pdf("figA.pdf", width=8, height=4)
 
@@ -31,7 +31,7 @@ layout(t(1:2))
 plot(gen, N, type="l", xlim=range(gen), ylim=c(0, max(N)), ylab="Population size", xlab="Generations")
 lines(gen, N/(1+4*vfit/mfit/mfit), col="blue")
 bottleneck.plot(N, y=1, lwd=2)
-selectionchange.plot(out.mean, y=1, cex=1.5)
+selectionchange.plot(mean.sim, y=1, cex=1.5)
 legend("bottomright", lty=1, col=c("black","blue"), legend=c("N", expression(N[e])), bty="n")
 
 plot(NULL, xlab="Generations", ylab="Fitness", xlim=range(gen), ylim=c(0,1))
@@ -39,6 +39,6 @@ plot(NULL, xlab="Generations", ylab="Fitness", xlim=range(gen), ylim=c(0,1))
 #~ lines(gen, mfit-sqrt(vfit), lty=1, col="blue")
 lines(gen, mfit, lwd=2)
 bottleneck.plot(N, y=1, lwd=2)
-selectionchange.plot(out.mean, y=1, cex=1.5)
+selectionchange.plot(mean.sim, y=1, cex=1.5)
 
 dev.off()
