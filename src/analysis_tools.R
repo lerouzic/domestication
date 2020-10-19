@@ -43,10 +43,11 @@ get.Ndyn <- function(repdir) {
 
 	ll <- list.files(path=repdir, pattern="^param.*\\.txt$", full.names=TRUE)
 	if (length(ll) == 0) {
-		cc <- list.files(path=repdir, pattern="^param.\\.tar*", full.names=TRUE)
+		cc <- list.files(path=repdir, pattern="^param.*\\.tar", full.names=TRUE)
 		stopifnot(length(cc) == 1)
 		untar.param(cc)
 		ll <- list.files(path=repdir, pattern="^param.*\\.txt$", full.names=TRUE)
+		# no tar again? Pro: no need to re-untar if one needs N several times; Cons: leaves the directories in an undefined state. 
 	}
 	myN <- sapply(ll, function(ff) { 
 		if (length(grep("INIT_PSIZE", readLines(ff))) == 0) 
@@ -111,12 +112,26 @@ selectionchange.plot <- function(out.table, y=0, pch=25, col="black", bg="red", 
 	points(x=sel, y=y, pch=pch, col=col, bg=bg, ...)
 }
 
+# Returns a list of data.frames from all files (without truncated files)
+results.table <- function(out.files, mc.cores=detectCores()-1, max.reps=length(out.files), verbose=TRUE) {
+	tt <- mclapply(out.files[1:(min(max.reps, length(out.files)))], function(ff) { 
+		ans <- try(read.table(ff, header=TRUE))
+		if (class(ans) == "try-error") return(numeric(0))
+		return(ans)
+		}, mc.cores=min(mc.cores))
+	ltt <- sapply(tt, nrow)
+	full.length <- max(ltt)
+	if (verbose && any(ltt != full.length))
+		cat("\nOnly ", sum(ltt == full.length), " out of ", length(out.files), " were included in the analysis\n")
+	tt <- tt[ltt == full.length]
+	tt
+}
+
 # Average out all data tables from a directory
 mean.sim <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
 	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
-
-	tt <- mclapply(out.files[1:(min(max.reps, length(out.files)))], read.table, header=TRUE, mc.cores=min(mc.cores, 4)) # read.tables on many cores is useless, probably limited by disk speed
+	tt <- results.table(out.files, mc.cores, max.reps)
 	ans <- replicate.mean(tt)
 	rm(tt)
 	gc()
@@ -127,8 +142,7 @@ mean.sim <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1) {
 var.sim <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
 	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
-
-	tt <- mclapply(out.files[1:(min(max.reps, length(out.files)))], read.table, header=TRUE, mc.cores=min(mc.cores, 4)) # read.tables on many cores is useless, probably limited by disk speed
+	tt <- results.table(out.files, mc.cores, max.reps)
 	ans <- replicate.var(tt)
 	rm(tt)
 	gc()
@@ -173,8 +187,7 @@ reaction.norm.dyn <- function(out.table, window.size=floor(nrow(out.table)/100),
 mean.norm <- function(out.dir, max.reps=Inf, FUN=identity, mc.cores=detectCores()-1) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
 	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
-
-	tt <- mclapply(out.files[1:(min(max.reps, length(out.files)))], read.table, header=TRUE, mc.cores=min(mc.cores, 4)) # read.tables on many cores is useless, probably limited by disk speed
+	tt <- results.table(out.files, mc.cores, max.reps)
 	nn <- mclapply(tt, reaction.norm.dyn, window.size=window.size, sliding=sliding, mc.cores=mc.cores)
 	ans <- replicate.mean(lapply(nn, FUN))
 	rm(tt)

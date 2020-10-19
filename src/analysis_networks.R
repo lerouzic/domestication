@@ -114,8 +114,7 @@ inout.connections <- function(W, epsilon=NULL, env=0.5, ...) {
 mean.connect <- function(out.dir, env=0.5, epsilon=NULL, max.reps=Inf, mc.cores=detectCores()-1) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
 	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
-
-	tt <- mclapply(out.files[1:(min(max.reps, length(out.files)))], read.table, header=TRUE, mc.cores=min(mc.cores, 4)) 
+	tt <- results.table(out.files, mc.cores, max.reps)
 	nn <- mclapply(tt, number.connections.dyn, env=env, epsilon=epsilon, mc.cores=mc.cores)
 	ans <- colMeans(do.call(rbind, nn))
 	rm(tt)
