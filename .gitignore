@@ -1,4 +1,7 @@
-/figures/*.pdf
+/results/*.pdf
+/results/*launch.sh
 /paper/*
 !/paper/*.tex
 !/paper/*.bib
+/cache
+/src/Simul_Prog
