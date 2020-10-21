@@ -7,6 +7,7 @@ suppressMessages(library(igraph))
 suppressMessages(library(Rcpp))
 suppressMessages(library(inline))
 suppressMessages(library(digest))
+suppressMessages(library(ellipse))
 
 cppFunction('
 	List internal_loop_cpp(const NumericMatrix &W, const NumericVector &S0, double a, double env, unsigned int steps, unsigned int measure) {
@@ -179,9 +180,13 @@ mean.numconn.groups <- function(listW, groups, epsilon=NULL, env=0.5, count.diag
 }
 
 plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), ann.text=TRUE, col.scale=gray(seq(1, 0, by=-0.01))) {
-	delta.angle <- 0.3 # angle between two arrows
+	circ.arc <- function(theta1=0, theta2=2*pi, n=100) { tt <- seq(theta1, theta2, length.out=n); cbind(cos(tt), sin(tt)) }
+	
+	delta.angle <- 0.25 # angle between two arrows
 	arr.dist  <- 0.15 # distance between the group name and the arrows
-	plot(NULL, xlim=c(-1,1), ylim=c(-1,1), axes=FALSE, ann=FALSE, asp=1)
+	self.angle <- 1.6*pi
+	par(mar=c(.01,0.1,0.1,0.1))
+	plot(NULL, xlim=c(-1.1,1.1), ylim=c(-1.2,1.2), axes=FALSE, ann=FALSE, asp=1)
 	lg <- length(group.names)
 	xy.groups <- cbind(cos(2*pi/lg*(0:(lg-1))), sin(2*pi/lg*(0:(lg-1))))
 	
@@ -208,7 +213,19 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), ann
 				
 				arrows(x0=x.i.plus, x1=x.j.plus, y0=y.i.plus, y1=y.j.plus, length=0.1, col=col.scale[round(numconn$plus[i,j]*length(col.scale))])
 				arrows(x0=x.i.minus, x1=x.j.minus, y0=y.i.minus, y1=y.j.minus, length=0.05, angle=90, col=col.scale[round(numconn$minus[i,j]*length(col.scale))])
-			} else {
+			} else { # i == j
+				# angle of i around the circle
+				alpha <- (i-1)*2*pi/lg
+				# the regulation circle is opposite to the center
+				cc <- circ.arc(alpha-self.angle/2, alpha+self.angle/2)
+				cc.plus <- t(t(cc)*arr.dist+(1+0.5*arr.dist)*xy.groups[i,])
+				cc.minus <- t(t(cc)*(1-delta.angle)*arr.dist+(1+0.5*arr.dist)*xy.groups[i,])
+				col.plus <- col.scale[round(numconn$plus[i,i]*length(col.scale))]
+				col.minus <- col.scale[round(numconn$minus[i,i]*length(col.scale))]
+				lines(cc.plus[1:(nrow(cc.plus)-1), 1], cc.plus[1:(nrow(cc.plus)-1),2], col=col.plus, lty=1)
+				arrows(x0=cc.plus[nrow(cc.plus)-1,1], x1=cc.plus[nrow(cc.plus),1], y0=cc.plus[nrow(cc.plus)-1,2], y1=cc.plus[nrow(cc.plus),2], col=col.plus, length=0.1)
+				lines(cc.minus[2:nrow(cc.minus), 1], cc.minus[2:nrow(cc.minus),2], col=col.minus, lty=1)
+				arrows(x0=cc.minus[2,1], x1=cc.minus[1,1], y0=cc.minus[2,2], y1=cc.minus[1,2], col=col.minus, length=0.05, angle=90)
 			}
 		}
 	}
