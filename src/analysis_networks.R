@@ -151,3 +151,65 @@ communities.dyn <- function(out.table, epsilon=NULL, env=0.5, directed=FALSE, mc
 	names(comm) <- as.character(out.table[,"Gen"])
 	comm
 }
+
+numconn.groups <- function(W, groups, epsilon=NULL, env=0.5, ...) {
+	cW <- cleanW(W=W, epsilon=epsilon, env=env, ...)
+	ug <- unique(groups)
+	nconn.plus <- nconn.minus <- matrix(0, ncol=length(ug), nrow=length(ug))
+	rownames(nconn.plus) <- rownames(nconn.minus) <- colnames(nconn.plus) <- colnames(nconn.minus) <- ug
+	# Very slow double for loop
+	for (i in 1:nrow(cW))
+		for (j in 1:ncol(cW)) {
+			if (cW[i,j] > 0) nconn.plus[i,j] <- nconn.plus[i,j]+1
+			if (cW[i,j] < 0) nconn.minus[i,j] <- nconn.minus[i,j]+1
+		}
+	list(plus=nconn.plus, minus=nconn.minus)
+}
+
+mean.numconn.groups <- function(listW, groups, epsilon=NULL, env=0.5, count.diag=NA, mc.cores=detectCores()-1, ...) {
+	if (is.na(count.diag)) count.diag <- sum(sapply(listW, function(W) sum(diag(W)!=0))) != 0
+	all.nconn <- mclapply(listW, function(W) numconn.groups(W=W, groups=groups, epsilon=epsilon, env=env, ...), mc.cores=mc.cores)
+	tg <- table(groups)
+	norm <- tg %*% t(tg)
+	if (!count.diag)
+		diag(norm) <- diag(norm)-tg
+	tplus <- do.call(abind, c(lapply(all.nconn, function(x) x$plus), list(along=3)))
+	tminus <-  do.call(abind, c(lapply(all.nconn, function(x) x$minus), list(along=3)))
+	list(plus=rowSums(tplus, dims=2)/norm, minus=rowSums(tminus, dims=2)/norm)
+}
+
+plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), ann.text=TRUE, col.scale=gray(seq(1, 0, by=-0.01))) {
+	delta.angle <- 0.3 # angle between two arrows
+	arr.dist  <- 0.15 # distance between the group name and the arrows
+	plot(NULL, xlim=c(-1,1), ylim=c(-1,1), axes=FALSE, ann=FALSE, asp=1)
+	lg <- length(group.names)
+	xy.groups <- cbind(cos(2*pi/lg*(0:(lg-1))), sin(2*pi/lg*(0:(lg-1))))
+	
+	# plots the groups
+	text(xy.groups[,1], xy.groups[,2], group.names)
+	
+	# plots the 'plus' arrows
+	for (i in 1:lg) {
+		for (j in 1:lg) {
+			if (i != j) {
+				# angle between i and j
+				alpha <- atan((xy.groups[j,2]-xy.groups[i,2])/(xy.groups[j,1]-xy.groups[i,1]))
+				if (i < j) alpha <- pi+alpha
+				
+				x.i.plus <- xy.groups[i,1]+arr.dist*cos(alpha-delta.angle/2)
+				y.i.plus <- xy.groups[i,2]+arr.dist*sin(alpha-delta.angle/2)
+				x.i.minus <- xy.groups[i,1]+arr.dist*cos(alpha-3*delta.angle/2)
+				y.i.minus <- xy.groups[i,2]+arr.dist*sin(alpha-3*delta.angle/2)
+				
+				x.j.plus <-  xy.groups[j,1]+arr.dist*cos(pi+alpha+delta.angle/2)
+				y.j.plus <- xy.groups[j,2]+arr.dist*sin(pi+alpha+delta.angle/2)
+				x.j.minus <- xy.groups[j,1]+arr.dist*cos(pi+alpha+3*delta.angle/2)
+				y.j.minus <- xy.groups[j,2]+arr.dist*sin(pi+alpha+3*delta.angle/2)
+				
+				arrows(x0=x.i.plus, x1=x.j.plus, y0=y.i.plus, y1=y.j.plus, length=0.1, col=col.scale[round(numconn$plus[i,j]*length(col.scale))])
+				arrows(x0=x.i.minus, x1=x.j.minus, y0=y.i.minus, y1=y.j.minus, length=0.05, angle=90, col=col.scale[round(numconn$minus[i,j]*length(col.scale))])
+			} else {
+			}
+		}
+	}
+}
