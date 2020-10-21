@@ -2,37 +2,22 @@
 
 # Figure D: evolution of the reaction norm
 
-source("../src/analysis_tools.R")
+source("commonfig.R")
 
-library(parallel)
-mc.cores <- min(12, detectCores()-1)
+my.mean.norm <- function(x, FUN=abs, ...) {
+	cache.file <- paste0(file.path(cache.dir, basename(x)), "-norm.rds")
+	if (use.cache && file.exists(cache.file)) {
+		return(readRDS(cache.file))
+	} else {
+		ans <- mean.norm(x, FUN=FUN, max.reps=Inf, mc.cores=mc.cores, ...)
+		saveRDS(ans, cache.file, version=2)
+		return(ans)
+	}
+}
 
-my.mean.sim <- function(x) mean.sim(x, max.reps=if (detectCores() > 23) Inf else 5, mc.cores=mc.cores) # For tests 
-my.mean.norm <- function(x) mean.norm(x, FUN=abs, max.reps=if (detectCores() > 23) Inf else 5, mc.cores=mc.cores) # the FUN=abs is important here! 
+mean.norm.default  <- my.mean.norm(out.dir.default, sliding=TRUE, window.size=window.avg)
+mean.norm.nobottle <- my.mean.norm(out.dir.nobottle, sliding=TRUE, window.size=window.avg)
 
-
-# The norm is calculated based on the simulation results using a window:
-window.size <- 50 # Number of time points (!= number of generations!)
-sliding <- FALSE   # Beware of the computational cost
-
-
-onerep <- function(out.dir) list.dirs(out.dir, full.names=TRUE, recursive=FALSE)[1]
-
-out.dir.default  <- "../cache/simDefault"
-out.dir.nobottle <- "../cache/simNobot"
-
-mean.sim.default  <- my.mean.sim(out.dir.default)
-mean.sim.nobottle <- my.mean.sim(out.dir.nobottle)
-
-mean.norm.default  <- my.mean.norm(out.dir.default)
-mean.norm.nobottle <- my.mean.norm(out.dir.nobottle)
-
-selpattern.default  <- selectionregime.detect(mean.sim.default)[-1] # The first gene is the environmental signal
-selpattern.nobottle <- selectionregime.detect(mean.sim.nobottle)[-1]
-
-Ndyn.default <- get.Ndyn(onerep(out.dir.default))
-
-col <- c(p="red", n="black", s="blue")
 lty <- c(default=1, nobottle=2)
 
 pdf("figD.pdf", width=5, height=5)

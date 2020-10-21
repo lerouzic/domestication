@@ -6,6 +6,16 @@ library(parallel)
 
 source("../src/makeparam_functions.R") # dubious path management...
 
+# Moving average (generation numbers as names)
+mov.avg <- function(x, gen=1:length(x), size=1, min.gen=0) {
+	x.ma <- diff(cumsum(x), lag=size)/size
+	gen.ma <- diff(cumsum(gen), lag=size)/size
+	names(x.ma) <- as.character(round(gen.ma))
+	x.ma <- x.ma[as.numeric(x.ma) >= min.gen]
+	x.ma <- x.ma[!is.na(x.ma)]
+	x.ma
+}
+
 # Applies the function FUN (typically, mean or var) to each element of the list of matrix/data.frames 
 replicate.apply <- function(tt, FUN=mean, ...) {
 	# better checking if the data base is consistent
@@ -40,8 +50,17 @@ replicate.var <- function(tt) {
 
 # Reconstructs the dynamics of the population size N from a replicate directory 
 # (takes a bit of time due to the number of files)
-get.Ndyn <- function(repdir) {
+get.Ndyn <- function(repdir, cache.dir="../cache/Ndyn") {
 
+	if (!is.null(cache.dir)) {
+		cf <- sub(".*cache/", "", repdir)
+		cf <- sub("/", "_", cf)
+		cache.file <- file.path(cache.dir, paste0(cf, ".rds"))
+		if (!dir.exists(cache.dir)) 
+			dir.create(cache.dir)
+		if (file.exists(cache.file))
+			return(readRDS(cache.file))
+	}
 	ll <- list.files(path=repdir, pattern="^param.*\\.txt$", full.names=TRUE)
 	if (length(ll) == 0) {
 		cc <- list.files(path=repdir, pattern="^param.*\\.tar", full.names=TRUE)
@@ -60,6 +79,9 @@ get.Ndyn <- function(repdir) {
 		})
 	myN <- na.omit(myN)[cumsum(!is.na(myN))] # Replace NAs by the last non-NA
 	names(myN) <- sapply(regmatches(ll, regexec(ll, pattern="gen(\\d+)")), "[", 2)
+	if (!is.null(cache.dir)) {
+		saveRDS(myN, cache.file, version=2)
+	}
 	myN
 }
 
@@ -185,7 +207,7 @@ reaction.norm.dyn <- function(out.table, window.size=floor(nrow(out.table)/100),
 }
 
 # Average out all reaction norms from a directory (use FUN=abs to get the absolute value of the norm)
-mean.norm <- function(out.dir, max.reps=Inf, FUN=identity, mc.cores=detectCores()-1) {
+mean.norm <- function(out.dir, max.reps=Inf, FUN=identity, mc.cores=detectCores()-1, sliding=TRUE, window.size=10) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
 	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
 	tt <- results.table(out.files, mc.cores, max.reps)

@@ -5,7 +5,22 @@ source("../src/analysis_tools.R")
 library(parallel)
 mc.cores <- min(12, detectCores()-1)
 
-my.mean.sim <- function(x) mean.sim(x, max.reps=if (detectCores() > 23) Inf else 5) # For tests 
+use.cache <- TRUE
+cache.dir <- "../cache"
+
+window.avg <- 9 # Size of the moving average window
+first.gen  <- 0  # First generation for the time series
+
+my.mean.sim <- function(x) {
+	cache.file <- paste0(file.path(cache.dir, basename(x)), "-mean.rds")
+	if (use.cache && file.exists(cache.file)) {
+		return(readRDS(cache.file))
+	} else {
+		ans <- mean.sim(x, max.reps=Inf, mc.cores=mc.cores)
+		saveRDS(ans, cache.file, version=2)
+		return(ans)
+	}
+}
 
 onerep <- function(out.dir) list.dirs(out.dir, full.names=TRUE, recursive=FALSE)[1]
 
@@ -25,9 +40,10 @@ selpattern.noselc   <- selectionregime.detect(mean.sim.noselc)[-1]
 selpattern.nosel    <- selectionregime.detect(mean.sim.nosel)[-1]
 
 Ndyn.default    <- get.Ndyn(onerep(out.dir.default))
-Ndyn.nobottle   <- get.Ndyn(onerep(out.dir.nobottle))
+#~ Ndyn.nobottle   <- get.Ndyn(onerep(out.dir.nobottle))
 Ndyn.noselc     <- get.Ndyn(onerep(out.dir.noselc))
 Ndyn.nosel      <- get.Ndyn(onerep(out.dir.nosel))
 
 col <- c(c="blue", s="blue", p="red", n="black")
 lty <- c(c=1, s=1, p=2, n=3)
+

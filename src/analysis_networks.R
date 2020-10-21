@@ -79,7 +79,7 @@ cleanW <- function(W, epsilon=NULL, env=0.5, cache.dir = "../cache/distW", ...) 
 				distMat[i,j] <- dd
 			}
 		if (!is.null(cache.dir))
-			saveRDS(distMat, pp)
+			saveRDS(distMat, pp, version=2)
 	}
 	cleanW <- matrix(0, ncol=ncol(W), nrow=nrow(W))
 	cleanW[distMat > epsilon] <- W[distMat > epsilon]
