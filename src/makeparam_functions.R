@@ -1,6 +1,6 @@
 # To be "Sourced" from a R script file
 
-Rutils <- suppressPackageStartupMessages(require(R.utils)) # Path manipulation 
+suppressPackageStartupMessages(require(R.utils)) # Path manipulation 
 
 library(parallel)
 
@@ -15,10 +15,11 @@ tar.param <- function(param.files, compressed.file, compression="gzip") {
 	unlink(pfile)
 }
 
-untar.param <- function(compressed.file) {
+untar.param <- function(compressed.file, remove.tar=FALSE) {
 #~ 	untar(compressed.file)
 	system(paste0("cd ", dirname(compressed.file), "; tar xfz ", basename(compressed.file)))
-	unlink(compressed.file)
+	if (remove.tar)
+		unlink(compressed.file)
 }
 
 create.launchfile <- function(prog.path, param.files, output.files, compressed.files, launch.file="./launchfile.sh", relative.paths=TRUE) {
