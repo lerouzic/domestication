@@ -159,8 +159,8 @@ numconn.groups <- function(W, groups, epsilon=NULL, env=0.5, ...) {
 	# Very slow double for loop
 	for (i in 1:nrow(cW))
 		for (j in 1:ncol(cW)) {
-			if (cW[i,j] > 0) nconn.plus[i,j] <- nconn.plus[i,j]+1
-			if (cW[i,j] < 0) nconn.minus[i,j] <- nconn.minus[i,j]+1
+			if (cW[i,j] > 0) nconn.plus[groups[i],groups[j]] <- nconn.plus[groups[i],groups[j]]+1
+			if (cW[i,j] < 0) nconn.minus[groups[i],groups[j]] <- nconn.minus[groups[i],groups[j]]+1
 		}
 	list(plus=nconn.plus, minus=nconn.minus)
 }
@@ -174,7 +174,7 @@ mean.numconn.groups <- function(listW, groups, epsilon=NULL, env=0.5, count.diag
 		diag(norm) <- diag(norm)-tg
 	tplus <- do.call(abind, c(lapply(all.nconn, function(x) x$plus), list(along=3)))
 	tminus <-  do.call(abind, c(lapply(all.nconn, function(x) x$minus), list(along=3)))
-	list(plus=rowSums(tplus, dims=2)/norm, minus=rowSums(tminus, dims=2)/norm)
+	list(plus=rowMeans(tplus, dims=2)/norm, minus=rowMeans(tminus, dims=2)/norm)
 }
 
 plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), ann.text=TRUE, col.scale=gray(seq(1, 0, by=-0.01))) {
