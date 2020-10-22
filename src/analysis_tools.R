@@ -54,6 +54,7 @@ replicate.var <- function(tt) {
 # (takes a bit of time due to the number of files)
 get.Ndyn <- function(repdir) {
 	ll <- list.files(path=repdir, pattern="^param.*\\.txt$", full.names=TRUE)
+	cc <- numeric(0)
 	if (length(ll) == 0) {
 		cc <- list.files(path=repdir, pattern="^param.*\\.tar", full.names=TRUE)
 		stopifnot(length(cc) == 1)
@@ -130,10 +131,12 @@ selectionchange.plot <- function(out.table, y=0, pch=25, col="black", bg="red", 
 }
 
 # Returns a list of data.frames from all files (without truncated files)
-results.table <- function(out.files, mc.cores=detectCores()-1, max.reps=length(out.files), verbose=TRUE) {
+results.table <- function(out.files, mc.cores=detectCores()-1, max.reps=length(out.files), verbose=TRUE, colnames.pattern=NULL) {
 	tt <- mclapply(out.files[1:(min(max.reps, length(out.files)))], function(ff) { 
 		ans <- try(read.table(ff, header=TRUE))
 		if (class(ans) == "try-error") return(numeric(0))
+		if (!is.null(colnames.pattern))
+			ans <- ans[,grepl(pattern=colnames.pattern, colnames(ans))]
 		return(ans)
 		}, mc.cores=min(mc.cores))
 	ltt <- sapply(tt, nrow)
@@ -145,18 +148,18 @@ results.table <- function(out.files, mc.cores=detectCores()-1, max.reps=length(o
 }
 
 # Average out all data tables from a directory
-mean.sim <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1) {
+mean.sim <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1, colnames.pattern=NULL) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
 	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
-	tt <- results.table(out.files, mc.cores, max.reps)
+	tt <- results.table(out.files, mc.cores, max.reps, colnames.pattern=colnames.pattern)
 	ans <- replicate.mean(tt)
 	rm(tt)
 	gc()
 	return(ans)
 }
 
-mean.sim.cache <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1) {
-	cache.fun(mean.sim, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, cache.subdir="means")
+mean.sim.cache <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1, colnames.pattern=colnames.pattern) {
+	cache.fun(mean.sim, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="means")
 }
 
 # variance of all data tables from a directory

@@ -5,7 +5,6 @@ source("../src/analysis_tools.R")
 library(parallel)
 mc.cores <- min(12, detectCores()-1)
 
-use.cache <- TRUE
 cache.dir <- default.cache.dir # defined in ../src/cache.R
 
 window.avg <- 9 # Size of the moving average window
@@ -18,10 +17,12 @@ out.dir.nobottle <- file.path(cache.dir, "simNobot")
 out.dir.noselc   <- file.path(cache.dir, "simNoselc")
 out.dir.nosel    <- file.path(cache.dir, "simNosel")
 
-mean.sim.default  <- mean.sim.cache(out.dir.default)
-mean.sim.nobottle <- mean.sim.cache(out.dir.nobottle)
-mean.sim.noselc   <- mean.sim.cache(out.dir.noselc)
-mean.sim.nosel    <- mean.sim.cache(out.dir.nosel)
+tokeep <- "Mphen|FitOpt|MFit|VFit"
+
+mean.sim.default  <- mean.sim.cache(out.dir.default, colnames.pattern=tokeep)
+mean.sim.nobottle <- mean.sim.cache(out.dir.nobottle, colnames.pattern=tokeep)
+mean.sim.noselc   <- mean.sim.cache(out.dir.noselc, colnames.pattern=tokeep)
+mean.sim.nosel    <- mean.sim.cache(out.dir.nosel, colnames.pattern=tokeep)
 
 selpattern.default  <- selectionregime.detect(mean.sim.default)[-1] # The first gene is the environmental signal
 selpattern.nobottle <- selectionregime.detect(mean.sim.nobottle)[-1]
