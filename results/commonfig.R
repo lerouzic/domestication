@@ -17,7 +17,7 @@ out.dir.nobottle <- file.path(cache.dir, "simNobot")
 out.dir.noselc   <- file.path(cache.dir, "simNoselc")
 out.dir.nosel    <- file.path(cache.dir, "simNosel")
 
-tokeep <- "Mphen|FitOpt|MFit|VFit"
+tokeep <- "Gen|Mphen|FitOpt|MFit|VFit"
 
 mean.sim.default  <- mean.sim.cache(out.dir.default, colnames.pattern=tokeep)
 mean.sim.nobottle <- mean.sim.cache(out.dir.nobottle, colnames.pattern=tokeep)
