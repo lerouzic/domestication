@@ -131,7 +131,7 @@ selectionchange.plot <- function(out.table, y=0, pch=25, col="black", bg="red", 
 }
 
 # Returns a list of data.frames from all files (without truncated files)
-results.table <- function(out.files, mc.cores=detectCores()-1, max.reps=length(out.files), verbose=TRUE, colnames.pattern=NULL) {
+results.table <- function(out.files, mc.cores=1, max.reps=length(out.files), verbose=TRUE, colnames.pattern=NULL) {
 	tt <- mclapply(out.files[1:(min(max.reps, length(out.files)))], function(ff) { 
 		ans <- try(read.table(ff, header=TRUE))
 		if (class(ans) == "try-error") return(numeric(0))
@@ -148,7 +148,7 @@ results.table <- function(out.files, mc.cores=detectCores()-1, max.reps=length(o
 }
 
 # Average out all data tables from a directory
-mean.sim <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1, colnames.pattern=NULL) {
+mean.sim <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=NULL) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
 	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
 	tt <- results.table(out.files, mc.cores, max.reps, colnames.pattern=colnames.pattern)
@@ -158,7 +158,7 @@ mean.sim <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1, colnames.p
 	return(ans)
 }
 
-mean.sim.cache <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1, colnames.pattern=colnames.pattern) {
+mean.sim.cache <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=colnames.pattern) {
 	cache.fun(mean.sim, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="means")
 }
 
