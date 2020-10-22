@@ -11,11 +11,11 @@ cache.fun <- function(FUN, ..., cache.dir=default.cache.dir, cache.subdir="misc"
 		if (!dir.exists(full.cache.dir))
 			dir.create(full.cache.dir)
 		full.cache.file <- file.path(full.cache.dir, cache.file)
-		if (file.exists(cache.file))
-			return(readRDS(cache.file))
+		if (file.exists(full.cache.file))
+			return(readRDS(full.cache.file))
 	}
 	ans <- FUN(...)
 	if (use.cache)
-		saveRDS(ans, cache.file, version=rds.version)
+		saveRDS(ans, full.cache.file, version=rds.version)
 	return(ans)
 }
