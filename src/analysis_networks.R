@@ -2,6 +2,7 @@
 
 
 source("../src/analysis_tools.R")
+source("../src/cache.R")
 
 suppressMessages(library(igraph))
 suppressMessages(library(Rcpp))
@@ -52,43 +53,32 @@ model.M2 <- function(W, S0=rep(a, nrow(W)), a=0.2, env=0.5, steps=20, measure=4,
 	return(ans)
 }
 
-cleanW <- function(W, epsilon=NULL, env=0.5, cache.dir = "../cache/distW", ...) {
-	# The cache system is based on a hash of the W matrix and env. Collisions are expected to be very rare,
-	# hopefully without consequences. 
+cleanW <- function(W, epsilon=NULL, env=0.5, ...) {
+	# ... are additional arguments to modelM2
+
 	if (is.null(epsilon)) epsilon <- sqrt((nrow(W)-1)*0.01^2)
-	if (!is.null(cache.dir) && !dir.exists(cache.dir)) dir.create(cache.dir)
-	
 	distMat <- matrix(0, ncol=ncol(W), nrow=nrow(W))
-	recompute <- TRUE
+	ref.expr <- model.M2(W, env=env, ...)$mean
 	
-	if (!is.null(cache.dir)) {
-		hh <- digest(list(env, W))
-		pp <- file.path(cache.dir, paste0(hh, ".rds"))
-		if (file.exists(pp)) {
-			distMat <- readRDS(pp)
-			recompute <- FALSE
+	for (i in 1:nrow(W))
+		for (j in 1:ncol(W)) {
+			myW <- W
+			myW[i,j] <- 0
+			new.expr <- model.M2(myW, env=env, ...)$mean
+			dd <- sqrt(sum((ref.expr[-1]-new.expr[-1])^2))
+			distMat[i,j] <- dd
 		}
-	}
-	if (recompute) {
-		ref.expr <- model.M2(W, env=env, ...)$mean
-		for (i in 1:nrow(W))
-			for (j in 1:ncol(W)) {
-				myW <- W
-				myW[i,j] <- 0
-				new.expr <- model.M2(myW, env=env, ...)$mean
-				dd <- sqrt(sum((ref.expr[-1]-new.expr[-1])^2))
-				distMat[i,j] <- dd
-			}
-		if (!is.null(cache.dir))
-			saveRDS(distMat, pp, version=2)
-	}
 	cleanW <- matrix(0, ncol=ncol(W), nrow=nrow(W))
 	cleanW[distMat > epsilon] <- W[distMat > epsilon]
 	cleanW
 }
 
+cleanW.cache <- function(W, epsilon=NULL, env=0.5, ...) {
+	cache.fun(cleanW, W=W, epsilon=epsilon, env=env, ..., cache.subdir="cleanW")
+}
+
 number.connections <- function(W, epsilon=NULL, env=0.5, ...) {
-	cW <- cleanW(W=W, epsilon=epsilon, env=env, ...)
+	cW <- cleanW.cache(W=W, epsilon=epsilon, env=env, ...)
 	sum(cW != 0)
 }
 
@@ -107,7 +97,7 @@ number.connections.dyn <- function(out.table, epsilon=NULL, env=0.5) { # if env 
 }
 
 inout.connections <- function(W, epsilon=NULL, env=0.5, ...) {
-	cW <- cleanW(W=W, epsilon=epsilon, env=env, ...)
+	cW <- cleanW.cache(W=W, epsilon=epsilon, env=env, ...)
 	list(connect.in=rowSums(cW != 0), connect.out=colSums(cW != 0))
 }
 
@@ -123,9 +113,13 @@ mean.connect <- function(out.dir, env=0.5, epsilon=NULL, max.reps=Inf, mc.cores=
 	return(ans)
 }
 
+mean.connect.cache <- function(out.dir, env=0.5, epsilon=NULL, max.reps=Inf, mc.cores=detectCores()-1) {
+	cache.fun(mean.connect, out.dir=out.dir, env=env, epsilon=epsilon, max.reps=max.reps, mc.cores=detectCores()-1, cache.subdir="connect")
+}
+
 # Returns a list of complex community objects according to several igraph algorithms
 communities <- function(W, epsilon=NULL, env=0.5, directed=FALSE, ...) {
-	cW <- cleanW(W, epsilon=epsilon, env=env, ...)
+	cW <- cleanW.cache(W, epsilon=epsilon, env=env, ...)
 	
 	Wgraph <- igraph::graph_from_adjacency_matrix(sign(cW))
 	if (!directed) 
@@ -153,8 +147,12 @@ communities.dyn <- function(out.table, epsilon=NULL, env=0.5, directed=FALSE, mc
 	comm
 }
 
+communities.dyn.cache <- function(out.table, epsilon=NULL, env=0.5, directed=FALSE, mc.cores=1) {
+	cache.fun(communities.dyn, out.table=out.table, epsilon=epsilon, env=env, directed=directed, mc.cores=mc.cores)
+}
+
 numconn.groups <- function(W, groups, epsilon=NULL, env=0.5, ...) {
-	cW <- cleanW(W=W, epsilon=epsilon, env=env, ...)
+	cW <- cleanW.cache(W=W, epsilon=epsilon, env=env, ...)
 	ug <- unique(groups)
 	nconn.plus <- nconn.minus <- matrix(0, ncol=length(ug), nrow=length(ug))
 	rownames(nconn.plus) <- rownames(nconn.minus) <- colnames(nconn.plus) <- colnames(nconn.minus) <- ug

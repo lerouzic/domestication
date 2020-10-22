@@ -4,19 +4,8 @@
 
 source("commonfig.R")
 
-my.mean.norm <- function(x, FUN=abs, ...) {
-	cache.file <- paste0(file.path(cache.dir, basename(x)), "-norm.rds")
-	if (use.cache && file.exists(cache.file)) {
-		return(readRDS(cache.file))
-	} else {
-		ans <- mean.norm(x, FUN=FUN, max.reps=Inf, mc.cores=mc.cores, ...)
-		saveRDS(ans, cache.file, version=2)
-		return(ans)
-	}
-}
-
-mean.norm.default  <- my.mean.norm(out.dir.default, sliding=TRUE, window.size=window.avg)
-mean.norm.nobottle <- my.mean.norm(out.dir.nobottle, sliding=TRUE, window.size=window.avg)
+mean.norm.default  <- mean.norm.cache(out.dir.default, sliding=TRUE, window.size=window.avg)
+mean.norm.nobottle <- mean.norm.cache(out.dir.nobottle, sliding=TRUE, window.size=window.avg)
 
 lty <- c(default=1, nobottle=2)
 

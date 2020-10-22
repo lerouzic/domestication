@@ -11,20 +11,9 @@ source("../src/analysis_networks.R")
 
 connect.threshold <- 0.1
 
-my.mean.connect <- function(x ) {
-	cache.file <- paste0(file.path(cache.dir, basename(x)), "-connect.rds")
-	if (use.cache && file.exists(cache.file)) {
-		return(readRDS(cache.file))
-	} else {
-		ans <- mean.connect(x, env=0.5, epsilon=connect.threshold, max.reps=Inf, mc.cores=mc.cores)
-		saveRDS(ans, cache.file, version=2)
-		return(ans)
-	}
-}
-
-mean.connect.default  <- my.mean.connect(out.dir.default)
-mean.connect.nobottle <- my.mean.connect(out.dir.nobottle)
-mean.connect.noselc   <- my.mean.connect(out.dir.noselc)
+mean.connect.default  <- mean.connect.cache(out.dir.default)
+mean.connect.nobottle <- mean.connect.cache(out.dir.nobottle)
+mean.connect.noselc   <- mean.connect.cache(out.dir.noselc)
 
 my.mean.connect.default <- mov.avg(mean.connect.default, as.numeric(names(mean.connect.default)), size=window.avg, min.gen=first.gen)
 my.mean.connect.nobottle <- mov.avg(mean.connect.nobottle, as.numeric(names(mean.connect.nobottle)), size=window.avg, min.gen=first.gen)

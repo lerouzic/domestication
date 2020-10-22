@@ -11,23 +11,12 @@ use.cache <- TRUE
 
 source("../src/analysis_networks.R")
 
-comm.files <- function(out.files, cache.dir="../cache") {
+comm.files <- function(out.files) {
 	 mclapply(out.files, function(ff) {
-		comm.cache.dir <- file.path(cache.dir, "comm")
-		if (!dir.exists(comm.cache.dir))
-			dir.create(comm.cache.dir)
-		cf <- sub(".*cache/", "", dirname(ff))
-		cf <- sub("/", "_", cf)
-		comm.cache.file <-file.path(comm.cache.dir, paste0(cf, ".rds"))
-		if (use.cache && file.exists(comm.cache.file)) {
-			return(readRDS(comm.cache.file))
-		} else {
-			tt <- read.table(ff, header=TRUE)
-			cc <- communities.dyn(tt, epsilon=connect.threshold, env=env, directed=directed, mc.cores=max(1, round(mc.cores/4)))
-			saveRDS(cc, comm.cache.file, version=2)
-			return(cc)
-		}
-	}, mc.cores=min(4, mc.cores))
+		tt <- read.table(ff, header=TRUE)
+		cc <- communities.dyn.cache(tt, epsilon=connect.threshold, env=env, directed=directed, mc.cores=max(1, round(mc.cores/4)))
+		return(cc)
+		}, mc.cores=min(4, mc.cores))
 }
 
 out.files.default  <- list.files(pattern="out.*", path=list.dirs(out.dir.default,  full.names=TRUE, recursive=FALSE), full.names=TRUE)

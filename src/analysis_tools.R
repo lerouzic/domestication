@@ -5,6 +5,8 @@ suppressMessages(library(abind))
 library(parallel)
 
 source("../src/makeparam_functions.R") # dubious path management...
+source("../src/cache.R")
+
 
 # Moving average (generation numbers as names)
 mov.avg <- function(x, gen=1:length(x), size=1, min.gen=0) {
@@ -50,24 +52,13 @@ replicate.var <- function(tt) {
 
 # Reconstructs the dynamics of the population size N from a replicate directory 
 # (takes a bit of time due to the number of files)
-get.Ndyn <- function(repdir, cache.dir="../cache/Ndyn") {
-
-	if (!is.null(cache.dir)) {
-		cf <- sub(".*cache/", "", repdir)
-		cf <- sub("/", "_", cf)
-		cache.file <- file.path(cache.dir, paste0(cf, ".rds"))
-		if (!dir.exists(cache.dir)) 
-			dir.create(cache.dir)
-		if (file.exists(cache.file))
-			return(readRDS(cache.file))
-	}
+get.Ndyn <- function(repdir) {
 	ll <- list.files(path=repdir, pattern="^param.*\\.txt$", full.names=TRUE)
 	if (length(ll) == 0) {
 		cc <- list.files(path=repdir, pattern="^param.*\\.tar", full.names=TRUE)
 		stopifnot(length(cc) == 1)
-		untar.param(cc)
+		untar.param(cc, remove.tar=FALSE)
 		ll <- list.files(path=repdir, pattern="^param.*\\.txt$", full.names=TRUE)
-		# no tar again? Pro: no need to re-untar if one needs N several times; Cons: leaves the directories in an undefined state. 
 	}
 	myN <- sapply(ll, function(ff) { 
 		if (length(grep("INIT_PSIZE", readLines(ff))) == 0) 
@@ -77,12 +68,15 @@ get.Ndyn <- function(repdir, cache.dir="../cache/Ndyn") {
 			return(pp[["INIT_PSIZE"]])
 		}
 		})
+	if (length(cc) == 1) # there was a tar that was uncompressed
+		unlink(ll)
 	myN <- na.omit(myN)[cumsum(!is.na(myN))] # Replace NAs by the last non-NA
 	names(myN) <- sapply(regmatches(ll, regexec(ll, pattern="gen(\\d+)")), "[", 2)
-	if (!is.null(cache.dir)) {
-		saveRDS(myN, cache.file, version=2)
-	}
 	myN
+}
+
+get.Ndyn.cache <- function(repdir) {
+	cache.fun(get.Ndyn, repdir=repdir, cache.subdir="Ndyn")
 }
 
 # Detects the begining and the end of the bottleneck(s?) from the dynamics of N
@@ -161,6 +155,10 @@ mean.sim <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1) {
 	return(ans)
 }
 
+mean.sim.cache <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1) {
+	cache.fun(mean.sim, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, cache.subdir="means")
+}
+
 # variance of all data tables from a directory
 var.sim <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
@@ -216,4 +214,8 @@ mean.norm <- function(out.dir, max.reps=Inf, FUN=identity, mc.cores=detectCores(
 	rm(tt)
 	gc()
 	return(ans)
+}
+
+mean.norm.cache <- function(out.dir, max.reps=Inf, FUN=identity, mc.cores=detectCores()-1, sliding=TRUE, window.size=10) {
+	cache.fun(mean.norm, out.dir=out.dir, max.reps=max.reps, FUN=FUN, mc.cores=mc.cores, sliding=sliding, window.size=window.size, cache.subdir="norm")
 }
