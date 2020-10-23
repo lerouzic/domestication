@@ -36,14 +36,18 @@ sel.after.dom[sel.after.dom == "c"] <- "s"
 sel.before.dom[1] <- sel.after.dom[1] <- "e" # The algorithm cannot know that the first guy is environment
 
 numconn.before.dom <- mean.numconn.groups(Wlist.before.dom, sel.before.dom)
+numconn.justafter.dom <- mean.numconn.groups(Wlist.before.dom, sel.after.dom)
 numconn.after.dom <- mean.numconn.groups(Wlist.after.dom, sel.after.dom)
 
 
-pdf("figH.pdf", width=10, height=5)
-layout(t(1:2))
+pdf("figH.pdf", width=12, height=4)
+layout(t(1:3))
 
 plot.numconn.groups(numconn.before.dom)
-
+title("Before domestication")
+plot.numconn.groups(numconn.justafter.dom)
+title("Immediately after")
 plot.numconn.groups(numconn.after.dom)
+title("Now")
 
 dev.off()

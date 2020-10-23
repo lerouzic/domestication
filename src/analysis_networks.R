@@ -153,7 +153,7 @@ communities.dyn.cache <- function(out.table, epsilon=NULL, env=0.5, directed=FAL
 
 numconn.groups <- function(W, groups, epsilon=NULL, env=0.5, ...) {
 	cW <- cleanW.cache(W=W, epsilon=epsilon, env=env, ...)
-	ug <- unique(groups)
+	ug <- sort(unique(groups))
 	nconn.plus <- nconn.minus <- matrix(0, ncol=length(ug), nrow=length(ug))
 	rownames(nconn.plus) <- rownames(nconn.minus) <- colnames(nconn.plus) <- colnames(nconn.minus) <- ug
 	# Very slow double for loop
@@ -177,19 +177,36 @@ mean.numconn.groups <- function(listW, groups, epsilon=NULL, env=0.5, count.diag
 	list(plus=rowMeans(tplus, dims=2)/norm, minus=rowMeans(tminus, dims=2)/norm)
 }
 
-plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), ann.text=TRUE, col.scale=gray(seq(1, 0, by=-0.01))) {
+plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), ann.text=TRUE, col.scale.plus=NULL, col.scale.minus=NULL, lwd.arr=2, ...) {
 	circ.arc <- function(theta1=0, theta2=2*pi, n=100) { tt <- seq(theta1, theta2, length.out=n); cbind(cos(tt), sin(tt)) }
+	posit.angle <- function(angle) { angle <- angle %% (2*pi); if (angle > pi/2 && angle <= 3*pi/2) angle <- angle + pi; angle %% (2*pi)}
+	if (is.null(col.scale.plus))
+		col.scale.plus <- colorRampPalette(c("white","black"))(100)
+	if (is.null(col.scale.minus))
+		col.scale.minus <- colorRampPalette(c("white","red"))(100)
 	
 	delta.angle <- 0.25 # angle between two arrows
 	arr.dist  <- 0.15 # distance between the group name and the arrows
 	self.angle <- 1.6*pi
-	par(mar=c(.01,0.1,0.1,0.1))
-	plot(NULL, xlim=c(-1.1,1.1), ylim=c(-1.2,1.2), axes=FALSE, ann=FALSE, asp=1)
+	ann.text.options <- list(
+		pos.shift.plus=0.75, 
+		pos.shift.minus=0.60, 
+		text.cex=0.7, 
+		col.plus=rev(col.scale.plus)[1], 
+		col.minus=rev(col.scale.minus)[1], 
+		thresh=0.05, 
+		digits=2)
+	
+	par(mar=c(0.1,0.1,4,0.1))
+	plot(NULL, xlim=c(-1.1,1.1), ylim=c(-1.2,1.2), axes=FALSE, ann=FALSE, asp=1, ...)
 	lg <- length(group.names)
 	xy.groups <- cbind(cos(2*pi/lg*(0:(lg-1))), sin(2*pi/lg*(0:(lg-1))))
 	
 	# plots the groups
 	text(xy.groups[,1], xy.groups[,2], group.names)
+	
+	numconn$plus[!is.finite(numconn$plus)] <- 0
+	numconn$minus[!is.finite(numconn$minus)] <- 0
 	
 	# plots the 'plus' arrows
 	for (i in 1:lg) {
@@ -197,20 +214,40 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), ann
 			if (i != j) {
 				# angle between i and j
 				alpha <- atan((xy.groups[j,2]-xy.groups[i,2])/(xy.groups[j,1]-xy.groups[i,1]))
-				if (i < j) alpha <- pi+alpha
+				if (xy.groups[i,1] > xy.groups[j,1]) alpha <- alpha - pi
 				
-				x.i.plus <- xy.groups[i,1]+arr.dist*cos(alpha-delta.angle/2)
-				y.i.plus <- xy.groups[i,2]+arr.dist*sin(alpha-delta.angle/2)
+				x.i.plus  <- xy.groups[i,1]+arr.dist*cos(alpha-delta.angle/2)
+				y.i.plus  <- xy.groups[i,2]+arr.dist*sin(alpha-delta.angle/2)
 				x.i.minus <- xy.groups[i,1]+arr.dist*cos(alpha-3*delta.angle/2)
 				y.i.minus <- xy.groups[i,2]+arr.dist*sin(alpha-3*delta.angle/2)
 				
-				x.j.plus <-  xy.groups[j,1]+arr.dist*cos(pi+alpha+delta.angle/2)
-				y.j.plus <- xy.groups[j,2]+arr.dist*sin(pi+alpha+delta.angle/2)
+				x.j.plus  <- xy.groups[j,1]+arr.dist*cos(pi+alpha+delta.angle/2)
+				y.j.plus  <- xy.groups[j,2]+arr.dist*sin(pi+alpha+delta.angle/2)
 				x.j.minus <- xy.groups[j,1]+arr.dist*cos(pi+alpha+3*delta.angle/2)
 				y.j.minus <- xy.groups[j,2]+arr.dist*sin(pi+alpha+3*delta.angle/2)
 				
-				arrows(x0=x.i.plus, x1=x.j.plus, y0=y.i.plus, y1=y.j.plus, length=0.1, col=col.scale[round(numconn$plus[i,j]*length(col.scale))])
-				arrows(x0=x.i.minus, x1=x.j.minus, y0=y.i.minus, y1=y.j.minus, length=0.05, angle=90, col=col.scale[round(numconn$minus[i,j]*length(col.scale))])
+				col.plus  <- col.scale.plus [round(numconn$plus[j,i]* length(col.scale.plus))]
+				col.minus <- col.scale.minus[round(numconn$minus[j,i]*length(col.scale.minus))]
+				
+				arrows(x0=x.i.plus,  x1=x.j.plus,  y0=y.i.plus,  y1=y.j.plus,  length=0.1,  col=col.plus,  lwd=lwd.arr)
+				arrows(x0=x.i.minus, x1=x.j.minus, y0=y.i.minus, y1=y.j.minus, length=0.05, col=col.minus, lwd=lwd.arr, angle=90)
+				
+				if (ann.text) {
+					if (numconn$plus[j,i] > ann.text.options$thresh)
+					text(	x=(1-ann.text.options$pos.shift.plus)*x.i.plus+ann.text.options$pos.shift.plus*x.j.plus, 
+							y=(1-ann.text.options$pos.shift.plus)*y.i.plus+ann.text.options$pos.shift.plus*y.j.plus, 
+							round(numconn$plus[j,i], digits=ann.text.options$digits), 
+							cex=ann.text.options$text.cex, 
+							col=ann.text.options$col.plus,
+							srt=180*(posit.angle(alpha)/pi))
+					if (numconn$minus[j,i] > ann.text.options$thresh)
+					text(	x=(1-ann.text.options$pos.shift.minus)*x.i.minus+ann.text.options$pos.shift.minus*x.j.minus, 
+							y=(1-ann.text.options$pos.shift.minus)*y.i.minus+ann.text.options$pos.shift.minus*y.j.minus, 
+							round(numconn$minus[j,i], digits=ann.text.options$digits), 
+							cex=ann.text.options$text.cex, 
+							col=ann.text.options$col.minus,
+							srt=180*(posit.angle(alpha)/pi))
+				}
 			} else { # i == j
 				# angle of i around the circle
 				alpha <- (i-1)*2*pi/lg
@@ -218,12 +255,27 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), ann
 				cc <- circ.arc(alpha-self.angle/2, alpha+self.angle/2)
 				cc.plus <- t(t(cc)*arr.dist+(1+0.5*arr.dist)*xy.groups[i,])
 				cc.minus <- t(t(cc)*(1-delta.angle)*arr.dist+(1+0.5*arr.dist)*xy.groups[i,])
-				col.plus <- col.scale[round(numconn$plus[i,i]*length(col.scale))]
-				col.minus <- col.scale[round(numconn$minus[i,i]*length(col.scale))]
-				lines(cc.plus[1:(nrow(cc.plus)-1), 1], cc.plus[1:(nrow(cc.plus)-1),2], col=col.plus, lty=1)
-				arrows(x0=cc.plus[nrow(cc.plus)-1,1], x1=cc.plus[nrow(cc.plus),1], y0=cc.plus[nrow(cc.plus)-1,2], y1=cc.plus[nrow(cc.plus),2], col=col.plus, length=0.1)
-				lines(cc.minus[2:nrow(cc.minus), 1], cc.minus[2:nrow(cc.minus),2], col=col.minus, lty=1)
-				arrows(x0=cc.minus[2,1], x1=cc.minus[1,1], y0=cc.minus[2,2], y1=cc.minus[1,2], col=col.minus, length=0.05, angle=90)
+				col.plus <- col.scale.plus[round(numconn$plus[i,i]*length(col.scale.plus))]
+				col.minus <- col.scale.minus[round(numconn$minus[i,i]*length(col.scale.minus))]
+				lines(cc.plus[1:(nrow(cc.plus)-1), 1], cc.plus[1:(nrow(cc.plus)-1),2], col=col.plus, lty=1, lwd=lwd.arr)
+				arrows(x0=cc.plus[nrow(cc.plus)-1,1], x1=cc.plus[nrow(cc.plus),1], y0=cc.plus[nrow(cc.plus)-1,2], y1=cc.plus[nrow(cc.plus),2], col=col.plus, length=0.1, lwd=lwd.arr)
+				lines(cc.minus[2:nrow(cc.minus), 1], cc.minus[2:nrow(cc.minus),2], col=col.minus, lty=1, lwd=lwd.arr)
+				arrows(x0=cc.minus[2,1], x1=cc.minus[1,1], y0=cc.minus[2,2], y1=cc.minus[1,2], col=col.minus, length=0.05, angle=90, lwd=lwd.arr)
+				
+				if (ann.text) {
+					if (numconn$plus[i,i] > ann.text.options$thresh)
+					text(	x=cc.plus[round(ann.text.options$pos.shift.plus*nrow(cc.plus)),1], 
+							y=cc.plus[round(ann.text.options$pos.shift.plus*nrow(cc.plus)),2], 
+							round(numconn$plus[i,i], digits=ann.text.options$digits), 
+							cex=ann.text.options$text.cex, 
+							col=ann.text.options$col.plus)
+					if (numconn$minus[i,i] > ann.text.options$thresh)
+					text(	x=cc.minus[round(ann.text.options$pos.shift.minus*nrow(cc.minus)),1], 
+							y=cc.minus[round(ann.text.options$pos.shift.minus*nrow(cc.minus)),2], 
+							round(numconn$minus[i,i], digits=ann.text.options$digits), 
+							cex=ann.text.options$text.cex, 
+							col=ann.text.options$col.minus)
+				}
 			}
 		}
 	}
