@@ -31,7 +31,7 @@ create.launchfile <- function(prog.path, param.files, output.files, compressed.f
 		all(file.exists(param.files) | file.exists(compressed.files)))
 		
 		
-	if (Rutils && relative.paths) {
+	if (relative.paths) {
 		launch.dir <- dirname(launch.file)
 		prog.path   <- getRelativePath(prog.path, launch.dir)
 		param.files <- getRelativePath(param.files, launch.dir)
