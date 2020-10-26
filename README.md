@@ -30,16 +30,20 @@ Launching all jobs can be performed with GNU parallel:
 
 On a slurm server:
 
-```#!/bin/bash
+```
+#!/bin/bash
 #
+#SBATCH --job-name=simAll2
 #SBATCH -p long                      # partition
+##SBATCH -N 1                       # nodes
+##SBATCH -n 54                        # cores
 #SBATCH --mail-type END
-#SBATCH --mail-user toto@domain.com
+#SBATCH --mail-user lerouzic@egce.cnrs-gif.fr
 #SBATCH --cpus-per-task 54
 
-module load parallel tar
+module load parallel
 
-parallel --shuf --joblog joblog.log -j $SLURM_CPUS_PER_TASK -a simAll.sh
+parallel --shuf --joblog joblog2.log -j $SLURM_CPUS_PER_TASK -delay 20 -a simAll_2.sh
 ```
 
 Current simulations:
