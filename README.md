@@ -43,7 +43,7 @@ On a slurm server:
 
 module load parallel
 
-parallel --shuf --joblog joblog2.log -j $SLURM_CPUS_PER_TASK -delay 20 -a simAll_2.sh
+parallel --shuf --joblog joblog2.log -j $SLURM_CPUS_PER_TASK --delay 20 -a simAll_2.sh
 ```
 
 Current simulations:
