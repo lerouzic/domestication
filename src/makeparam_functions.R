@@ -39,6 +39,27 @@ create.launchfile <- function(prog.path, param.files, output.files, compressed.f
 		compressed.files<- getRelativePath(compressed.files, launch.dir)
 	}
 	
+	command <- paste0( prog.path, " -z ", compressed.files, " -p ", param.files, " -o ", output.files )
+	writeLines(command, launch.file)
+}
+
+create.launchfile.old <- function(prog.path, param.files, output.files, compressed.files, launch.file="./launchfile.sh", relative.paths=TRUE) {
+	# relative.paths sets all paths relative to the launch.file directory
+	stopifnot(
+		length(param.files) > 0, 
+		length(param.files) == length(output.files),
+		file.exists(prog.path), 
+		all(file.exists(param.files) | file.exists(compressed.files)))
+		
+		
+	if (relative.paths) {
+		launch.dir <- dirname(launch.file)
+		prog.path   <- getRelativePath(prog.path, launch.dir)
+		param.files <- getRelativePath(param.files, launch.dir)
+		output.files<- getRelativePath(output.files, launch.dir) 
+		compressed.files<- getRelativePath(compressed.files, launch.dir)
+	}
+	
 	uncompress.command <- ifelse(is.na(compressed.files), "", paste0("tar xfz ", compressed.files, " -C ", dirname(compressed.files), " && "))
 #~ 	compress.command <- ifelse(is.na(compressed.files), "", paste0("tar cfz ", compressed.files, " ", dirname(compressed.files), "/param*.txt;"))
 	compress.command <- ifelse(is.na(compressed.files), "", paste0("rm -f ", dirname(compressed.files), "/param*.txt;"))
