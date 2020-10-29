@@ -52,3 +52,6 @@ Current simulations:
 * simAll_3 -> Toutatis
 * simAll_4 -> IFBcore
 * simAll_5 -> IFBcore
+* simAll_6 -> IFBCore
+* simAll_7 -> IFBcore
+* simAll_8 -> IFBCore
