@@ -10,12 +10,14 @@ connect.threshold <- 0.1
 env <- 0.5
 
 Wgen <- function(files, gen) {
-	mclapply(files, function(ff) {
+	ans <- mclapply(files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
+		if (!gen %in% tt[,"Gen"]) return(NA)
 		W <- tt[tt[,"Gen"] == gen, grepl(colnames(tt), pattern="MeanAll")]
 		rm(tt); gc()
 		W <- matrix(unlist(W), ncol=sqrt(length(W)), byrow=TRUE)
 	}, mc.cores=1)
+	ans[!sapply(ans, function(x) length(x) == 1 && is.na(x))]
 }
 
 Wgen.cache <- function(files, gen) {
@@ -35,9 +37,9 @@ sel.before.dom[sel.before.dom == "c"] <- "s" # constant and stable should be the
 sel.after.dom[sel.after.dom == "c"] <- "s"
 sel.before.dom[1] <- sel.after.dom[1] <- "e" # The algorithm cannot know that the first guy is environment
 
-numconn.before.dom <- mean.numconn.groups(Wlist.before.dom, sel.before.dom)
-numconn.justafter.dom <- mean.numconn.groups(Wlist.before.dom, sel.after.dom)
-numconn.after.dom <- mean.numconn.groups(Wlist.after.dom, sel.after.dom)
+numconn.before.dom <- mean.numconn.groups(Wlist.before.dom, sel.before.dom, mc.cores=mc.cores)
+numconn.justafter.dom <- mean.numconn.groups(Wlist.before.dom, sel.after.dom, mc.cores=mc.cores)
+numconn.after.dom <- mean.numconn.groups(Wlist.after.dom, sel.after.dom, mc.cores=mc.cores)
 
 
 pdf("figH.pdf", width=12, height=4)
