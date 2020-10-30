@@ -9,14 +9,17 @@ source("../src/analysis_networks.R")
 connect.threshold <- 0.1
 env <- 0.5
 
-inoutgen <- function(files, gen) 
-	mclapply(files, function(ff) {
+inoutgen <- function(files, gen) {
+	ans <- mclapply(files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
+		if (!gen %in% tt$Gen) return(NA)
 		W <- tt[tt[,"Gen"] == gen, grepl(colnames(tt), pattern="MeanAll")]
 		rm(tt); gc()
 		W <- matrix(unlist(W), ncol=sqrt(length(W)), byrow=TRUE)
 		inout.connections(W, env=env, epsilon=connect.threshold)
 	}, mc.cores=mc.cores)
+	ans[!sapply(ans, function(x) length(x) < 2 || is.na(x))]
+}
 mean.inout <- function(x)
 	list(connect.in = rowMeans(sapply(x, "[[", "connect.in")), connect.out=rowMeans(sapply(x, "[[", "connect.out")))
 
