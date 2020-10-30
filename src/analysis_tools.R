@@ -195,10 +195,10 @@ reaction.norm <- function(partial.out.table, signal.gene="MPhen1") {
 }
 
 # Reaction norm dynamics (for a given window size)
-reaction.norm.dyn <- function(out.table, window.size=floor(nrow(out.table)/100), sliding=FALSE, signal.gene="MPhen1") {
+reaction.norm.dyn <- function(out.table, window.size=floor(nrow(out.table)/100), sliding=TRUE, signal.gene="MPhen1") {
 	stopifnot(window.size > 1, window.size <= nrow(out.table))
 	list.gens <- if (sliding) {
-					lapply(1:(nrow(out.table)-1), function(i.start) i.start:(i.start+window.size-1))
+					lapply(1:(nrow(out.table)-window.size+1), function(i.start) i.start:(i.start+window.size-1))
 				} else {
 					lapply(1:floor(nrow(out.table)/window.size), function(i.start) (1+(i.start-1)*window.size):(i.start*window.size))
 				}
@@ -208,17 +208,17 @@ reaction.norm.dyn <- function(out.table, window.size=floor(nrow(out.table)/100),
 }
 
 # Average out all reaction norms from a directory (use FUN=abs to get the absolute value of the norm)
-mean.norm <- function(out.dir, max.reps=Inf, FUN=identity, mc.cores=detectCores()-1, sliding=TRUE, window.size=10) {
+mean.norm <- function(out.dir, max.reps=Inf, FUN.to.apply=identity, mc.cores=detectCores()-1, sliding=TRUE, window.size=10) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
 	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
 	tt <- results.table(out.files, mc.cores, max.reps)
 	nn <- mclapply(tt, reaction.norm.dyn, window.size=window.size, sliding=sliding, mc.cores=mc.cores)
-	ans <- replicate.mean(lapply(nn, FUN))
+	ans <- replicate.mean(lapply(nn, FUN.to.apply))
 	rm(tt)
 	gc()
 	return(ans)
 }
 
-mean.norm.cache <- function(out.dir, max.reps=Inf, FUN=identity, mc.cores=detectCores()-1, sliding=TRUE, window.size=10) {
-	cache.fun(mean.norm, out.dir=out.dir, max.reps=max.reps, FUN=FUN, mc.cores=mc.cores, sliding=sliding, window.size=window.size, cache.subdir="norm")
+mean.norm.cache <- function(out.dir, max.reps=Inf, FUN.to.apply=identity, mc.cores=detectCores()-1, sliding=TRUE, window.size=10) {
+	cache.fun(mean.norm, out.dir=out.dir, max.reps=max.reps, FUN.to.apply=FUN.to.apply, mc.cores=mc.cores, sliding=sliding, window.size=window.size, cache.subdir="norm")
 }

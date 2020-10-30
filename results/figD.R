@@ -3,9 +3,10 @@
 # Figure D: evolution of the reaction norm
 
 source("commonfig.R")
+source("../src/analysis_tools.R")
 
-mean.norm.default  <- mean.norm.cache(out.dir.default, sliding=TRUE, window.size=window.avg)
-mean.norm.nobottle <- mean.norm.cache(out.dir.nobottle, sliding=TRUE, window.size=window.avg)
+mean.norm.default  <- mean.norm.cache(out.dir.default, FUN.to.apply=abs, sliding=TRUE, window.size=window.norm)
+mean.norm.nobottle <- mean.norm.cache(out.dir.nobottle, FUN.to.apply=abs, sliding=TRUE, window.size=window.norm)
 
 lty <- c(default=1, nobottle=2)
 

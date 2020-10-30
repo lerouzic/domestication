@@ -7,7 +7,8 @@ mc.cores <- min(12, detectCores()-1)
 
 cache.dir <- default.cache.dir # defined in ../src/cache.R
 
-window.avg <- 9 # Size of the moving average window
+window.avg <- 1 # Size of the moving average window
+window.norm <- 10 # Size of the window for reaction norms
 first.gen  <- 0  # First generation for the time series
 
 onerep <- function(out.dir) list.dirs(out.dir, full.names=TRUE, recursive=FALSE)[1]
@@ -17,7 +18,7 @@ out.dir.nobottle <- file.path(cache.dir, "simNobot")
 out.dir.noselc   <- file.path(cache.dir, "simNoselc")
 out.dir.nosel    <- file.path(cache.dir, "simNosel")
 
-tokeep <- "Gen|Mphen|FitOpt|MFit|VFit"
+tokeep <- "Gen|Mphen|VPhen|FitOpt|MFit|VFit|VarAll"
 
 mean.sim.default  <- mean.sim.cache(out.dir.default, colnames.pattern=tokeep)
 mean.sim.nobottle <- mean.sim.cache(out.dir.nobottle, colnames.pattern=tokeep)
