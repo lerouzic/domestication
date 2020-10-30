@@ -280,3 +280,32 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), ann
 		}
 	}
 }
+
+scalefree.regression <- function(M) {
+	# Returns the (adjusted) r^2 of the scale free regresssion of the number of connections
+	stopifnot(is.matrix(M), ncol(M) == nrow(M), isSymmetric(M))
+	diag(M) <- 0
+	nconn <- apply(M, 1, function(x) sum(x != 0))
+	freqtt <- table(nconn)/length(nconn)
+	freqtt <- freqtt[names(freqtt) != "0"]
+	ll <- lm(log(freqtt) ~ log(as.numeric(names(freqtt))))
+	summary(ll)$adj.r.squared
+}
+
+cor.pval <- function(R, N, p.adjust.method="holm") {
+	stopifnot(is.matrix(R), nrow(R) == ncol(R), isSymmetric(R), all(R >= -1), all(R <= 1), N > 2)
+	t.matrix <- abs(R) * sqrt(N-2)/sqrt(1-R*R)
+	p.matrix <- 2*(1-pt(t.matrix, N-2))
+	p.corr <- p.adjust(p.matrix[upper.tri(p.matrix)], method=p.adjust.method)
+	# Now ensure the output is symmetric
+	p.matrix[upper.tri(p.matrix)] <- p.corr
+	p.matrix <- t(p.matrix)
+	p.matrix[upper.tri(p.matrix)] <- p.corr
+	p.matrix
+}
+
+cleanR <- function(R, cutoff=NA, power=NA) {
+	R <- abs(cov2cor(R))
+	
+	
+}
