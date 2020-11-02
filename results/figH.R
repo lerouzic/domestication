@@ -6,7 +6,6 @@ source("./commonfig.R")
 
 source("../src/analysis_networks.R")
 
-connect.threshold <- 0.1
 env <- 0.5
 
 Wgen <- function(files, gen) {
