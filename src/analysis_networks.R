@@ -177,7 +177,38 @@ mean.numconn.groups <- function(listW, groups, epsilon=NULL, env=0.5, count.diag
 	list(plus=rowMeans(tplus, dims=2)/norm, minus=rowMeans(tminus, dims=2)/norm)
 }
 
-plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), ann.text=TRUE, col.scale.plus=NULL, col.scale.minus=NULL, lwd.arr=2, ...) {
+
+numcorrgen.groups <- function(R, groups, cutoff=0.1) {
+	cR <- R
+	cR[abs(cR) < 1e-10] <- 0
+	diag(cR)[diag(cR) == 0] <- 1 # It happens with the environment
+	cR <- cov2cor(cR)
+	cR[abs(cR) < cutoff] <- 0
+	diag(cR) <- 0
+	ug <- sort(unique(groups))
+	nconn.plus <- nconn.minus <- matrix(0, ncol=length(ug), nrow=length(ug))
+	rownames(nconn.plus) <- rownames(nconn.minus) <- colnames(nconn.plus) <- colnames(nconn.minus) <- ug
+	# Very slow double for loop
+	for (i in 1:nrow(cR))
+		for (j in 1:ncol(cR)) {
+			if (cR[i,j] > 0) nconn.plus[groups[i],groups[j]] <- nconn.plus[groups[i],groups[j]]+1
+			if (cR[i,j] < 0) nconn.minus[groups[i],groups[j]] <- nconn.minus[groups[i],groups[j]]+1
+		}
+	list(plus=nconn.plus, minus=nconn.minus)
+}
+
+
+mean.numcorrgen.groups <- function(listR, groups, cutoff=0.1, mc.cores=detectCores()-1) {
+	all.ncorr <- mclapply(listR, function(R) numcorrgen.groups(R=R, groups=groups, cutoff=cutoff), mc.cores=mc.cores)
+	tg <- table(groups)
+	norm <- tg %*% t(tg)
+	diag(norm) <- diag(norm)-tg
+	tplus <- do.call(abind, c(lapply(all.ncorr, function(x) x$plus), list(along=3)))
+	tminus <-  do.call(abind, c(lapply(all.ncorr, function(x) x$minus), list(along=3)))
+	list(plus=rowMeans(tplus, dims=2)/norm, minus=rowMeans(tminus, dims=2)/norm)
+}
+
+plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), directed=TRUE, ann.text=TRUE, col.scale.plus=NULL, col.scale.minus=NULL, lwd.arr=2, ...) {
 	circ.arc <- function(theta1=0, theta2=2*pi, n=100) { tt <- seq(theta1, theta2, length.out=n); cbind(cos(tt), sin(tt)) }
 	posit.angle <- function(angle) { angle <- angle %% (2*pi); if (angle > pi/2 && angle <= 3*pi/2) angle <- angle + pi; angle %% (2*pi)}
 	if (is.null(col.scale.plus))
@@ -208,7 +239,6 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), ann
 	numconn$plus[!is.finite(numconn$plus)] <- 0
 	numconn$minus[!is.finite(numconn$minus)] <- 0
 	
-	# plots the 'plus' arrows
 	for (i in 1:lg) {
 		for (j in 1:lg) {
 			if (i != j) {
@@ -229,18 +259,26 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), ann
 				col.plus  <- col.scale.plus [round(numconn$plus[j,i]* length(col.scale.plus))]
 				col.minus <- col.scale.minus[round(numconn$minus[j,i]*length(col.scale.minus))]
 				
-				arrows(x0=x.i.plus,  x1=x.j.plus,  y0=y.i.plus,  y1=y.j.plus,  length=0.1,  col=col.plus,  lwd=lwd.arr)
-				arrows(x0=x.i.minus, x1=x.j.minus, y0=y.i.minus, y1=y.j.minus, length=0.05, col=col.minus, lwd=lwd.arr, angle=90)
+				if (directed) {
+					arrows(x0=x.i.plus,  x1=x.j.plus,  y0=y.i.plus,  y1=y.j.plus,  length=0.1,  col=col.plus,  lwd=lwd.arr)
+					arrows(x0=x.i.minus, x1=x.j.minus, y0=y.i.minus, y1=y.j.minus, length=0.05, col=col.minus, lwd=lwd.arr, angle=90)
+				} else { # The non-directed case is a bit of a hack, reusing existing variables
+					if (i > j) { # otherwise no need to draw anything
+						arrows(x0=x.i.plus,  x1=x.j.plus,  y0=y.i.plus,  y1=y.j.plus, code=3, length=0,  col=col.plus,  lwd=lwd.arr)
+					} else { # j < i necessarily, as the case i==j is treated elsewhere
+						arrows(x0=x.i.plus,  x1=x.j.plus,  y0=y.i.plus,  y1=y.j.plus, code=3, length=0,  col=col.minus,  lwd=lwd.arr)
+					}
+				}
 				
 				if (ann.text) {
 					if (numconn$plus[j,i] > ann.text.options$thresh)
 					text(	x=(1-ann.text.options$pos.shift.plus)*x.i.plus+ann.text.options$pos.shift.plus*x.j.plus, 
 							y=(1-ann.text.options$pos.shift.plus)*y.i.plus+ann.text.options$pos.shift.plus*y.j.plus, 
-							round(numconn$plus[j,i], digits=ann.text.options$digits), 
+							round(if (!directed && j > i) numconn$minus[i,j] else numconn$plus[j,i], digits=ann.text.options$digits), 
 							cex=ann.text.options$text.cex, 
-							col=ann.text.options$col.plus,
+							col=if(!directed && j > i) ann.text.options$col.minus else ann.text.options$col.plus,
 							srt=180*(posit.angle(alpha)/pi))
-					if (numconn$minus[j,i] > ann.text.options$thresh)
+					if (numconn$minus[j,i] > ann.text.options$thresh && directed)
 					text(	x=(1-ann.text.options$pos.shift.minus)*x.i.minus+ann.text.options$pos.shift.minus*x.j.minus, 
 							y=(1-ann.text.options$pos.shift.minus)*y.i.minus+ann.text.options$pos.shift.minus*y.j.minus, 
 							round(numconn$minus[j,i], digits=ann.text.options$digits), 
@@ -258,9 +296,11 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), ann
 				col.plus <- col.scale.plus[round(numconn$plus[i,i]*length(col.scale.plus))]
 				col.minus <- col.scale.minus[round(numconn$minus[i,i]*length(col.scale.minus))]
 				lines(cc.plus[1:(nrow(cc.plus)-1), 1], cc.plus[1:(nrow(cc.plus)-1),2], col=col.plus, lty=1, lwd=lwd.arr)
-				arrows(x0=cc.plus[nrow(cc.plus)-1,1], x1=cc.plus[nrow(cc.plus),1], y0=cc.plus[nrow(cc.plus)-1,2], y1=cc.plus[nrow(cc.plus),2], col=col.plus, length=0.1, lwd=lwd.arr)
+				if (directed)
+					arrows(x0=cc.plus[nrow(cc.plus)-1,1], x1=cc.plus[nrow(cc.plus),1], y0=cc.plus[nrow(cc.plus)-1,2], y1=cc.plus[nrow(cc.plus),2], col=col.plus, length=0.1, lwd=lwd.arr)
 				lines(cc.minus[2:nrow(cc.minus), 1], cc.minus[2:nrow(cc.minus),2], col=col.minus, lty=1, lwd=lwd.arr)
-				arrows(x0=cc.minus[2,1], x1=cc.minus[1,1], y0=cc.minus[2,2], y1=cc.minus[1,2], col=col.minus, length=0.05, angle=90, lwd=lwd.arr)
+				if (directed)
+					arrows(x0=cc.minus[2,1], x1=cc.minus[1,1], y0=cc.minus[2,2], y1=cc.minus[1,2], col=col.minus, length=0.05, angle=90, lwd=lwd.arr)
 				
 				if (ann.text) {
 					if (numconn$plus[i,i] > ann.text.options$thresh)
@@ -280,6 +320,8 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), ann
 		}
 	}
 }
+
+##### Tools for coexpression networks (not used -> deletion?)
 
 scalefree.regression <- function(M) {
 	# Returns the (adjusted) r^2 of the scale free regresssion of the number of connections
@@ -304,8 +346,3 @@ cor.pval <- function(R, N, p.adjust.method="holm") {
 	p.matrix
 }
 
-cleanR <- function(R, cutoff=NA, power=NA) {
-	R <- abs(cov2cor(R))
-	
-	
-}
