@@ -109,11 +109,11 @@ selectionregime.detect <- function(out.table) {
 
 # Detects the generation number(s?) at which the selection regime changes
 selectionchange.detect <- function(out.table) {
-	# The task is difficult, has to rely on some assumptions 
+	# The task is difficult, has to rely on some assumptions 
 	# The algo looks for stable optima that changes from time to time
 	# out.file can be the mean over replicates or a single file. Probably works better with a single file
 	selcat <- selectionregime.detect(out.table)
-	changes.domestic <- as.matrix(apply(out.table[,names(selcat)[selcat == "ss"]], 2, function(x) which(diff(x)!=0)))
+	changes.domestic <- as.matrix(apply(out.table[,names(selcat)[selcat == "ss"],drop=F], 2, function(x) which(diff(x)!=0)))
 	if (!all(apply(changes.domestic, 2, function(x) length(unique(x))==1))) stop("The selection change history looks different for domestic genes.")
 	return(out.table[1+changes.domestic[1,],"Gen"])
 }
