@@ -40,15 +40,18 @@ numconn.before.dom <- mean.numconn.groups(Wlist.before.dom, sel.before.dom, mc.c
 numconn.justafter.dom <- mean.numconn.groups(Wlist.before.dom, sel.after.dom, mc.cores=mc.cores)
 numconn.after.dom <- mean.numconn.groups(Wlist.after.dom, sel.after.dom, mc.cores=mc.cores)
 
+cn <- colnames(numconn.before.dom$plus)
+group.names.before.dom <- setNames(cn, paste0(toupper(cn), "[", table(sel.before.dom)[cn], "]"))
+group.names.after.dom <- setNames(cn, paste0(toupper(cn), "[", table(sel.after.dom)[cn], "]"))
 
 pdf("figH.pdf", width=8, height=4)
 layout(t(1:2))
 
-plot.numconn.groups(numconn.before.dom)
+plot.numconn.groups(numconn.before.dom, group.names=group.names.before.dom)
 title("Before domestication")
 #~ plot.numconn.groups(numconn.justafter.dom)
 #~ title("Immediately after")
-plot.numconn.groups(numconn.after.dom, numconn.ref=numconn.before.dom)
+plot.numconn.groups(numconn.after.dom, numconn.ref=numconn.before.dom, group.names=group.names.after.dom)
 title("Now")
 
 dev.off()

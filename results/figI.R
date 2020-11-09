@@ -40,15 +40,16 @@ numcorr.before.dom <- mean.numcorrgen.groups(Clist.before.dom, sel.before.dom, c
 numcorr.justafter.dom <- mean.numcorrgen.groups(Clist.before.dom, sel.after.dom, cutoff=cutoff, mc.cores=mc.cores)
 numcorr.after.dom <- mean.numcorrgen.groups(Clist.after.dom, sel.after.dom, cutoff=cutoff, mc.cores=mc.cores)
 
+cn <- colnames(numcorr.before.dom$plus)
+group.names.before.dom <- setNames(cn, paste0(toupper(cn), "[", table(sel.before.dom)[cn], "]"))
+group.names.after.dom <- setNames(cn, paste0(toupper(cn), "[", table(sel.after.dom)[cn], "]"))
 
-pdf("figI.pdf", width=12, height=4)
-layout(t(1:3))
+pdf("figI.pdf", width=8, height=4)
+layout(t(1:2))
 
-plot.numconn.groups(numcorr.before.dom, directed=FALSE)
+plot.numconn.groups(numcorr.before.dom, group.names=group.names.before.dom, directed=FALSE, pos.shift.minus=0.5)
 title("Before domestication")
-plot.numconn.groups(numcorr.justafter.dom, directed=FALSE)
-title("Immediately after")
-plot.numconn.groups(numcorr.after.dom, directed=FALSE)
+plot.numconn.groups(numcorr.after.dom, numconn.ref=numcorr.before.dom, group.names=group.names.after.dom, directed=FALSE, pos.shift.minus=0.5)
 title("Now")
 
 dev.off()

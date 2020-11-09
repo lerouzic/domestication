@@ -211,7 +211,9 @@ mean.numcorrgen.groups <- function(listR, groups, cutoff=0.1, remove.e=TRUE, mc.
 	list(plus=rowMeans(tplus, dims=2)/norm, minus=rowMeans(tminus, dims=2)/norm)
 }
 
-plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), numconn.ref=NULL, directed=TRUE, ann.text=TRUE, col.scale.plus=NULL, col.scale.minus=NULL, lwd.arr=2, ...) {
+plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), 
+								numconn.ref=NULL, directed=TRUE, ann.text=TRUE, col.scale.plus=NULL, col.scale.minus=NULL, 
+								lwd.arr=2, pos.shift.plus=0.80, pos.shift.minus=0.60, ...) {
 	circ.arc <- function(theta1=0, theta2=2*pi, n=100) { tt <- seq(theta1, theta2, length.out=n); cbind(cos(tt), sin(tt)) }
 	posit.angle <- function(angle) { angle <- angle %% (2*pi); if (angle > pi/2 && angle <= 3*pi/2) angle <- angle + pi; angle %% (2*pi)}
 	if (is.null(col.scale.plus))
@@ -223,8 +225,8 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), num
 	arr.dist  <- 0.15 # distance between the group name and the arrows
 	self.angle <- 1.4*pi
 	ann.text.options <- list(
-		pos.shift.plus=0.80, 
-		pos.shift.minus=0.60, 
+		pos.shift.plus=pos.shift.plus, 
+		pos.shift.minus=pos.shift.minus, 
 		text.cex=0.7, 
 		col.plus=rev(col.scale.plus)[1], 
 		col.minus=rev(col.scale.minus)[1], 
@@ -232,12 +234,13 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), num
 		digits=2)
 	
 	par(mar=c(0.1,0.1,4,0.1))
-	plot(NULL, xlim=c(-1.1,1.1), ylim=c(-1.1,1.1), axes=FALSE, ann=FALSE, asp=1, ...)
+	plot(NULL, xlim=c(-1.2,1.2), ylim=c(-1.2,1.2), axes=FALSE, ann=FALSE, asp=1, ...)
 	lg <- length(group.names)
 	xy.groups <- cbind(cos(2*pi/lg*(0:(lg-1))), sin(2*pi/lg*(0:(lg-1))))
 	
+	if (is.null(names(group.names))) names(group.names) <- group.names
 	# plots the groups
-	text(xy.groups[,1], xy.groups[,2], group.names)
+	text(xy.groups[,1], xy.groups[,2], parse(text=names(group.names)))
 	
 	numconn$plus[!is.finite(numconn$plus)] <- 0
 	numconn$minus[!is.finite(numconn$minus)] <- 0
