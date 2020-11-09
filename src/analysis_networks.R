@@ -349,6 +349,28 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus),
 	}
 }
 
+
+# Extraction of G matrices from files
+
+Ggen <- function(files, gen) {
+	ans <- mclapply(files, function(ff) {
+		tt <- read.table(ff, header=TRUE)
+		if (!gen %in% tt[,"Gen"]) return(NA)
+		cc <- tt[tt[,"Gen"] == gen, grepl(colnames(tt), pattern="CovPhen")]
+		rm(tt); gc()
+		cc <- matrix(unlist(cc), ncol=sqrt(length(cc)), byrow=TRUE)
+		diag(cc)[diag(cc) < 1e-6] <- 1
+		cc
+	}, mc.cores=1)
+	ans[!sapply(ans, function(x) length(x) == 1 && is.na(x))]
+}
+
+Ggen.cache <- function(files, gen) {
+	cache.fun(Ggen, files=files, gen=gen, cache.subdir="Ggen")
+}
+
+
+
 ##### Tools for coexpression networks (not used -> deletion?)
 
 scalefree.regression <- function(M) {
