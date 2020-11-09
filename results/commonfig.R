@@ -34,8 +34,21 @@ Ndyn.default    <- get.Ndyn.cache(onerep(out.dir.default))
 Ndyn.noselc     <- get.Ndyn.cache(onerep(out.dir.noselc))
 Ndyn.nosel      <- get.Ndyn.cache(onerep(out.dir.nosel))
 
-col <- c(c="blue", s="blue", p="red", n="black")
-lty <- c(c=1, s=1, p=2, n=3)
+col.sel <- c(c="blue", s="blue", p="red", n="black")
+lty.sel <- c(c=1, s=1, p=2, n=3)
+col.sce <- c(default="black", nobottle="black", noselc="black", nosel="gray")
+lty.sce <- c(default=1, nobottle=2, noselc=3, nosel=3)
+
+generation.axis <- function(show.bottleneck=FALSE, ...) {
+	mxx <- max(as.numeric(names(Ndyn.default)))
+	if (show.bottleneck) {
+		bd <- unlist(bottleneck.detect(Ndyn.default))
+		toshow <- sort(c(first.gen, mxx, bd))
+	} else {
+		toshow <- mxx - pretty(c(0, mxx - first.gen), n=3)
+	}
+	axis(1, at=toshow, labels = toshow - mxx, ...)
+}
 
 legname <- function(nn) {
 	legn <- c(
@@ -44,4 +57,8 @@ legname <- function(nn) {
 		noselc  ="Constant selection")
 		
 	ifelse(nn %in% names(legn), legn[nn], nn)
+}
+
+subpanel <- function(x) {
+	title(outer=FALSE,adj=0.025 ,main=x,cex.main=1.4,col="black",line=-1)
 }
