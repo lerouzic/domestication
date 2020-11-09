@@ -41,14 +41,14 @@ numconn.justafter.dom <- mean.numconn.groups(Wlist.before.dom, sel.after.dom, mc
 numconn.after.dom <- mean.numconn.groups(Wlist.after.dom, sel.after.dom, mc.cores=mc.cores)
 
 
-pdf("figH.pdf", width=12, height=4)
-layout(t(1:3))
+pdf("figH.pdf", width=8, height=4)
+layout(t(1:2))
 
 plot.numconn.groups(numconn.before.dom)
 title("Before domestication")
-plot.numconn.groups(numconn.justafter.dom)
-title("Immediately after")
-plot.numconn.groups(numconn.after.dom)
+#~ plot.numconn.groups(numconn.justafter.dom)
+#~ title("Immediately after")
+plot.numconn.groups(numconn.after.dom, numconn.ref=numconn.before.dom)
 title("Now")
 
 dev.off()

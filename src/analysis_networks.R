@@ -24,14 +24,16 @@ cppFunction('
 			for (unsigned int i = 0; i < S0.size(); i++) {
 				double tmp = 0.;
 				if (i == 0) { // The signal gene
-					tmp = S0[i];
+					tmp = env;
 				} else {
 					for (unsigned int j = 0; j < S0.size(); j++) {
 						tmp += sto(j,t-1) * W(i,j);
 					}
 					tmp =  1. / (1. + lambda * exp(-mu*tmp));
 				}
+				
 				sto(i,t) = tmp;
+				
 				if (t > steps-measure) {
 					sumx(i) += tmp;
 					sumx2(i) += tmp*tmp;
@@ -198,17 +200,18 @@ numcorrgen.groups <- function(R, groups, cutoff=0.1) {
 }
 
 
-mean.numcorrgen.groups <- function(listR, groups, cutoff=0.1, mc.cores=detectCores()-1) {
+mean.numcorrgen.groups <- function(listR, groups, cutoff=0.1, remove.e=TRUE, mc.cores=detectCores()-1) {
 	all.ncorr <- mclapply(listR, function(R) numcorrgen.groups(R=R, groups=groups, cutoff=cutoff), mc.cores=mc.cores)
 	tg <- table(groups)
 	norm <- tg %*% t(tg)
 	diag(norm) <- diag(norm)-tg
-	tplus <- do.call(abind, c(lapply(all.ncorr, function(x) x$plus), list(along=3)))
-	tminus <-  do.call(abind, c(lapply(all.ncorr, function(x) x$minus), list(along=3)))
+	if (remove.e) norm <- norm[rownames(norm)!="e",colnames(norm)!="e"]
+	tplus <- do.call(abind, c(lapply(all.ncorr, function(x) if (remove.e) x$plus[rownames(x$plus)!="e",colnames(x$plus)!="e"] else x$plus), list(along=3)))
+	tminus <-  do.call(abind, c(lapply(all.ncorr, function(x) if (remove.e) x$minus[rownames(x$minus)!="e",colnames(x$minus)!="e"] else x$minus), list(along=3)))
 	list(plus=rowMeans(tplus, dims=2)/norm, minus=rowMeans(tminus, dims=2)/norm)
 }
 
-plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), directed=TRUE, ann.text=TRUE, col.scale.plus=NULL, col.scale.minus=NULL, lwd.arr=2, ...) {
+plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), numconn.ref=NULL, directed=TRUE, ann.text=TRUE, col.scale.plus=NULL, col.scale.minus=NULL, lwd.arr=2, ...) {
 	circ.arc <- function(theta1=0, theta2=2*pi, n=100) { tt <- seq(theta1, theta2, length.out=n); cbind(cos(tt), sin(tt)) }
 	posit.angle <- function(angle) { angle <- angle %% (2*pi); if (angle > pi/2 && angle <= 3*pi/2) angle <- angle + pi; angle %% (2*pi)}
 	if (is.null(col.scale.plus))
@@ -218,9 +221,9 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), dir
 	
 	delta.angle <- 0.25 # angle between two arrows
 	arr.dist  <- 0.15 # distance between the group name and the arrows
-	self.angle <- 1.6*pi
+	self.angle <- 1.4*pi
 	ann.text.options <- list(
-		pos.shift.plus=0.75, 
+		pos.shift.plus=0.80, 
 		pos.shift.minus=0.60, 
 		text.cex=0.7, 
 		col.plus=rev(col.scale.plus)[1], 
@@ -271,20 +274,36 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), dir
 				}
 				
 				if (ann.text) {
-					if (numconn$plus[j,i] > ann.text.options$thresh)
-					text(	x=(1-ann.text.options$pos.shift.plus)*x.i.plus+ann.text.options$pos.shift.plus*x.j.plus, 
+					if (numconn$plus[j,i] > ann.text.options$thresh) {
+						txt.num <- if (!directed && j > i) {
+							if (is.null(numconn.ref))
+								numconn$minus[i,j]
+							else
+								numconn$minus[i,j] - numconn.ref$minus[i,j]
+						} else {
+							if (is.null(numconn.ref))
+								numconn$plus[j,i]
+							else
+								numconn$plus[j,i] - numconn.ref$plus[j,i]
+						}
+						txt.str <- sprintf(paste0("%", if (is.null(numconn.ref)) "" else "+", "1.", ann.text.options$digits, "f"), txt.num)
+						text(x=(1-ann.text.options$pos.shift.plus)*x.i.plus+ann.text.options$pos.shift.plus*x.j.plus, 
 							y=(1-ann.text.options$pos.shift.plus)*y.i.plus+ann.text.options$pos.shift.plus*y.j.plus, 
-							round(if (!directed && j > i) numconn$minus[i,j] else numconn$plus[j,i], digits=ann.text.options$digits), 
+							txt.str, 
 							cex=ann.text.options$text.cex, 
 							col=if(!directed && j > i) ann.text.options$col.minus else ann.text.options$col.plus,
 							srt=180*(posit.angle(alpha)/pi))
-					if (numconn$minus[j,i] > ann.text.options$thresh && directed)
-					text(	x=(1-ann.text.options$pos.shift.minus)*x.i.minus+ann.text.options$pos.shift.minus*x.j.minus, 
+					}
+					if (numconn$minus[j,i] > ann.text.options$thresh && directed) {
+						txt.num <- if (is.null(numconn.ref)) numconn$minus[j,i]	else numconn$minus[j,i] - numconn.ref$minus[j,i]
+						txt.str <- sprintf(paste0("%", if (is.null(numconn.ref)) "" else "+", "1.", ann.text.options$digits, "f"), txt.num)
+						text(x=(1-ann.text.options$pos.shift.minus)*x.i.minus+ann.text.options$pos.shift.minus*x.j.minus, 
 							y=(1-ann.text.options$pos.shift.minus)*y.i.minus+ann.text.options$pos.shift.minus*y.j.minus, 
-							round(numconn$minus[j,i], digits=ann.text.options$digits), 
+							txt.str, 
 							cex=ann.text.options$text.cex, 
 							col=ann.text.options$col.minus,
 							srt=180*(posit.angle(alpha)/pi))
+					}
 				}
 			} else { # i == j
 				# angle of i around the circle
@@ -303,18 +322,24 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), dir
 					arrows(x0=cc.minus[2,1], x1=cc.minus[1,1], y0=cc.minus[2,2], y1=cc.minus[1,2], col=col.minus, length=0.05, angle=90, lwd=lwd.arr)
 				
 				if (ann.text) {
-					if (numconn$plus[i,i] > ann.text.options$thresh)
-					text(	x=cc.plus[round(ann.text.options$pos.shift.plus*nrow(cc.plus)),1], 
+					if (numconn$plus[i,i] > ann.text.options$thresh) {
+						txt.num <- if (is.null(numconn.ref)) numconn$plus[i,i]	else numconn$plus[i,i] - numconn.ref$plus[i,i]
+						txt.str <- sprintf(paste0("%", if (is.null(numconn.ref)) "" else "+", "1.", ann.text.options$digits, "f"), txt.num)
+						text(x=cc.plus[round(ann.text.options$pos.shift.plus*nrow(cc.plus)),1], 
 							y=cc.plus[round(ann.text.options$pos.shift.plus*nrow(cc.plus)),2], 
-							round(numconn$plus[i,i], digits=ann.text.options$digits), 
+							txt.str, 
 							cex=ann.text.options$text.cex, 
 							col=ann.text.options$col.plus)
-					if (numconn$minus[i,i] > ann.text.options$thresh)
-					text(	x=cc.minus[round(ann.text.options$pos.shift.minus*nrow(cc.minus)),1], 
+					}
+					if (numconn$minus[i,i] > ann.text.options$thresh) {
+						txt.num <- if (is.null(numconn.ref)) numconn$minus[i,i]	else numconn$minus[i,i] - numconn.ref$minus[i,i]
+						txt.str <- sprintf(paste0("%", if (is.null(numconn.ref)) "" else "+", "1.", ann.text.options$digits, "f"), txt.num)						
+						text(x=cc.minus[round(ann.text.options$pos.shift.minus*nrow(cc.minus)),1], 
 							y=cc.minus[round(ann.text.options$pos.shift.minus*nrow(cc.minus)),2], 
 							round(numconn$minus[i,i], digits=ann.text.options$digits), 
 							cex=ann.text.options$text.cex, 
 							col=ann.text.options$col.minus)
+					}
 				}
 			}
 		}
@@ -346,3 +371,33 @@ cor.pval <- function(R, N, p.adjust.method="holm") {
 	p.matrix
 }
 
+
+numcorrenv.groups <- function(W, groups, cutoff=0.1, envs = seq(0.01, 0.99, length.out=21), ...) {
+	dd <- do.call(rbind, lapply(envs, function(env) model.M2(W=W, env=env, ...)$mean))
+	cR <- var(dd)
+	cR[abs(cR) < 1e-10] <- 0
+	
+	cR <- cR/diag(cR)
+	cR[abs(cR) < cutoff] <- 0
+	diag(cR) <- 0
+	ug <- sort(unique(groups))
+	nconn.plus <- nconn.minus <- matrix(0, ncol=length(ug), nrow=length(ug))
+	rownames(nconn.plus) <- rownames(nconn.minus) <- colnames(nconn.plus) <- colnames(nconn.minus) <- ug
+	# Very slow double for loop
+	for (i in 1:nrow(cR))
+		for (j in 1:ncol(cR)) {
+			if (cR[i,j] > 0) nconn.plus[groups[i],groups[j]] <- nconn.plus[groups[i],groups[j]]+1
+			if (cR[i,j] < 0) nconn.minus[groups[i],groups[j]] <- nconn.minus[groups[i],groups[j]]+1
+		}
+	list(plus=nconn.plus, minus=nconn.minus)
+}
+
+mean.numcorrenv.groups <- function(listW, groups, cutoff=0.1, mc.cores=detectCores()-1) {
+	all.ncorr <- mclapply(listW, function(W) numcorrenv.groups(W=W, groups=groups, cutoff=cutoff), mc.cores=mc.cores)
+	tg <- table(groups)
+	norm <- tg %*% t(tg)
+	diag(norm) <- diag(norm)-tg
+	tplus <- do.call(abind, c(lapply(all.ncorr, function(x) x$plus), list(along=3)))
+	tminus <-  do.call(abind, c(lapply(all.ncorr, function(x) x$minus), list(along=3)))
+	list(plus=rowMeans(tplus, dims=2)/norm, minus=rowMeans(tminus, dims=2)/norm)
+}
