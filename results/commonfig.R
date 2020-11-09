@@ -37,3 +37,11 @@ Ndyn.nosel      <- get.Ndyn.cache(onerep(out.dir.nosel))
 col <- c(c="blue", s="blue", p="red", n="black")
 lty <- c(c=1, s=1, p=2, n=3)
 
+legname <- function(nn) {
+	legn <- c(
+		default ="Default",
+		nobottle="No bottleneck",
+		noselc  ="Constant selection")
+		
+	ifelse(nn %in% names(legn), legn[nn], nn)
+}
