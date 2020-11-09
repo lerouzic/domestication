@@ -32,15 +32,16 @@ plot(NULL, xlim=range(xx), ylim=ylim, xlab="", ylab=ylab, xaxt="n")
 for (cc in unique(sel.before)) {
 	yy <- (rowMeans(expr.var.default[,sel.before==cc])*y.factor)[xx <= sel.change.gen]
 	my.yy <- mov.avg(yy, xx[xx <= sel.change.gen], size=window.avg, min.gen=first.gen)
-	lines(xx[xx <= sel.change.gen], yy[xx <= sel.change.gen], lty=1, col=col[cc])
+	lines(xx[xx <= sel.change.gen], yy[xx <= sel.change.gen], lty=1, col=col.sel[cc])
 }
 for (cc in unique(selpattern.default)) {
 	yy <- (rowMeans(expr.var.default[,selpattern.default==cc])*y.factor)[xx > sel.change.gen]
 	my.yy <- mov.avg(yy, xx[xx > sel.change.gen], size=window.avg, min.gen=first.gen)
-	lines(as.numeric(names(my.yy)), my.yy, lty=lty[substr(cc,1,1)], col=col[substr(cc,2,2)])
+	lines(as.numeric(names(my.yy)), my.yy, lty=lty.sel[substr(cc,1,1)], col=col.sel[substr(cc,2,2)])
 }
 bottleneck.plot(Ndyn.default, y=0, lwd=2)
 selectionchange.plot(mean.sim.default, y=0, cex=1.5)
+subpanel("A")
 
 ### Panel B: no bottleneck #############################################
 sel.change.gen <- selectionchange.detect(mean.sim.nobottle) # This should be the same as default
@@ -51,34 +52,38 @@ plot(NULL, xlim=range(xx), ylim=ylim, xlab="", ylab="", xaxt="n", yaxt="n")
 for (cc in unique(sel.before)) {
 	yy <- (rowMeans(expr.var.nobottle[,sel.before==cc])*y.factor)[xx <= sel.change.gen]
 	my.yy <- mov.avg(yy, xx[xx <= sel.change.gen], size=window.avg, min.gen=first.gen)
-	lines(as.numeric(names(my.yy)), my.yy, lty=1, col=col[cc])
+	lines(as.numeric(names(my.yy)), my.yy, lty=1, col=col.sel[cc])
 }
 for (cc in unique(selpattern.nobottle)) {
 	yy <- (rowMeans(expr.var.nobottle[,selpattern.nobottle==cc])*y.factor)[xx > sel.change.gen]
 	my.yy <- mov.avg(yy, xx[xx > sel.change.gen], size=window.avg, min.gen=first.gen)
-	lines(as.numeric(names(my.yy)), my.yy, lty=lty[substr(cc,1,1)], col=col[substr(cc,2,2)])
+	lines(as.numeric(names(my.yy)), my.yy, lty=lty.sel[substr(cc,1,1)], col=col.sel[substr(cc,2,2)])
 }
 selectionchange.plot(mean.sim.nobottle, y=0, cex=1.5)
+subpanel("B")
 
 ### Panel C: no selection change #######################################
 xx <- as.numeric(mean.sim.noselc[,"Gen"])
-plot(NULL, xlim=range(xx), ylim=ylim, xlab="Generations", ylab=ylab)
+plot(NULL, xlim=range(xx), ylim=ylim, xlab="Generations", ylab=ylab, xaxt="n")
 for (cc in unique(selpattern.noselc)) {
 	yy <- rowMeans(expr.var.noselc[,selpattern.noselc==cc])*y.factor
 	my.yy <- mov.avg(yy, xx, size=window.avg, min.gen=first.gen)
-	lines(as.numeric(names(my.yy)), my.yy, lty=1, col=col[cc])
+	lines(as.numeric(names(my.yy)), my.yy, lty=1, col=col.sel[cc])
 }
+generation.axis()
 bottleneck.plot(Ndyn.noselc, y=0, lwd=2)
+subpanel("C")
 
 ### Panel D: no selection ##############################################
 xx <- as.numeric(mean.sim.nosel[,"Gen"])
-plot(NULL, xlim=range(xx), ylim=ylim, xlab="Generations", ylab="", yaxt="n")
-axis(1)
+plot(NULL, xlim=range(xx), ylim=ylim, xlab="Generations", ylab="", yaxt="n", xaxt="n")
 
 yy <- rowMeans(expr.var.nosel)*y.factor
 my.yy <- mov.avg(yy, xx, size=window.avg, min.gen=first.gen)
-lines(as.numeric(names(my.yy)), my.yy, lty=1, col=col["n"])
+lines(as.numeric(names(my.yy)), my.yy, lty=1, col=col.sel["n"])
 
+generation.axis()
 bottleneck.plot(Ndyn.nosel, y=0, lwd=2)
+subpanel("D")
 
 dev.off()

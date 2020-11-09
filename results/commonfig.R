@@ -46,6 +46,7 @@ generation.axis <- function(show.bottleneck=FALSE, ...) {
 		toshow <- sort(c(first.gen, mxx, bd))
 	} else {
 		toshow <- mxx - pretty(c(0, mxx - first.gen), n=3)
+		toshow <- toshow[toshow > first.gen]
 	}
 	axis(1, at=toshow, labels = toshow - mxx, ...)
 }

@@ -15,24 +15,27 @@ mean.connect.default  <- mean.connect.cache(out.dir.default)
 mean.connect.nobottle <- mean.connect.cache(out.dir.nobottle)
 mean.connect.noselc   <- mean.connect.cache(out.dir.noselc)
 
-my.mean.connect.default <- mov.avg(mean.connect.default, as.numeric(names(mean.connect.default)), size=window.avg, min.gen=first.gen)
+my.mean.connect.default <-  mov.avg(mean.connect.default,  as.numeric(names(mean.connect.default)),  size=window.avg, min.gen=first.gen)
 my.mean.connect.nobottle <- mov.avg(mean.connect.nobottle, as.numeric(names(mean.connect.nobottle)), size=window.avg, min.gen=first.gen)
-my.mean.connect.noselc <- mov.avg(mean.connect.noselc, as.numeric(names(mean.connect.noselc)), size=window.avg, min.gen=first.gen)
+my.mean.connect.noselc <-   mov.avg(mean.connect.noselc,   as.numeric(names(mean.connect.noselc)),   size=window.avg, min.gen=first.gen)
 
-col <- c(default="black", nobottle="darkgreen", noselc="orange")
-leg <- c(default="Bottleneck + sel change", nobottle="Sel change (no bottleneck)", noselc="Bottleneck (no sel change)")
+scenarios <- c("default", "nobottle", "noselc")
 
 pdf("figE.pdf", width=5, height=5)
 
-plot(NULL, xlim=c(first.gen, max(mean.sim.default[,"Gen"])), ylim=c(0, max(c(mean.connect.default, mean.connect.nobottle, mean.connect.noselc))), xlab="Generation", ylab="Nb connections")
+plot(NULL, 
+	xlim=c(first.gen, max(mean.sim.default[,"Gen"])), 
+	ylim=c(0, max(c(mean.connect.default, mean.connect.nobottle, mean.connect.noselc))), 
+	xlab="Generation", ylab="Nb connections", xaxt="n")
 
-lines(as.numeric(names(my.mean.connect.default)),  my.mean.connect.default,  col=col["default"])
-lines(as.numeric(names(my.mean.connect.nobottle)), my.mean.connect.nobottle, col=col["nobottle"])
-lines(as.numeric(names(my.mean.connect.noselc)),   my.mean.connect.noselc,   col=col["noselc"])
+lines(as.numeric(names(my.mean.connect.default)),  my.mean.connect.default,  col=col.sce["default"],  lty=lty.sce["default"])
+lines(as.numeric(names(my.mean.connect.nobottle)), my.mean.connect.nobottle, col=col.sce["nobottle"], lty=lty.sce["nobottle"])
+lines(as.numeric(names(my.mean.connect.noselc)),   my.mean.connect.noselc,   col=col.sce["noselc"],   lty=lty.sce["noselc"])
 
 bottleneck.plot(Ndyn.default, y=0, lwd=2)
 selectionchange.plot(mean.sim.default, y=0, cex=1.5)
 
-legend("topleft", pch=22, col=col, pt.bg=col, legend=leg, bty="n", cex=0.8)
+legend("topleft", lty=lty.sce[scenarios], col=col.sce[scenarios], legend=legname(scenarios), bty="n", cex=0.8)
+generation.axis()
 
 dev.off()

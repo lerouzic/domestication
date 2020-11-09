@@ -54,10 +54,10 @@ plot(NULL, xlim=xlim, ylim=ylim, xlab="Connections to the gene", ylab="Connectio
 	points(
 		x=sapply(regimes, function(nn) mean(mean.before.dom$connect.in[-1][first.sel==nn])),
 		y=sapply(regimes, function(nn) mean(mean.before.dom$connect.out[-1][first.sel==nn])), 
-		pch=19, col=col[regimes], cex=2)
+		pch=19, col=col.sel[regimes], cex=2)
 	x1 <- sapply(both.sel, function(nn) mean(mean.after.dom$connect.in[-1][selpattern.default==nn]))
 	y1 <- sapply(both.sel, function(nn) mean(mean.after.dom$connect.out[-1][selpattern.default==nn]))
-	points(x=x1, y=y1, pch=17, col=col[substr(both.sel,2,2)], cex=2)
+	points(x=x1, y=y1, pch=17, col=col.sel[substr(both.sel,2,2)], cex=2)
 	arrows(
 		x0=sapply(both.sel, function(nn) mean(mean.before.dom$connect.in[-1][substr(selpattern.default,1,1)==substr(nn,1,1)])),
 		x1=x1,
@@ -67,8 +67,8 @@ plot(NULL, xlim=xlim, ylim=ylim, xlab="Connections to the gene", ylab="Connectio
 	points(
 		x=sapply(regimes, function(nn) mean(mean.end.sim.noselc$connect.in[-1][selpattern.noselc==nn])),
 		y=sapply(regimes, function(nn) mean(mean.end.sim.noselc$connect.out[-1][selpattern.noselc==nn])), 
-		pch=1, col=col[regimes], cex=2)
+		pch=1, col=col.sel[regimes], cex=2)
 	
-	legend("topleft", pch=c(15,15,15,19,17,1), col=c(col[regimes], rep("darkgray",3)), legend=c(leg, "Before domestication", "After domestication", "No domestication"))
+	legend("topleft", pch=c(15,15,15,19,17,1), col=c(col.sel[regimes], rep("darkgray",3)), legend=c(leg, "Before domestication", "After domestication", "No domestication"))
 	
 dev.off()

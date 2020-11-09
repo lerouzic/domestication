@@ -232,7 +232,7 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), num
 		digits=2)
 	
 	par(mar=c(0.1,0.1,4,0.1))
-	plot(NULL, xlim=c(-1.1,1.1), ylim=c(-1.2,1.2), axes=FALSE, ann=FALSE, asp=1, ...)
+	plot(NULL, xlim=c(-1.1,1.1), ylim=c(-1.1,1.1), axes=FALSE, ann=FALSE, asp=1, ...)
 	lg <- length(group.names)
 	xy.groups <- cbind(cos(2*pi/lg*(0:(lg-1))), sin(2*pi/lg*(0:(lg-1))))
 	
@@ -336,7 +336,7 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), num
 						txt.str <- sprintf(paste0("%", if (is.null(numconn.ref)) "" else "+", "1.", ann.text.options$digits, "f"), txt.num)						
 						text(x=cc.minus[round(ann.text.options$pos.shift.minus*nrow(cc.minus)),1], 
 							y=cc.minus[round(ann.text.options$pos.shift.minus*nrow(cc.minus)),2], 
-							round(numconn$minus[i,i], digits=ann.text.options$digits), 
+							txt.str, 
 							cex=ann.text.options$text.cex, 
 							col=ann.text.options$col.minus)
 					}
