@@ -5,8 +5,8 @@
 source("commonfig.R")
 source("../src/analysis_tools.R")
 
-mean.norm.default  <- mean.norm.cache(out.dir.default, FUN.to.apply=abs, sliding=TRUE, window.size=window.norm)
-mean.norm.nobottle <- mean.norm.cache(out.dir.nobottle, FUN.to.apply=abs, sliding=TRUE, window.size=window.norm)
+mean.norm.default  <- mean.norm.cache(out.dir.default, FUN.to.apply=abs, sliding=TRUE, window.size=window.norm, mc.cores=mc.cores)
+mean.norm.nobottle <- mean.norm.cache(out.dir.nobottle, FUN.to.apply=abs, sliding=TRUE, window.size=window.norm, mc.cores=mc.cores)
 
 pdf("figD.pdf", width=5, height=5)
 

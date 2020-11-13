@@ -138,7 +138,7 @@ results.table <- function(out.files, mc.cores=1, max.reps=length(out.files), ver
 		if (!is.null(colnames.pattern))
 			ans <- ans[,grepl(pattern=colnames.pattern, colnames(ans))]
 		return(ans)
-		}, mc.cores=min(mc.cores))
+		}, mc.cores=mc.cores)
 	ltt <- sapply(tt, nrow)
 	full.length <- max(ltt)
 	if (verbose && any(ltt != full.length))
@@ -208,7 +208,7 @@ reaction.norm.dyn <- function(out.table, window.size=floor(nrow(out.table)/100),
 }
 
 # Average out all reaction norms from a directory (use FUN=abs to get the absolute value of the norm)
-mean.norm <- function(out.dir, max.reps=Inf, FUN.to.apply=identity, mc.cores=detectCores()-1, sliding=TRUE, window.size=10) {
+mean.norm <- function(out.dir, max.reps=Inf, FUN.to.apply=identity, mc.cores=1, sliding=TRUE, window.size=10) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
 	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
 	tt <- results.table(out.files, mc.cores, max.reps)
@@ -219,6 +219,6 @@ mean.norm <- function(out.dir, max.reps=Inf, FUN.to.apply=identity, mc.cores=det
 	return(ans)
 }
 
-mean.norm.cache <- function(out.dir, max.reps=Inf, FUN.to.apply=identity, mc.cores=detectCores()-1, sliding=TRUE, window.size=10) {
+mean.norm.cache <- function(out.dir, max.reps=Inf, FUN.to.apply=identity, mc.cores=1, sliding=TRUE, window.size=10) {
 	cache.fun(mean.norm, out.dir=out.dir, max.reps=max.reps, FUN.to.apply=FUN.to.apply, mc.cores=mc.cores, sliding=sliding, window.size=window.size, cache.subdir="norm")
 }
