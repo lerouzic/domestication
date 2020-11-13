@@ -47,12 +47,13 @@ parallel --shuf --joblog joblog2.log -j $SLURM_CPUS_PER_TASK --delay 20 -a simAl
 ```
 
 Current simulations:
-* simAll_1 -> Taranis
-* simAll_2 -> IFBcore
+* simAll_1 -> Taranis  (done)
+* simAll_2 -> IFBcore  (done)
 * simAll_3 -> Toutatis (done)
-* simAll_4 -> IFBcore
-* simAll_5 -> IFBcore
-* simAll_6 -> IFBCore
-* simAll_7 -> IFBcore
-* simAll_8 -> IFBCore
-* simAll_9 -> Toutatis
+* simAll_4 -> IFBcore  (done)
+* simAll_5 -> IFBcore  (done)
+* simAll_6 -> IFBCore  (done)
+* simAll_7 -> IFBcore  (done)
+* simAll_8 -> IFBCore  (done)
+* simAll_9 -> Toutatis (done)
+* simAll_10-> ?
