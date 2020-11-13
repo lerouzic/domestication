@@ -39,7 +39,7 @@ Gmean.before.toplot <- Gmean.before.dom
 Gmean.after.toplot  <- Gmean.after.dom
 
 ng <- ncol(Gmean.before.toplot)-1
-cols <- colorRampPalette(col.cor[(if absolute 2 else 1):length(col.col))(1001)
+cols <- colorRampPalette(col.cor[(if absolute 2 else 1):length(col.col)])(1001)
 cex.axis <- 0.6
 
 pdf("figM.pdf", width=9, height=4)
