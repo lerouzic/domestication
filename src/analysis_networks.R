@@ -104,7 +104,7 @@ inout.connections <- function(W, epsilon=NULL, env=0.5, ...) {
 }
 
 # Average out all network connections from a directory 
-mean.connect <- function(out.dir, env=0.5, epsilon=NULL, max.reps=Inf, mc.cores=detectCores()-1) {
+mean.connect <- function(out.dir, env=0.5, epsilon=NULL, max.reps=Inf, mc.cores=1) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
 	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
 	tt <- results.table(out.files, mc.cores, max.reps)
@@ -115,8 +115,8 @@ mean.connect <- function(out.dir, env=0.5, epsilon=NULL, max.reps=Inf, mc.cores=
 	return(ans)
 }
 
-mean.connect.cache <- function(out.dir, env=0.5, epsilon=NULL, max.reps=Inf, mc.cores=detectCores()-1) {
-	cache.fun(mean.connect, out.dir=out.dir, env=env, epsilon=epsilon, max.reps=max.reps, mc.cores=detectCores()-1, cache.subdir="connect")
+mean.connect.cache <- function(out.dir, env=0.5, epsilon=NULL, max.reps=Inf, mc.cores=1) {
+	cache.fun(mean.connect, out.dir=out.dir, env=env, epsilon=epsilon, max.reps=max.reps, mc.cores=mc.cores, cache.subdir="connect")
 }
 
 # Returns a list of complex community objects according to several igraph algorithms
@@ -167,7 +167,7 @@ numconn.groups <- function(W, groups, epsilon=NULL, env=0.5, ...) {
 	list(plus=nconn.plus, minus=nconn.minus)
 }
 
-mean.numconn.groups <- function(listW, groups, epsilon=NULL, env=0.5, count.diag=NA, mc.cores=detectCores()-1, ...) {
+mean.numconn.groups <- function(listW, groups, epsilon=NULL, env=0.5, count.diag=NA, mc.cores=1, ...) {
 	if (is.na(count.diag)) count.diag <- sum(sapply(listW, function(W) sum(diag(W)!=0))) != 0
 	all.nconn <- mclapply(listW, function(W) numconn.groups(W=W, groups=groups, epsilon=epsilon, env=env, ...), mc.cores=mc.cores)
 	tg <- table(groups)
@@ -200,7 +200,7 @@ numcorrgen.groups <- function(R, groups, cutoff=0.1) {
 }
 
 
-mean.numcorrgen.groups <- function(listR, groups, cutoff=0.1, remove.e=TRUE, mc.cores=detectCores()-1) {
+mean.numcorrgen.groups <- function(listR, groups, cutoff=0.1, remove.e=TRUE, mc.cores=1) {
 	all.ncorr <- mclapply(listR, function(R) numcorrgen.groups(R=R, groups=groups, cutoff=cutoff), mc.cores=mc.cores)
 	tg <- table(groups)
 	norm <- tg %*% t(tg)
@@ -417,7 +417,7 @@ numcorrenv.groups <- function(W, groups, cutoff=0.1, envs = seq(0.01, 0.99, leng
 	list(plus=nconn.plus, minus=nconn.minus)
 }
 
-mean.numcorrenv.groups <- function(listW, groups, cutoff=0.1, mc.cores=detectCores()-1) {
+mean.numcorrenv.groups <- function(listW, groups, cutoff=0.1, mc.cores=1) {
 	all.ncorr <- mclapply(listW, function(W) numcorrenv.groups(W=W, groups=groups, cutoff=cutoff), mc.cores=mc.cores)
 	tg <- table(groups)
 	norm <- tg %*% t(tg)

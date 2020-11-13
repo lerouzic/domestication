@@ -11,9 +11,9 @@ source("../src/analysis_networks.R")
 
 connect.threshold <- 0.1
 
-mean.connect.default  <- mean.connect.cache(out.dir.default)
-mean.connect.nobottle <- mean.connect.cache(out.dir.nobottle)
-mean.connect.noselc   <- mean.connect.cache(out.dir.noselc)
+mean.connect.default  <- mean.connect.cache(out.dir.default,  mc.cores=mc.cores)
+mean.connect.nobottle <- mean.connect.cache(out.dir.nobottle, mc.cores=mc.cores)
+mean.connect.noselc   <- mean.connect.cache(out.dir.noselc,   mc.cores=mc.cores)
 
 my.mean.connect.default <-  mov.avg(mean.connect.default,  as.numeric(names(mean.connect.default)),  size=window.avg, min.gen=first.gen)
 my.mean.connect.nobottle <- mov.avg(mean.connect.nobottle, as.numeric(names(mean.connect.nobottle)), size=window.avg, min.gen=first.gen)
