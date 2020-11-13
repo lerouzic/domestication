@@ -17,7 +17,7 @@ Wgen <- function(files, gen) {
 		W <- tt[tt[,"Gen"] == gen, grepl(colnames(tt), pattern="MeanAll")]
 		rm(tt); gc()
 		W <- matrix(unlist(W), ncol=sqrt(length(W)), byrow=TRUE)
-	}, mc.cores=1)
+	}, mc.cores=mc.cores)
 	names(ans) <- files
 	ans[!sapply(ans, function(x) length(x) == 1 && is.na(x))]
 }

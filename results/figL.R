@@ -43,9 +43,9 @@ genselchange <- selectionchange.detect(mean.sim.default)
 gens <- mean.sim.default[,"Gen"]
 mygens <- gens[seq(1, length(gens), length.out=round(gens[length(gens)] / delta.gen))]
 
-allG.default   <- lapply(mygens, function(g) Ggen.cache(out.files.default,  g))
-allG.nobottle  <- lapply(mygens, function(g) Ggen.cache(out.files.nobottle, g))
-allG.noselc    <- lapply(mygens, function(g) Ggen.cache(out.files.noselc,   g))
+allG.default   <- mclapply(mygens, function(g) Ggen.cache(out.files.default,  g), mc.cores=mc.cores)
+allG.nobottle  <- mclapply(mygens, function(g) Ggen.cache(out.files.nobottle, g), mc.cores=mc.cores)
+allG.noselc    <- mclapply(mygens, function(g) Ggen.cache(out.files.noselc,   g)), mc.cores=mc.cores
 
 mt.default     <- Mantel.obs(lapply(allG.default, function(x) lapply(x, covtransf)))
 mt.nobottle    <- Mantel.obs(lapply(allG.nobottle, function(x) lapply(x, covtransf)))
