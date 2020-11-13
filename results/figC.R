@@ -26,6 +26,7 @@ ylim <- c(0, 5*mean(expr.var.default))*y.factor
 ### Panel A: default ###################################################
 sel.change.gen <- selectionchange.detect(mean.sim.default)
 sel.before <- substr(selpattern.default, 1, 1)
+sel.before[sel.before == "c"] <- "s" # No need to distinguish constant and stable? 
 
 xx <- as.numeric(mean.sim.default[,"Gen"])
 plot(NULL, xlim=range(xx), ylim=ylim, xlab="", ylab=ylab, xaxt="n")
@@ -41,11 +42,15 @@ for (cc in unique(selpattern.default)) {
 }
 bottleneck.plot(Ndyn.default, y=0, lwd=2)
 selectionchange.plot(mean.sim.default, y=0, cex=1.5)
+
+legend("topright", lty=1, col=col.sel[unique(sel.before)], legend=c("Stable","Plastic", "Non-selected"))
+
 subpanel("A")
 
 ### Panel B: no bottleneck #############################################
 sel.change.gen <- selectionchange.detect(mean.sim.nobottle) # This should be the same as default
 sel.before <- substr(selpattern.nobottle, 1, 1)             # idem
+sel.before[sel.before == "c"] <- "s" # No need to distinguish constant and stable? 
 
 xx <- as.numeric(mean.sim.nobottle[,"Gen"])
 plot(NULL, xlim=range(xx), ylim=ylim, xlab="", ylab="", xaxt="n", yaxt="n")
