@@ -91,8 +91,9 @@ number.connections.dyn <- function(out.table, epsilon=NULL, env=0.5) { # if env 
 	net.size <- sqrt(ncol(W.table))
 	nb.conn <- sapply(1:nrow(W.table), function(i) { 
 			W <- matrix(unlist(W.table[i,]), ncol=net.size, byrow=TRUE)
-			stopifnot(nrow(W) == ncol(W))
-			number.connections(W, epsilon=epsilon, env=env[i])
+			if(nrow(W) != ncol(W)) return(NA)
+			ans <- try(number.connections(W, epsilon=epsilon, env=env[i]))
+			if (class(ans) == "try-error") NA else ans
 		})
 	names(nb.conn) <- as.character(out.table[,"Gen"])
 	nb.conn
@@ -109,7 +110,7 @@ mean.connect <- function(out.dir, env=0.5, epsilon=NULL, max.reps=Inf, mc.cores=
 	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
 	tt <- results.table(out.files, mc.cores, max.reps)
 	nn <- mclapply(tt, number.connections.dyn, env=env, epsilon=epsilon, mc.cores=mc.cores)
-	ans <- colMeans(do.call(rbind, nn))
+	ans <- colMeans(do.call(rbind, nn), na.rm=TRUE)
 	rm(tt)
 	gc()
 	return(ans)
