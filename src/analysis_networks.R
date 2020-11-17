@@ -241,6 +241,8 @@ delta.Gdiff.dyn <- function(out.table, deltaG=NA, mc.cores=1) {
 	listG <- Glist.table(out.table[seqgen,])
 	
 	ans <- mclapply(1:(length(listG)-1), function(i) delta.Gdiff(listG[[i+1]], listG[[i]]), mc.cores=mc.cores)
+	l.ans <- sapply(ans, nrow)
+	ans <- ans[l.ans == max(l.ans)] # removing incomplete data sets (ongoing simulations)
 	ans <- do.call(c, ans)
 	names(ans) <- as.character(gen[seqgen])[-1]
 	ans	
