@@ -213,9 +213,9 @@ plot.inout.change <- function(mysim, mysim.ref=NULL, regimes=c("s","p","n"), xla
 	out.files.mysim <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]], full.names=TRUE, recursive=FALSE), full.names=TRUE)
 	genselchange <- selectionchange.detect(meansim.all[[mysim]])
 	
-	before.dom      <- inout.gen.cache(out.files.mysim, gen=genselchange, epsilon=connect.threshold, env=connect.env, mc.cores=mc.cores)
+	before.dom      <- inout.gen.cache(out.files.mysim, gen=genselchange, mc.cores=mc.cores)
 	mean.before.dom <- mean.inout (before.dom)
-	after.dom       <- inout.gen.cache(out.files.mysim, gen=meansim.all[[mysim]][nrow(meansim.all[[mysim]]),"Gen"], epsilon=connect.threshold, env=connect.env, mc.cores=mc.cores)
+	after.dom       <- inout.gen.cache(out.files.mysim, gen=meansim.all[[mysim]][nrow(meansim.all[[mysim]]),"Gen"], mc.cores=mc.cores)
 	mean.after.dom  <- mean.inout (after.dom)
 
 	mean.after.ref <- NULL
@@ -274,11 +274,10 @@ plot.inout.gainloss <- function(mysims, deltaG=NA, xlab="Generation", ylab="Nb c
 }
 
 plot.network.feature <- function(mysims, what=c("nbconn", "modularity")[1], algos=names(col.algo), ylab=NULL, xlab="Generation", ylim=NULL, ...) {
-	library(igraph)
 	comm.files <- function(out.files) {
 	 mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
-		cc <- communities.dyn.cache(tt, epsilon=connect.threshold, env=env, directed=directed, mc.cores=1)
+		cc <- communities.dyn.cache(tt, directed=directed, mc.cores=1)
 		return(cc)
 		}, mc.cores=mc.cores)
 	}
@@ -286,7 +285,7 @@ plot.network.feature <- function(mysims, what=c("nbconn", "modularity")[1], algo
 	modn <- sapply(mysims, function(mysim) {
 		out.files <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]], full.names=TRUE, recursive=FALSE), full.names=TRUE)
 		comm      <- comm.files(out.files)
-		sapply(algos, function(algo) 
+		sapply(algos, function(algo) {
 			colMeans(do.call(rbind, mclapply(comm, function(cc) sapply(cc, function(ccc) {
 				if (what=="nbconn")
 					length(igraph::communities(ccc[[algo]]))
@@ -294,7 +293,7 @@ plot.network.feature <- function(mysims, what=c("nbconn", "modularity")[1], algo
 					igraph::modularity(ccc[[algo]])
 				else
 					NA
-			}), mc.cores=mc.cores))), simplify=FALSE)
+			}), mc.cores=1)))}, simplify=FALSE)
 		}, USE.NAMES=TRUE, simplify=FALSE)
 		
 	gen <- meansim.all[[mysims[1]]][,"Gen"]

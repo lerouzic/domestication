@@ -156,9 +156,8 @@ number.connections <- function(W, ...) {
 	sum(cW != 0)
 }
 
-number.connections.dyn <- function(out.table) { # if env == NULL, MPhen1 is used instead
+number.connections.dyn <- function(out.table) { 
 	W.table <- out.table[,grepl(colnames(out.table), pattern="MeanAll")]
-	env <- if(is.null(env)) out.table[,"MPhen1"] else rep(env, nrow(out.table))
 	
 	net.size <- sqrt(ncol(W.table))
 	nb.conn <- sapply(1:nrow(W.table), function(i) { 
@@ -318,7 +317,6 @@ communities <- function(W, directed=FALSE, ...) {
 # Returns the communities algorithm for all generations of a data dable. Beware, the returned object is complex and needs to be further processed
 communities.dyn <- function(out.table, directed=FALSE, mc.cores=1) {
 	W.table <- out.table[,grepl(colnames(out.table), pattern="MeanAll")]
-	env <- if(is.null(env)) out.table[,"MPhen1"] else rep(env, nrow(out.table))
 	
 	net.size <- sqrt(ncol(W.table))
 	comm <- mclapply(1:nrow(W.table), function(i) { 
