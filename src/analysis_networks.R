@@ -216,6 +216,8 @@ mean.delta.inout.dyn <- function(files, deltaG=NA, mc.cores=1) {
 		tt <- read.table(ff, header=TRUE)
 		delta.inout.dyn(tt, deltaG, mc.cores=1)
 	}, mc.cores=mc.cores)
+	l.ans <- sapply(ans, nrow)
+	ans <- ans[l.ans == max(l.ans)] # removing incomplete data sets (ongoing simulations)
 	aa <- do.call(abind, c(ans, list(along=3)))
 	rowMeans(aa, dims=2)
 }
