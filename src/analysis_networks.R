@@ -1,14 +1,8 @@
 # Various functions to analyze the network
 
-
+source("./common-par.R")
 source("../src/analysis_tools.R")
 source("../src/cache.R")
-
-suppressMessages(library(igraph))
-suppressMessages(library(Rcpp))
-suppressMessages(library(inline))
-suppressMessages(library(digest))
-suppressMessages(library(ellipse))
 
 cppFunction('
 	List internal_loop_cpp(const NumericMatrix &W, const NumericVector &S0, double a, double env, unsigned int steps, unsigned int measure) {
@@ -55,11 +49,89 @@ model.M2 <- function(W, S0=rep(a, nrow(W)), a=0.2, env=0.5, steps=20, measure=4,
 	return(ans)
 }
 
-cleanW <- function(W, epsilon=NULL, env=0.5, ...) {
-	# ... are additional arguments to modelM2
 
-	if (is.null(epsilon)) epsilon <- sqrt((nrow(W)-1)*0.01^2)
-	distMat <- matrix(0, ncol=ncol(W), nrow=nrow(W))
+# Extraction of W and G matrices from files
+
+Wgen.files <- function(files, gen) {
+	ans <- mclapply(files, function(ff) {
+		tt <- read.table(ff, header=TRUE)
+		if (!gen %in% tt[,"Gen"]) return(NA)
+		W <- tt[tt[,"Gen"] == gen, grepl(colnames(tt), pattern="MeanAll")]
+		rm(tt); gc()
+		W <- matrix(unlist(W), ncol=sqrt(length(W)), byrow=TRUE)
+	}, mc.cores=1)
+	ans[!sapply(ans, function(x) length(x) == 1 && is.na(x))]
+}
+
+Wgen.files.cache <- function(files, gen) {
+	cache.fun(Wgen.files, files=files, gen=gen, cache.subdir="Wgen")
+}
+
+Wlist.table <- function(out.table) {
+	gen <- out.table[,"Gen"]
+	out.table <- out.table[, grepl(colnames(out.table), pattern="MeanAll")]
+	ans <- lapply(1:nrow(out.table), function(i) {
+		W <- out.table[i,]
+		matrix(unlist(W), ncol=sqrt(length(W)), byrow=TRUE)
+	})
+	names(ans) <- as.character(gen)
+	ans
+}
+
+Wlist.files <- function(files) {
+	ans <- mclapply(files, function(ff) {
+		tt <- read.table(ff, header=TRUE)
+		browser()
+		Wlist.table(tt)
+		rm(tt); gc()
+	}, mc.cores=1)	
+}
+
+Ggen.files <- function(files, gen) {
+	ans <- mclapply(files, function(ff) {
+		tt <- read.table(ff, header=TRUE)
+		if (!gen %in% tt[,"Gen"]) return(NA)
+		cc <- tt[tt[,"Gen"] == gen, grepl(colnames(tt), pattern="CovPhen")]
+		rm(tt); gc()
+		cc <- matrix(unlist(cc), ncol=sqrt(length(cc)), byrow=TRUE)
+		diag(cc)[diag(cc) < 1e-6] <- 1
+		cc
+	}, mc.cores=1)
+	ans[!sapply(ans, function(x) length(x) == 1 && is.na(x))]
+}
+
+Ggen.files.cache <- function(files, gen) {
+	cache.fun(Ggen.files, files=files, gen=gen, cache.subdir="Ggen")
+}
+
+Glist.table <- function(out.table) {
+	gen <- out.table[,"Gen"]
+	out.table <- out.table[, grepl(colnames(out.table), pattern="CovPhen")]
+	ans <- lapply(1:nrow(out.table), function(i) {
+		G <- out.table[i,]
+		matrix(unlist(G), ncol=sqrt(length(G)), byrow=TRUE)
+	})
+	names(ans) <- as.character(gen)
+	ans
+}
+
+
+Glist.files <- function(files) {
+	ans <- mclapply(files, function(ff) {
+		tt <- read.table(ff, header=TRUE)
+		browser()
+		Glist.table(tt)
+		rm(tt); gc()
+	}, mc.cores=1)	
+}
+
+
+# Network analysis
+
+cleanW <- function(W, epsilon, env, ...) {
+	# ... are additional arguments to modelM2
+	if (is.na(epsilon)) epsilon <- sqrt((nrow(W)-1)*0.01^2)
+	distMat <- matrix(0, ncol=ncol(W), nrow=nrow(W))	
 	ref.expr <- model.M2(W, env=env, ...)$mean
 	
 	for (i in 1:nrow(W))
@@ -70,21 +142,21 @@ cleanW <- function(W, epsilon=NULL, env=0.5, ...) {
 			dd <- sqrt(sum((ref.expr[-1]-new.expr[-1])^2))
 			distMat[i,j] <- dd
 		}
-	cleanW <- matrix(0, ncol=ncol(W), nrow=nrow(W))
-	cleanW[distMat > epsilon] <- W[distMat > epsilon]
-	cleanW
+	cW <- matrix(0, ncol=ncol(W), nrow=nrow(W))
+	cW[distMat > epsilon] <- W[distMat > epsilon]
+	cW
 }
 
-cleanW.cache <- function(W, epsilon=NULL, env=0.5, ...) {
+cleanW.cache <- function(W, epsilon=connect.threshold, env=connect.env, ...) {
 	cache.fun(cleanW, W=W, epsilon=epsilon, env=env, ..., cache.subdir="cleanW")
 }
 
-number.connections <- function(W, epsilon=NULL, env=0.5, ...) {
-	cW <- cleanW.cache(W=W, epsilon=epsilon, env=env, ...)
+number.connections <- function(W, ...) {
+	cW <- cleanW.cache(W=W, ...)
 	sum(cW != 0)
 }
 
-number.connections.dyn <- function(out.table, epsilon=NULL, env=0.5) { # if env == NULL, MPhen1 is used instead
+number.connections.dyn <- function(out.table) { # if env == NULL, MPhen1 is used instead
 	W.table <- out.table[,grepl(colnames(out.table), pattern="MeanAll")]
 	env <- if(is.null(env)) out.table[,"MPhen1"] else rep(env, nrow(out.table))
 	
@@ -92,37 +164,145 @@ number.connections.dyn <- function(out.table, epsilon=NULL, env=0.5) { # if env 
 	nb.conn <- sapply(1:nrow(W.table), function(i) { 
 			W <- matrix(unlist(W.table[i,]), ncol=net.size, byrow=TRUE)
 			if(nrow(W) != ncol(W)) return(NA)
-			ans <- try(number.connections(W, epsilon=epsilon, env=env[i]))
+			ans <- try(number.connections(W))
 			if (class(ans) == "try-error") NA else ans
 		})
 	names(nb.conn) <- as.character(out.table[,"Gen"])
 	nb.conn
 }
 
-inout.connections <- function(W, epsilon=NULL, env=0.5, ...) {
-	cW <- cleanW.cache(W=W, epsilon=epsilon, env=env, ...)
+inout.connections <- function(W, ...) {
+	cW <- cleanW.cache(W=W, ...)
 	list(connect.in=rowSums(cW != 0), connect.out=colSums(cW != 0))
 }
 
+# in/out connections at a specific generation
+inout.gen <- function(files, gen, mc.cores=1) {
+	ans <- mclapply(files, function(ff) {
+		tt <- read.table(ff, header=TRUE)
+		if (!gen %in% tt$Gen) return(NA)
+		W <- tt[tt[,"Gen"] == gen, grepl(colnames(tt), pattern="MeanAll")]
+		rm(tt); gc()
+		W <- matrix(unlist(W), ncol=sqrt(length(W)), byrow=TRUE)
+		inout.connections(W)
+	}, mc.cores=mc.cores)
+	ans[!sapply(ans, function(x) length(x) < 2 || is.na(x))]
+}
+
+inout.gen.cache <- function(files, gen, mc.cores=1) {
+	cache.fun(inout.gen,files=files, gen=gen, mc.cores=mc.cores, cache.subdir="Rcache-inout")
+}
+
+delta.inout <- function(W, Wref) {
+	cW <- cleanW.cache(W)
+	cWref <- cleanW.cache(Wref)
+	
+	c(gain=sum(cWref == 0 & cW != 0), loss=sum(cWref != 0 & cW == 0))
+}
+
+# Returns two columns: one with the gains, 
+delta.inout.dyn <- function(out.table, deltaG=1, mc.cores=1) {
+	gen <- out.table[,"Gen"]
+	seqgen <- seq(1, length(gen), length.out=min(length(gen), 1+gen[length(gen)] %/% deltaG))
+	listW <- Wlist.table(out.table[seqgen,])
+	
+	ans <- mclapply(1:(length(listW)-1), function(i) delta.inout(listW[[i+1]], listW[[i]]), mc.cores=mc.cores)
+	ans <- do.call(rbind, ans)
+	rownames(ans) <- as.character(gen[seqgen])[-1]
+	ans
+}
+
+mean.delta.inout.dyn <- function(files, deltaG=NA, mc.cores=1) {
+	ans <- mclapply(files, function(ff) {
+		tt <- read.table(ff, header=TRUE)
+		delta.inout.dyn(tt, deltaG, mc.cores=1)
+	}, mc.cores=mc.cores)
+	aa <- do.call(abind, c(ans, list(along=3)))
+	rowMeans(aa, dims=2)
+}
+
+mean.delta.inout.dyn.cache <- function(files, deltaG=NA, mc.cores=1) {
+	cache.fun(mean.delta.inout.dyn, files=files, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-dinout")
+}
+
+delta.Gdiff <- function(G, G.ref) {
+	# A bit of cleaning is necessary : first generation and "environmental" gene can mess up the vcov
+	if (any(is.na(G)) || any(is.na(G.ref))) return(NA)
+	diag(G)[diag(G) < 1e-8] <- 1e-8
+	diag(G.ref)[diag(G.ref) < 1e-8] <- 1e-8
+	# covtransf is defined in common-precalc.R, it turns vcov into distance matrices
+	1 - mantel.rtest(covtransf(G), covtransf(G.ref), nrepet=1)$obs
+}
+
+delta.Gdiff.dyn <- function(out.table, deltaG=NA, mc.cores=1) {
+	gen <- out.table[,"Gen"]
+	seqgen <- seq(1, length(gen), length.out=min(length(gen), 1+gen[length(gen)] %/% deltaG))
+	listG <- Glist.table(out.table[seqgen,])
+	
+	ans <- mclapply(1:(length(listG)-1), function(i) delta.Gdiff(listG[[i+1]], listG[[i]]), mc.cores=mc.cores)
+	ans <- do.call(c, ans)
+	names(ans) <- as.character(gen[seqgen])[-1]
+	ans	
+}
+
+mean.Gdiff.dyn <- function(files, deltaG=NA, mc.cores=1) {
+	ans <- mclapply(files, function(ff) {
+		tt <- read.table(ff, header=TRUE)
+		delta.Gdiff.dyn(tt, deltaG, mc.cores=1)
+	}, mc.cores=mc.cores)
+	aa <- do.call(rbind, ans)
+	colMeans(aa)	
+}
+
+mean.Gdiff.dyn.cache <- function(files, deltaG=NA, mc.cores=1) {
+	cache.fun(mean.Gdiff.dyn, files=files, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-Gdiff")
+}
+
+propPC.dyn <- function(out.table, PC=1, mc.cores=1) {
+	gen <- out.table[,"Gen"]
+	listG <- Glist.table(out.table)
+	
+	ans <- mclapply(listG, function(G) {
+		ee <- eigen(G)
+		ee$values[PC]/sum(ee$values)
+	}, mc.cores=mc.cores)
+	aa <- do.call(c, ans)
+	names(aa) <- as.character(gen)
+	aa
+}
+
+mean.propPC.dyn <- function(files, PC=1, mc.cores=1) {
+	ans <- mclapply(files, function(ff) {
+		tt <- read.table(ff, header=TRUE)
+		propPC.dyn(tt, PC=PC, mc.cores=1)
+	}, mc.cores=mc.cores)
+	aa <- do.call(rbind, ans)
+	colMeans(aa)	
+}
+
+mean.propPC.dyn.cache <- function(files, PC=1, mc.cores=1) {
+	cache.fun(mean.propPC.dyn, files=files, PC=PC, mc.cores=mc.cores, cache.subdir="Rcache-propPC")
+}
+
 # Average out all network connections from a directory 
-mean.connect <- function(out.dir, env=0.5, epsilon=NULL, max.reps=Inf, mc.cores=1) {
+mean.connect <- function(out.dir, max.reps=Inf, mc.cores=1) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
 	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
 	tt <- results.table(out.files, mc.cores, max.reps)
-	nn <- mclapply(tt, number.connections.dyn, env=env, epsilon=epsilon, mc.cores=mc.cores)
+	nn <- mclapply(tt, number.connections.dyn, mc.cores=mc.cores)
 	ans <- colMeans(do.call(rbind, nn), na.rm=TRUE)
 	rm(tt)
 	gc()
 	return(ans)
 }
 
-mean.connect.cache <- function(out.dir, env=0.5, epsilon=NULL, max.reps=Inf, mc.cores=1) {
-	cache.fun(mean.connect, out.dir=out.dir, env=env, epsilon=epsilon, max.reps=max.reps, mc.cores=mc.cores, cache.subdir="connect")
+mean.connect.cache <- function(out.dir, max.reps=Inf, mc.cores=1) {
+	cache.fun(mean.connect, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, cache.subdir="connect")
 }
 
 # Returns a list of complex community objects according to several igraph algorithms
-communities <- function(W, epsilon=NULL, env=0.5, directed=FALSE, ...) {
-	cW <- cleanW.cache(W, epsilon=epsilon, env=env, ...)
+communities <- function(W, directed=FALSE, ...) {
+	cW <- cleanW.cache(W, ...)
 	
 	Wgraph <- igraph::graph_from_adjacency_matrix(sign(cW))
 	if (!directed) 
@@ -136,7 +316,7 @@ communities <- function(W, epsilon=NULL, env=0.5, directed=FALSE, ...) {
 }
 
 # Returns the communities algorithm for all generations of a data dable. Beware, the returned object is complex and needs to be further processed
-communities.dyn <- function(out.table, epsilon=NULL, env=0.5, directed=FALSE, mc.cores=1) { # if env == NULL, MPhen1 is used instead
+communities.dyn <- function(out.table, directed=FALSE, mc.cores=1) {
 	W.table <- out.table[,grepl(colnames(out.table), pattern="MeanAll")]
 	env <- if(is.null(env)) out.table[,"MPhen1"] else rep(env, nrow(out.table))
 	
@@ -144,18 +324,18 @@ communities.dyn <- function(out.table, epsilon=NULL, env=0.5, directed=FALSE, mc
 	comm <- mclapply(1:nrow(W.table), function(i) { 
 			W <- matrix(unlist(W.table[i,]), ncol=net.size, byrow=TRUE)
 			stopifnot(nrow(W) == ncol(W))
-			communities(W, epsilon=epsilon, env=env[i], directed=directed)
+			communities(W, directed=directed)
 		}, mc.cores=mc.cores)
 	names(comm) <- as.character(out.table[,"Gen"])
 	comm
 }
 
-communities.dyn.cache <- function(out.table, epsilon=NULL, env=0.5, directed=FALSE, mc.cores=1) {
-	cache.fun(communities.dyn, out.table=out.table, epsilon=epsilon, env=env, directed=directed, mc.cores=mc.cores)
+communities.dyn.cache <- function(out.table, directed=FALSE, mc.cores=1) {
+	cache.fun(communities.dyn, out.table=out.table, directed=directed, mc.cores=mc.cores)
 }
 
-numconn.groups <- function(W, groups, epsilon=NULL, env=0.5, ...) {
-	cW <- cleanW.cache(W=W, epsilon=epsilon, env=env, ...)
+numconn.groups <- function(W, groups, ...) {
+	cW <- cleanW.cache(W=W, ...)
 	ug <- sort(unique(groups))
 	nconn.plus <- nconn.minus <- matrix(0, ncol=length(ug), nrow=length(ug))
 	rownames(nconn.plus) <- rownames(nconn.minus) <- colnames(nconn.plus) <- colnames(nconn.minus) <- ug
@@ -168,9 +348,9 @@ numconn.groups <- function(W, groups, epsilon=NULL, env=0.5, ...) {
 	list(plus=nconn.plus, minus=nconn.minus)
 }
 
-mean.numconn.groups <- function(listW, groups, epsilon=NULL, env=0.5, count.diag=NA, mc.cores=1, ...) {
+mean.numconn.groups <- function(listW, groups, count.diag=NA, mc.cores=1, ...) {
 	if (is.na(count.diag)) count.diag <- sum(sapply(listW, function(W) sum(diag(W)!=0))) != 0
-	all.nconn <- mclapply(listW, function(W) numconn.groups(W=W, groups=groups, epsilon=epsilon, env=env, ...), mc.cores=mc.cores)
+	all.nconn <- mclapply(listW, function(W) numconn.groups(W=W, groups=groups, ...), mc.cores=mc.cores)
 	tg <- table(groups)
 	norm <- tg %*% t(tg)
 	if (!count.diag)
@@ -181,7 +361,7 @@ mean.numconn.groups <- function(listW, groups, epsilon=NULL, env=0.5, count.diag
 }
 
 
-numcorrgen.groups <- function(R, groups, cutoff=0.1) {
+numcorrgen.groups <- function(R, groups, cutoff) {
 	cR <- R
 	cR[abs(cR) < 1e-10] <- 0
 	diag(cR)[diag(cR) == 0] <- 1 # It happens with the environment
@@ -201,7 +381,7 @@ numcorrgen.groups <- function(R, groups, cutoff=0.1) {
 }
 
 
-mean.numcorrgen.groups <- function(listR, groups, cutoff=0.1, remove.e=TRUE, mc.cores=1) {
+mean.numcorrgen.groups <- function(listR, groups, cutoff=corr.threshold, remove.e=TRUE, mc.cores=1) {
 	all.ncorr <- mclapply(listR, function(R) numcorrgen.groups(R=R, groups=groups, cutoff=cutoff), mc.cores=mc.cores)
 	tg <- table(groups)
 	norm <- tg %*% t(tg)
@@ -210,164 +390,6 @@ mean.numcorrgen.groups <- function(listR, groups, cutoff=0.1, remove.e=TRUE, mc.
 	tplus <- do.call(abind, c(lapply(all.ncorr, function(x) if (remove.e) x$plus[rownames(x$plus)!="e",colnames(x$plus)!="e"] else x$plus), list(along=3)))
 	tminus <-  do.call(abind, c(lapply(all.ncorr, function(x) if (remove.e) x$minus[rownames(x$minus)!="e",colnames(x$minus)!="e"] else x$minus), list(along=3)))
 	list(plus=rowMeans(tplus, dims=2)/norm, minus=rowMeans(tminus, dims=2)/norm)
-}
-
-plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), 
-								numconn.ref=NULL, directed=TRUE, ann.text=TRUE, col.scale.plus=NULL, col.scale.minus=NULL, 
-								lwd.arr=2, pos.shift.plus=0.80, pos.shift.minus=0.60, ...) {
-	circ.arc <- function(theta1=0, theta2=2*pi, n=100) { tt <- seq(theta1, theta2, length.out=n); cbind(cos(tt), sin(tt)) }
-	posit.angle <- function(angle) { angle <- angle %% (2*pi); if (angle > pi/2 && angle <= 3*pi/2) angle <- angle + pi; angle %% (2*pi)}
-	if (is.null(col.scale.plus))
-		col.scale.plus <- colorRampPalette(c("white","black"))(100)
-	if (is.null(col.scale.minus))
-		col.scale.minus <- colorRampPalette(c("white","red"))(100)
-	
-	delta.angle <- 0.25 # angle between two arrows
-	arr.dist  <- 0.15 # distance between the group name and the arrows
-	self.angle <- 1.4*pi
-	ann.text.options <- list(
-		pos.shift.plus=pos.shift.plus, 
-		pos.shift.minus=pos.shift.minus, 
-		text.cex=0.7, 
-		col.plus=rev(col.scale.plus)[1], 
-		col.minus=rev(col.scale.minus)[1], 
-		thresh=0.05, 
-		digits=2)
-	
-	par(mar=c(0.1,0.1,4,0.1))
-	plot(NULL, xlim=c(-1.2,1.2), ylim=c(-1.2,1.2), axes=FALSE, ann=FALSE, asp=1, ...)
-	lg <- length(group.names)
-	xy.groups <- cbind(cos(2*pi/lg*(0:(lg-1))), sin(2*pi/lg*(0:(lg-1))))
-	
-	if (is.null(names(group.names))) names(group.names) <- group.names
-	# plots the groups
-	text(xy.groups[,1], xy.groups[,2], parse(text=names(group.names)))
-	
-	numconn$plus[!is.finite(numconn$plus)] <- 0
-	numconn$minus[!is.finite(numconn$minus)] <- 0
-	
-	for (i in 1:lg) {
-		for (j in 1:lg) {
-			if (i != j) {
-				# angle between i and j
-				alpha <- atan((xy.groups[j,2]-xy.groups[i,2])/(xy.groups[j,1]-xy.groups[i,1]))
-				if (xy.groups[i,1] > xy.groups[j,1]) alpha <- alpha - pi
-				
-				x.i.plus  <- xy.groups[i,1]+arr.dist*cos(alpha-delta.angle/2)
-				y.i.plus  <- xy.groups[i,2]+arr.dist*sin(alpha-delta.angle/2)
-				x.i.minus <- xy.groups[i,1]+arr.dist*cos(alpha-3*delta.angle/2)
-				y.i.minus <- xy.groups[i,2]+arr.dist*sin(alpha-3*delta.angle/2)
-				
-				x.j.plus  <- xy.groups[j,1]+arr.dist*cos(pi+alpha+delta.angle/2)
-				y.j.plus  <- xy.groups[j,2]+arr.dist*sin(pi+alpha+delta.angle/2)
-				x.j.minus <- xy.groups[j,1]+arr.dist*cos(pi+alpha+3*delta.angle/2)
-				y.j.minus <- xy.groups[j,2]+arr.dist*sin(pi+alpha+3*delta.angle/2)
-				
-				col.plus  <- col.scale.plus [round(numconn$plus[j,i]* length(col.scale.plus))]
-				col.minus <- col.scale.minus[round(numconn$minus[j,i]*length(col.scale.minus))]
-				
-				if (directed) {
-					arrows(x0=x.i.plus,  x1=x.j.plus,  y0=y.i.plus,  y1=y.j.plus,  length=0.1,  col=col.plus,  lwd=lwd.arr)
-					arrows(x0=x.i.minus, x1=x.j.minus, y0=y.i.minus, y1=y.j.minus, length=0.05, col=col.minus, lwd=lwd.arr, angle=90)
-				} else { # The non-directed case is a bit of a hack, reusing existing variables
-					if (i > j) { # otherwise no need to draw anything
-						arrows(x0=x.i.plus,  x1=x.j.plus,  y0=y.i.plus,  y1=y.j.plus, code=3, length=0,  col=col.plus,  lwd=lwd.arr)
-					} else { # j < i necessarily, as the case i==j is treated elsewhere
-						arrows(x0=x.i.plus,  x1=x.j.plus,  y0=y.i.plus,  y1=y.j.plus, code=3, length=0,  col=col.minus,  lwd=lwd.arr)
-					}
-				}
-				
-				if (ann.text) {
-					if (numconn$plus[j,i] > ann.text.options$thresh) {
-						txt.num <- if (!directed && j > i) {
-							if (is.null(numconn.ref))
-								numconn$minus[i,j]
-							else
-								numconn$minus[i,j] - numconn.ref$minus[i,j]
-						} else {
-							if (is.null(numconn.ref))
-								numconn$plus[j,i]
-							else
-								numconn$plus[j,i] - numconn.ref$plus[j,i]
-						}
-						txt.str <- sprintf(paste0("%", if (is.null(numconn.ref)) "" else "+", "1.", ann.text.options$digits, "f"), txt.num)
-						text(x=(1-ann.text.options$pos.shift.plus)*x.i.plus+ann.text.options$pos.shift.plus*x.j.plus, 
-							y=(1-ann.text.options$pos.shift.plus)*y.i.plus+ann.text.options$pos.shift.plus*y.j.plus, 
-							txt.str, 
-							cex=ann.text.options$text.cex, 
-							col=if(!directed && j > i) ann.text.options$col.minus else ann.text.options$col.plus,
-							srt=180*(posit.angle(alpha)/pi))
-					}
-					if (numconn$minus[j,i] > ann.text.options$thresh && directed) {
-						txt.num <- if (is.null(numconn.ref)) numconn$minus[j,i]	else numconn$minus[j,i] - numconn.ref$minus[j,i]
-						txt.str <- sprintf(paste0("%", if (is.null(numconn.ref)) "" else "+", "1.", ann.text.options$digits, "f"), txt.num)
-						text(x=(1-ann.text.options$pos.shift.minus)*x.i.minus+ann.text.options$pos.shift.minus*x.j.minus, 
-							y=(1-ann.text.options$pos.shift.minus)*y.i.minus+ann.text.options$pos.shift.minus*y.j.minus, 
-							txt.str, 
-							cex=ann.text.options$text.cex, 
-							col=ann.text.options$col.minus,
-							srt=180*(posit.angle(alpha)/pi))
-					}
-				}
-			} else { # i == j
-				# angle of i around the circle
-				alpha <- (i-1)*2*pi/lg
-				# the regulation circle is opposite to the center
-				cc <- circ.arc(alpha-self.angle/2, alpha+self.angle/2)
-				cc.plus <- t(t(cc)*arr.dist+(1+0.5*arr.dist)*xy.groups[i,])
-				cc.minus <- t(t(cc)*(1-delta.angle)*arr.dist+(1+0.5*arr.dist)*xy.groups[i,])
-				col.plus <- col.scale.plus[round(numconn$plus[i,i]*length(col.scale.plus))]
-				col.minus <- col.scale.minus[round(numconn$minus[i,i]*length(col.scale.minus))]
-				lines(cc.plus[1:(nrow(cc.plus)-1), 1], cc.plus[1:(nrow(cc.plus)-1),2], col=col.plus, lty=1, lwd=lwd.arr)
-				if (directed)
-					arrows(x0=cc.plus[nrow(cc.plus)-1,1], x1=cc.plus[nrow(cc.plus),1], y0=cc.plus[nrow(cc.plus)-1,2], y1=cc.plus[nrow(cc.plus),2], col=col.plus, length=0.1, lwd=lwd.arr)
-				lines(cc.minus[2:nrow(cc.minus), 1], cc.minus[2:nrow(cc.minus),2], col=col.minus, lty=1, lwd=lwd.arr)
-				if (directed)
-					arrows(x0=cc.minus[2,1], x1=cc.minus[1,1], y0=cc.minus[2,2], y1=cc.minus[1,2], col=col.minus, length=0.05, angle=90, lwd=lwd.arr)
-				
-				if (ann.text) {
-					if (numconn$plus[i,i] > ann.text.options$thresh) {
-						txt.num <- if (is.null(numconn.ref)) numconn$plus[i,i]	else numconn$plus[i,i] - numconn.ref$plus[i,i]
-						txt.str <- sprintf(paste0("%", if (is.null(numconn.ref)) "" else "+", "1.", ann.text.options$digits, "f"), txt.num)
-						text(x=cc.plus[round(ann.text.options$pos.shift.plus*nrow(cc.plus)),1], 
-							y=cc.plus[round(ann.text.options$pos.shift.plus*nrow(cc.plus)),2], 
-							txt.str, 
-							cex=ann.text.options$text.cex, 
-							col=ann.text.options$col.plus)
-					}
-					if (numconn$minus[i,i] > ann.text.options$thresh) {
-						txt.num <- if (is.null(numconn.ref)) numconn$minus[i,i]	else numconn$minus[i,i] - numconn.ref$minus[i,i]
-						txt.str <- sprintf(paste0("%", if (is.null(numconn.ref)) "" else "+", "1.", ann.text.options$digits, "f"), txt.num)						
-						text(x=cc.minus[round(ann.text.options$pos.shift.minus*nrow(cc.minus)),1], 
-							y=cc.minus[round(ann.text.options$pos.shift.minus*nrow(cc.minus)),2], 
-							txt.str, 
-							cex=ann.text.options$text.cex, 
-							col=ann.text.options$col.minus)
-					}
-				}
-			}
-		}
-	}
-}
-
-
-# Extraction of G matrices from files
-
-Ggen <- function(files, gen) {
-	ans <- mclapply(files, function(ff) {
-		tt <- read.table(ff, header=TRUE)
-		if (!gen %in% tt[,"Gen"]) return(NA)
-		cc <- tt[tt[,"Gen"] == gen, grepl(colnames(tt), pattern="CovPhen")]
-		rm(tt); gc()
-		cc <- matrix(unlist(cc), ncol=sqrt(length(cc)), byrow=TRUE)
-		diag(cc)[diag(cc) < 1e-6] <- 1
-		cc
-	}, mc.cores=1)
-	ans[!sapply(ans, function(x) length(x) == 1 && is.na(x))]
-}
-
-Ggen.cache <- function(files, gen) {
-	cache.fun(Ggen, files=files, gen=gen, cache.subdir="Ggen")
 }
 
 
