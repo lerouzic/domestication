@@ -328,8 +328,16 @@ communities.dyn <- function(out.table, directed=FALSE, mc.cores=1) {
 	comm
 }
 
-communities.dyn.cache <- function(out.table, directed=FALSE, mc.cores=1) {
-	cache.fun(communities.dyn, out.table=out.table, directed=directed, mc.cores=mc.cores, cache.subdir="Rcache-commdyn")
+communities.dyn.files <- function(files, directed=FALSE, mc.cores=1) {
+	 mclapply(files, function(ff) {
+		tt <- read.table(ff, header=TRUE)
+		cc <- communities.dyn(tt, directed=directed, mc.cores=1)
+		return(cc)
+		}, mc.cores=mc.cores)
+}
+
+communities.dyn.files.cache <- function(files, directed=FALSE, mc.cores=1) {
+	cache.fun(communities.dyn.files, files=files, directed=directed, mc.cores=mc.cores, cache.subdir="Rcache-commdyn")
 }
 
 numconn.groups <- function(W, groups, ...) {

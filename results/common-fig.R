@@ -274,17 +274,10 @@ plot.inout.gainloss <- function(mysims, deltaG=NA, xlab="Generation", ylab="Nb c
 }
 
 plot.network.feature <- function(mysims, what=c("nbconn", "modularity")[1], algos=names(col.algo), ylab=NULL, xlab="Generation", ylim=NULL, ...) {
-	comm.files <- function(out.files) {
-	 mclapply(out.files, function(ff) {
-		tt <- read.table(ff, header=TRUE)
-		cc <- communities.dyn.cache(tt, directed=directed, mc.cores=1)
-		return(cc)
-		}, mc.cores=mc.cores)
-	}
 	
 	modn <- sapply(mysims, function(mysim) {
 		out.files <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]], full.names=TRUE, recursive=FALSE), full.names=TRUE)
-		comm      <- comm.files(out.files)
+		comm      <- communities.dyn.files.cache(out.files, mc.cores=mc.cores)
 		sapply(algos, function(algo) {
 			colMeans(do.call(rbind, mclapply(comm, function(cc) sapply(cc, function(ccc) {
 				if (what=="nbconn")
@@ -293,7 +286,7 @@ plot.network.feature <- function(mysims, what=c("nbconn", "modularity")[1], algo
 					igraph::modularity(ccc[[algo]])
 				else
 					NA
-			}), mc.cores=1)))}, simplify=FALSE)
+			}), mc.cores=mc.cores)))}, simplify=FALSE)
 		}, USE.NAMES=TRUE, simplify=FALSE)
 		
 	gen <- meansim.all[[mysims[1]]][,"Gen"]
