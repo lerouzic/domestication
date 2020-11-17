@@ -77,7 +77,7 @@ get.Ndyn <- function(repdir) {
 }
 
 get.Ndyn.cache <- function(repdir) {
-	cache.fun(get.Ndyn, repdir=repdir, cache.subdir="Ndyn")
+	cache.fun(get.Ndyn, repdir=repdir, cache.subdir="Rcache-Ndyn")
 }
 
 # Detects the begining and the end of the bottleneck(s?) from the dynamics of N
@@ -159,7 +159,7 @@ mean.sim <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=NULL) {
 }
 
 mean.sim.cache <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=colnames.pattern) {
-	cache.fun(mean.sim, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="means")
+	cache.fun(mean.sim, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-means")
 }
 
 # variance of all data tables from a directory
@@ -220,5 +220,5 @@ mean.norm <- function(out.dir, max.reps=Inf, FUN.to.apply=identity, mc.cores=1, 
 }
 
 mean.norm.cache <- function(out.dir, max.reps=Inf, FUN.to.apply=identity, mc.cores=1, sliding=TRUE, window.size=10) {
-	cache.fun(mean.norm, out.dir=out.dir, max.reps=max.reps, FUN.to.apply=FUN.to.apply, mc.cores=mc.cores, sliding=sliding, window.size=window.size, cache.subdir="norm")
+	cache.fun(mean.norm, out.dir=out.dir, max.reps=max.reps, FUN.to.apply=FUN.to.apply, mc.cores=mc.cores, sliding=sliding, window.size=window.size, cache.subdir="Rcache-norm")
 }

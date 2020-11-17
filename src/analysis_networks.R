@@ -64,7 +64,7 @@ Wgen.files <- function(files, gen) {
 }
 
 Wgen.files.cache <- function(files, gen) {
-	cache.fun(Wgen.files, files=files, gen=gen, cache.subdir="Wgen")
+	cache.fun(Wgen.files, files=files, gen=gen, cache.subdir="Rcache-Wgen")
 }
 
 Wlist.table <- function(out.table) {
@@ -101,7 +101,7 @@ Ggen.files <- function(files, gen) {
 }
 
 Ggen.files.cache <- function(files, gen) {
-	cache.fun(Ggen.files, files=files, gen=gen, cache.subdir="Ggen")
+	cache.fun(Ggen.files, files=files, gen=gen, cache.subdir="Rcache-Ggen")
 }
 
 Glist.table <- function(out.table) {
@@ -148,7 +148,7 @@ cleanW <- function(W, epsilon, env, ...) {
 }
 
 cleanW.cache <- function(W, epsilon=connect.threshold, env=connect.env, ...) {
-	cache.fun(cleanW, W=W, epsilon=epsilon, env=env, ..., cache.subdir="cleanW")
+	cache.fun(cleanW, W=W, epsilon=epsilon, env=env, ..., cache.subdir="Rcache-cleanW")
 }
 
 number.connections <- function(W, ...) {
@@ -297,7 +297,7 @@ mean.connect <- function(out.dir, max.reps=Inf, mc.cores=1) {
 }
 
 mean.connect.cache <- function(out.dir, max.reps=Inf, mc.cores=1) {
-	cache.fun(mean.connect, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, cache.subdir="connect")
+	cache.fun(mean.connect, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, cache.subdir="Rcache-connect")
 }
 
 # Returns a list of complex community objects according to several igraph algorithms
@@ -331,7 +331,7 @@ communities.dyn <- function(out.table, directed=FALSE, mc.cores=1) {
 }
 
 communities.dyn.cache <- function(out.table, directed=FALSE, mc.cores=1) {
-	cache.fun(communities.dyn, out.table=out.table, directed=directed, mc.cores=mc.cores)
+	cache.fun(communities.dyn, out.table=out.table, directed=directed, mc.cores=mc.cores, cache.subdir="Rcache-commdyn")
 }
 
 numconn.groups <- function(W, groups, ...) {
