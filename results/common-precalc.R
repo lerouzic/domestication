@@ -24,7 +24,7 @@ simtag <- c(
 	largenet="simLargenet")
 	
 outdir.all     <- lapply(simtag, function(nn) file.path(cache.dir, nn))
-meansim.all    <- lapply(outdir.all, function(od) mean.sim.cache(od, colnames.pattern=tokeep))
+meansim.all    <- lapply(outdir.all, function(od) mean.sim.cache(od, colnames.pattern=tokeep, mc.cores=mc.cores))
 selpattern.all <- lapply(meansim.all, function(ms) selectionregime.detect(ms)[-1])
 Ndyn.all       <- lapply(outdir.all, function(od) get.Ndyn.cache(onerep(od)))
 

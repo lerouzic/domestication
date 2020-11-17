@@ -221,7 +221,7 @@ plot.inout.change <- function(mysim, mysim.ref=NULL, regimes=c("s","p","n"), xla
 	mean.after.ref <- NULL
 	if (!is.null(mysim.ref)) {
 		out.files.ref <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim.ref]], full.names=TRUE, recursive=FALSE), full.names=TRUE)
-		mean.after.ref <- mean.inout(inout.gen.cache(out.files.ref, gen=meansim.all[[mysim.ref]][nrow(meansim.all[[mysim.ref]]),"Gen"]))
+		mean.after.ref <- mean.inout(inout.gen.cache(out.files.ref, gen=meansim.all[[mysim.ref]][nrow(meansim.all[[mysim.ref]]),"Gen"], mc.cores=mc.cores))
 	}
 	
 	if (is.null(xlim)) 
@@ -258,7 +258,7 @@ plot.inout.gainloss <- function(mysims, deltaG=NA, xlab="Generation", ylab="Nb c
 	
 	iogl <- sapply(mysims, function(mysim) {
 		out.files  <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]],  full.names=TRUE, recursive=FALSE), full.names=TRUE)
-		fl <- mean.delta.inout.dyn.cache(out.files, deltaG)
+		fl <- mean.delta.inout.dyn.cache(out.files, deltaG, mc.cores=mc.cores)
 	}, USE.NAMES=TRUE, simplify=FALSE)
 	
 	gen <-as.numeric(rownames(iogl[[1]]))
@@ -278,9 +278,9 @@ plot.network.feature <- function(mysims, what=c("nbconn", "modularity")[1], algo
 	comm.files <- function(out.files) {
 	 mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
-		cc <- communities.dyn.cache(tt, epsilon=connect.threshold, env=env, directed=directed, mc.cores=max(1, round(mc.cores/4)))
+		cc <- communities.dyn.cache(tt, epsilon=connect.threshold, env=env, directed=directed, mc.cores=1)
 		return(cc)
-		}, mc.cores=min(4, mc.cores))
+		}, mc.cores=mc.cores)
 	}
 	
 	modn <- sapply(mysims, function(mysim) {
@@ -456,7 +456,7 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus),
 plot.Gdiff <- function(mysims, deltaG=NA, xlab="Generation", ylab="Change in G matrix", ylim=c(0,1), ...) {
 	gd <- sapply(mysims, function(mysim) {
 		out.files  <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]],  full.names=TRUE, recursive=FALSE), full.names=TRUE)
-		mean.Gdiff.dyn.cache(out.files, deltaG)
+		mean.Gdiff.dyn.cache(out.files, deltaG, mc.cores=mc.cores)
 	}, USE.NAMES=TRUE, simplify=FALSE)
 	
 	gen <-as.numeric(names(gd[[1]]))
@@ -471,7 +471,7 @@ plot.Gdiff <- function(mysims, deltaG=NA, xlab="Generation", ylab="Change in G m
 plot.GPC <- function(mysims, PC=1, xlab="Generation", ylab="Proportion of total variance", ylim=c(0,1), ...) {
 	gpc <- sapply(mysims, function(mysim) {
 		out.files  <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]],  full.names=TRUE, recursive=FALSE), full.names=TRUE)
-		mean.propPC.dyn.cache(out.files, PC)
+		mean.propPC.dyn.cache(out.files, PC, mc.cores=mc.cores)
 	}, USE.NAMES=TRUE, simplify=FALSE)
 	
 	gen <-as.numeric(names(gpc[[1]]))
@@ -491,7 +491,7 @@ plot.Gmat <- function(mysim, gen, absolute=TRUE, cols=NULL) {
 	st <- if (absolute) 0 else -1
 	out.files <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]], full.names=TRUE, recursive=FALSE), full.names=TRUE)
 	
-	Glist <- Ggen.files.cache(out.files, gen)
+	Glist <- Ggen.files.cache(out.files, gen, mc.cores=mc.cores)
 	Glist <- lapply(Glist, function(G) if (absolute) abs(cov2cor(G)) else cov2cor(G))
 	
 	Gmean <- rowMeans(do.call(abind, c(Glist, list(along=3))), dims=2)
