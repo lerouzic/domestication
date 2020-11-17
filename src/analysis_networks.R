@@ -55,7 +55,7 @@ model.M2 <- function(W, S0=rep(a, nrow(W)), a=0.2, env=0.5, steps=20, measure=4,
 Wgen.files <- function(files, gen) {
 	ans <- mclapply(files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
-		if (!gen %in% tt[,"Gen"]) return(NA)
+		if (!gen %in% tt[,"Gen"]) return(NULL)
 		W <- tt[tt[,"Gen"] == gen, grepl(colnames(tt), pattern="MeanAll")]
 		rm(tt); gc()
 		W <- matrix(unlist(W), ncol=sqrt(length(W)), byrow=TRUE)
@@ -90,7 +90,7 @@ Wlist.files <- function(files) {
 Ggen.files <- function(files, gen, mc.cores=1) {
 	ans <- mclapply(files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
-		if (!gen %in% tt[,"Gen"]) return(NA)
+		if (!gen %in% tt[,"Gen"]) return(NULL)
 		cc <- tt[tt[,"Gen"] == gen, grepl(colnames(tt), pattern="CovPhen")]
 		rm(tt); gc()
 		cc <- matrix(unlist(cc), ncol=sqrt(length(cc)), byrow=TRUE)
