@@ -87,7 +87,7 @@ Wlist.files <- function(files) {
 	}, mc.cores=1)	
 }
 
-Ggen.files <- function(files, gen) {
+Ggen.files <- function(files, gen, mc.cores=1) {
 	ans <- mclapply(files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		if (!gen %in% tt[,"Gen"]) return(NA)
@@ -100,8 +100,8 @@ Ggen.files <- function(files, gen) {
 	ans[!sapply(ans, function(x) length(x) == 1 && is.na(x))]
 }
 
-Ggen.files.cache <- function(files, gen) {
-	cache.fun(Ggen.files, files=files, gen=gen, cache.subdir="Rcache-Ggen")
+Ggen.files.cache <- function(files, gen, mc.cores=1) {
+	cache.fun(Ggen.files, files=files, gen=gen, mc.cores=mc.cores, cache.subdir="Rcache-Ggen")
 }
 
 Glist.table <- function(out.table) {
