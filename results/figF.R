@@ -14,6 +14,6 @@ pdf("figF.pdf", width=5, height=5)
 	
 	# all pch are hard-coded... Not very clean, but the figure is used only once.
 	legend("topleft", pch=c(15,15,15,19,17,1), col=c(col.sel[regimes], rep("darkgray",3)), 	
-		legend=c(leg, "Before domestication", "After domestication", "No domestication"))
+		legend=c(leg, "Before domestication", "Now", "No domestication"))
 	
 dev.off()

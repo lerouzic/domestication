@@ -42,7 +42,7 @@ axis(3, at=1:ng, sel.before.dom[-1], cex.axis=cex.axis, tick=FALSE, line=-1)
 
 
 plot.Gmat("default", gen.end, absolute=absolute)
-title("After domestication")
+title("Now")
 axis(2, at=1:ng, rev(sel.after.dom[-1]), cex.axis=cex.axis, tick=FALSE, line=-1)
 axis(3, at=1:ng, sel.after.dom[-1], cex.axis=cex.axis, tick=FALSE, line=-1)
 
