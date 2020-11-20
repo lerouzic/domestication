@@ -475,6 +475,20 @@ plot.GPC <- function(mysims, PC=1, xlab="Generation", ylab="Proportion of total 
 	}	
 }
 
+plot.Grank <- function(mysims, xlab="Generation", ylab="Effective rank of G", ylim=NULL, ...) {
+	gr <- sapply(mysims, function(mysim) {
+		out.files  <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]],  full.names=TRUE, recursive=FALSE), full.names=TRUE)
+		mean.erankG.dyn.cache(out.files, mc.cores=mc.cores)
+	}, USE.NAMES=TRUE, simplify=FALSE)	
+	
+	gen <-as.numeric(names(gr[[1]]))
+	if (is.null(ylim)) ylim <- c(0, max(unlist(gr)))
+	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	
+	for (mysim in mysims) {
+		lines(gen, gr[[mysim]], lty=lty.sce[mysim], col=col.sce[mysim])
+	}		
+}
 
 plot.Gmat <- function(mysim, gen, absolute=TRUE, cols=NULL) {
 	if(is.null(cols))

@@ -11,8 +11,8 @@ source("../src/analysis_networks.R")
 
 scenarios <- c("default","nobot","noselc")
 
-pdf("figL.pdf", width=8, height=4)
-	layout(rbind(1:2))
+pdf("figL.pdf", width=12, height=4)
+	layout(rbind(1:3))
 	
 	plot.Gdiff(scenarios, deltaG=deltaG, xaxt="n")
 	
@@ -31,7 +31,16 @@ pdf("figL.pdf", width=8, height=4)
 	selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
 
 	subpanel("B")
+	
+	
+	plot.Grank(scenarios, xaxt="n")	
+	
+	generation.axis()
+	bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
+	selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
 
+	subpanel("C")
+	
 dev.off()
 
 

@@ -287,6 +287,48 @@ mean.propPC.dyn.cache <- function(files, PC=1, mc.cores=1) {
 	cache.fun(mean.propPC.dyn, files=files, PC=PC, mc.cores=mc.cores, cache.subdir="Rcache-propPC")
 }
 
+erankG.dyn <- function(out.table, mc.cores=1) {
+	erank <- function(M) {
+		# calculation of the effective rank as defined in 
+		# Roy, O., & Vetterli, M. (2007). 
+		# The effective rank: A measure of effective dimensionality. 
+		# In 2007 15th European Signal Processing Conference (pp. 606-610). IEEE.
+		ee <- abs(eigen(M)$values)
+		p  <- ee/sum(ee)
+		sa <- - sum(ifelse(p==0, 0, p*log(p))) # Shannon entropy
+		exp(sa)
+	}
+	
+	gen <- out.table[,"Gen"]
+	listG <- Glist.table(out.table)
+	
+	ans <- mclapply(listG, function(G) {
+		erank(G)
+	}, mc.cores=mc.cores)
+	aa <- do.call(c, ans)
+	names(aa) <- as.character(gen)
+	aa
+}
+
+
+mean.erankG.dyn <- function(files, mc.cores=1) {
+	ans <- mclapply(files, function(ff) {
+		tt <- read.table(ff, header=TRUE)
+		erankG.dyn(tt, mc.cores=1)
+	}, mc.cores=mc.cores)
+	aa <- do.call(rbind, ans)
+	colMeans(aa)	
+}
+
+mean.erankG.dyn.cache <- function(files, mc.cores=1) {
+	cache.fun(mean.erankG.dyn, files=files, mc.cores=mc.cores, cache.subdir="Rcache-erankG")
+}
+
+mean.propPC.dyn.cache <- function(files, PC=1, mc.cores=1) {
+	cache.fun(mean.propPC.dyn, files=files, PC=PC, mc.cores=mc.cores, cache.subdir="Rcache-propPC")
+}
+
+
 # Average out all network connections from a directory 
 mean.connect <- function(out.dir, max.reps=Inf, mc.cores=1) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
