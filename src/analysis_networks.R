@@ -241,8 +241,6 @@ delta.Gdiff.dyn <- function(out.table, deltaG=NA, mc.cores=1) {
 	listG <- Glist.table(out.table[seqgen,])
 	
 	ans <- mclapply(1:(length(listG)-1), function(i) delta.Gdiff(listG[[i+1]], listG[[i]]), mc.cores=mc.cores)
-	l.ans <- sapply(ans, nrow)
-	ans <- ans[l.ans == max(l.ans)] # removing incomplete data sets (ongoing simulations)
 	ans <- do.call(c, ans)
 	names(ans) <- as.character(gen[seqgen])[-1]
 	ans	
@@ -253,6 +251,8 @@ mean.Gdiff.dyn <- function(files, deltaG=NA, mc.cores=1) {
 		tt <- read.table(ff, header=TRUE)
 		delta.Gdiff.dyn(tt, deltaG, mc.cores=1)
 	}, mc.cores=mc.cores)
+	ansl <- sapply(ans, length)
+	ans <- ans[ansl == max(ansl)]
 	aa <- do.call(rbind, ans)
 	colMeans(aa)	
 }
@@ -279,6 +279,8 @@ mean.propPC.dyn <- function(files, PC=1, mc.cores=1) {
 		tt <- read.table(ff, header=TRUE)
 		propPC.dyn(tt, PC=PC, mc.cores=1)
 	}, mc.cores=mc.cores)
+	ansl <- sapply(ans, length)
+	ans <- ans[ansl == max(ansl)]
 	aa <- do.call(rbind, ans)
 	colMeans(aa)	
 }
@@ -316,6 +318,8 @@ mean.erankG.dyn <- function(files, mc.cores=1) {
 		tt <- read.table(ff, header=TRUE)
 		erankG.dyn(tt, mc.cores=1)
 	}, mc.cores=mc.cores)
+	ansl <- sapply(ans, length)
+	ans <- ans[ansl == max(ansl)]
 	aa <- do.call(rbind, ans)
 	colMeans(aa)	
 }
