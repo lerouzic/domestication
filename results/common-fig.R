@@ -55,7 +55,7 @@ legname <- function(nn) {
 	legn <- c(
 		default ="Default",
 		nobot   ="No bottleneck",
-		noselc  ="Constant selection",
+		noselc  ="No selection switch",
 		nosel   ="Drift",
 		nomut   ="No new mutations",
 		smallsel="Less selected genes",
