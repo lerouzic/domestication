@@ -50,22 +50,6 @@ source("./common-precalc.R")
 #      
 
 
-# Consistent caption text
-legname <- function(nn) {
-	legn <- c(
-		default ="Default",
-		nobot   ="No bottleneck",
-		noselc  ="No selection switch",
-		nosel   ="Drift",
-		nomut   ="No new mutations",
-		smallsel="Less selected genes",
-		strongsel="Strong selection",
-		strongbot="Strong bottleneck",
-		largenet="Large network")
-		
-	ifelse(nn %in% names(legn), legn[nn], nn)
-}
-
 generation.axis <- function(show.bottleneck=FALSE, ...) {
 	mxx <- max(as.numeric(names(Ndyn.all[["default"]])))
 	if (show.bottleneck) {
