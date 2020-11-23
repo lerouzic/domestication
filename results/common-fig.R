@@ -148,8 +148,9 @@ plot.var.gene <- function(mysim, what=c("molecular", "expression")[1], ylim=NULL
 
 	sel.change.gen <- try(selectionchange.detect(meansim.all[[mysim]]), silent=TRUE)
 	if (class(sel.change.gen) == "try-error") sel.change.gen <- max(gen)
-	sel.before <- substr(selpattern.all[[mysim]], 1, 1)
-	sel.before[sel.before == "c"] <- "s" # No need to distinguish constant and stable? 
+	sel.pattern <- selpattern.all[[mysim]]
+	sel.pattern[sel.pattern == "cc"] <- "ss" # No need to distinguish constant and stable?
+	sel.before <- substr(sel.pattern, 1, 1)
 
 	if (is.null(ylim)) ylim <- c(0, y.factor*max(var.data))
 
@@ -161,10 +162,12 @@ plot.var.gene <- function(mysim, what=c("molecular", "expression")[1], ylim=NULL
 		lines(as.numeric(names(my.yy)), my.yy, lty=1, col=col.sel[cc])
 	}
 	if (sel.change.gen < max(gen))
-		for (cc in unique(selpattern.all[[mysim]])) {
-			yy <- (rowMeans(var.data[,selpattern.all[[mysim]]==cc,drop=FALSE])*y.factor)[gen > sel.change.gen]
+		for (cc in unique(sel.pattern)) {
+			yy <- (rowMeans(var.data[,sel.pattern==cc,drop=FALSE])*y.factor)[gen > sel.change.gen]
 			my.yy <- mov.avg(yy, gen[gen > sel.change.gen], size=window.avg, min.gen=0)
-			lines(as.numeric(names(my.yy)), my.yy, lty=lty.sel[substr(cc,1,1)], col=col.sel[substr(cc,2,2)])
+			mysel.before <- substr(cc, 1, 1)
+			mysel.after  <- substr(cc, 2, 2)
+			lines(as.numeric(names(my.yy)), my.yy, lty=lty.sel[mysel.before], col=col.sel[mysel.after])
 		}
 }
 
