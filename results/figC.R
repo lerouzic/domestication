@@ -10,7 +10,7 @@ source("./common-fig.R")
 pdf("figC.pdf", width=5, height=5)
 layout(rbind(1:2,3:4))
 
-par(mar=c(0.1, 0.1, 0.1, 0.5), oma=c(5, 5, 0, 1))
+par(mar=c(0.1, 0.1, 0.5, 0.5), oma=c(5, 5, 0, 1))
 
 y.factor <- c('(""%*% 10^{-3})' = 1000)
 ylab <- "Expression variance"
@@ -25,6 +25,7 @@ sel.pat[sel.pat == "c"] <- "s" # No need to distinguish constant and stable?
 plot.var.gene("default", what="expression", ylim=ylim, ylab=ylab, y.factor=y.factor, xlab="", xaxt="n", xpd=NA)
 bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
 selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
+legend("topright", lty=c(0, 1, 1, 1), col=c(0, col.sel[unique(sel.pat)]), legend=c("Before dom:", "Stable","Plastic", "Non-selected"), cex=cex.legend)
 
 subpanel("A")
 
@@ -32,6 +33,8 @@ subpanel("A")
 
 plot.var.gene("nobot", what="expression", ylim=ylim, ylab="", y.factor=y.factor, xlab="", yaxt="n", xaxt="n", xpd=NA)
 selectionchange.plot(meansim.all[["nobot"]], y=0, cex=1.5)
+legend("topright", lty=c(0, lty.sel[unique(sel.pat)]), col=c(0, 1, 1, 1), legend=c("After dom:", "Stable","Plastic", "Non-selected"), cex=cex.legend)
+
 subpanel("B")
 
 ### Panel C: no selection change #######################################
@@ -39,7 +42,6 @@ subpanel("B")
 plot.var.gene("noselc", what="expression", ylim=ylim, ylab=ylab, y.factor=y.factor, xlab="", xaxt="n", xpd=NA)
 generation.axis()
 bottleneck.plot(Ndyn.all[["noselc"]], y=0, lwd=2)
-legend("topright", lty=1, col=col.sel[unique(sel.pat)], legend=c("Stable","Plastic", "Non-selected"))
 
 subpanel("C")
 

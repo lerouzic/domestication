@@ -23,6 +23,8 @@ connect.env       <- 0.5
 
 corr.threshold    <- 0.2
 
+cex.legend <- 0.8
+
 col.sel <- c(c="blue", s="blue", p="red", n="black")
 lty.sel <- c(c=1, s=1, p=2, n=3)
 col.sce <- c(default="black", nobot="black", noselc="black", nosel="gray")
