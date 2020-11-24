@@ -1,9 +1,9 @@
 
+source("./common-par.R")
+
 source("../src/cache.R")
 source("../src/analysis_tools.R")
 source("../src/analysis_networks.R")
-
-source("./common-par.R")
 
 cor2dist <- function(r) as.dist(sqrt(2*(1-r)))
 covtransf <- function(x) cor2dist(cov2cor(x))

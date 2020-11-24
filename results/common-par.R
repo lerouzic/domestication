@@ -1,6 +1,4 @@
 # Common parameters (colors, plotting options) shared by all figures.
-
-
       
 suppressMessages(library(parallel))    # for mclapply
 suppressMessages(library(digest))      # to generate cache file names
@@ -9,6 +7,8 @@ suppressMessages(library(ade4))        # for mantel.rtest
 suppressMessages(library(igraph))      # graph topology calculation
 suppressMessages(library(Rcpp))        # fast model
 suppressMessages(library(inline))      # fact model
+
+source("../src/cache.R")
 
 mc.cores <- min(12, detectCores()-1)
 cache.dir <- default.cache.dir # defined in ../src/cache.R
