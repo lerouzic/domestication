@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# Figure M: G matrix before/after domestication
+# Figure S5: G matrix before/after domestication
 
 source("./common-fig.R")
 
@@ -25,25 +25,24 @@ sel.after.dom <- ifelse(sel.before.dom != sel.after.dom, toupper(sel.after.dom),
 
 cex.axis <- 0.6
 
-pdf("figM.pdf", width=9, height=4)
-
-layout(t(1:3), width=c(0.1, 0.45, 0.45))
-
-par(mar=c(1, 4, 4, 0.1))
-
-plot.Gmat.legend(absolute=absolute)
-
-par(mar=c(0.1, 2, 4, 0.1))
-
-plot.Gmat("default", gen.dom, absolute=absolute)
-title("Before domestication")
-axis(2, at=1:ng, rev(sel.before.dom[-1]), cex.axis=cex.axis, tick=FALSE, line=-1)
-axis(3, at=1:ng, sel.before.dom[-1], cex.axis=cex.axis, tick=FALSE, line=-1)
-
-
-plot.Gmat("default", gen.end, absolute=absolute)
-title("Now")
-axis(2, at=1:ng, rev(sel.after.dom[-1]), cex.axis=cex.axis, tick=FALSE, line=-1)
-axis(3, at=1:ng, sel.after.dom[-1], cex.axis=cex.axis, tick=FALSE, line=-1)
+pdf("figS5.pdf", width=2*panel.width, height=panel.height)
+	layout(t(1:3), width=c(0.1, 0.45, 0.45))
+	
+	par(mar=c(1, 4, 4, 0.1))
+	
+	plot.Gmat.legend(absolute=absolute)
+	
+	par(mar=c(0.1, 2, 4, 0.1))
+	
+	plot.Gmat("default", gen.dom, absolute=absolute)
+	title("Before domestication")
+	axis(2, at=1:ng, rev(sel.before.dom[-1]), cex.axis=cex.axis, tick=FALSE, line=-1)
+	axis(3, at=1:ng, sel.before.dom[-1], cex.axis=cex.axis, tick=FALSE, line=-1)
+	
+	
+	plot.Gmat("default", gen.end, absolute=absolute)
+	title("Now")
+	axis(2, at=1:ng, rev(sel.after.dom[-1]), cex.axis=cex.axis, tick=FALSE, line=-1)
+	axis(3, at=1:ng, sel.after.dom[-1], cex.axis=cex.axis, tick=FALSE, line=-1)
 
 dev.off()
