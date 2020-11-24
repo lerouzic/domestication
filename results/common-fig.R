@@ -258,8 +258,8 @@ plot.inout.gainloss <- function(mysims, deltaG=NA, xlab="Generation", ylab="Nb c
 	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 	
 	for (mysim in mysims) {
-		lines(gen, iogl[[mysim]][,"gain"], lty=lty.sce[mysim], col=col.gl["gain"])
-		lines(gen, iogl[[mysim]][,"loss"], lty=lty.sce[mysim], col=col.gl["loss"])		
+		lines(gen, iogl[[mysim]][,"gain"], lty=lty.sce[mysim], col=col.gl["Gain"])
+		lines(gen, iogl[[mysim]][,"loss"], lty=lty.sce[mysim], col=col.gl["Loss"])		
 	}	
 }
 
@@ -318,7 +318,7 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus),
 		thresh=0.05, 
 		digits=2)
 	
-	par(mar=c(0.1,0.1,4,0.1))
+	par(mar=c(0.1,0.1,2,0.1))
 	plot(NULL, xlim=c(-1.2,1.2), ylim=c(-1.2,1.2), axes=FALSE, ann=FALSE, asp=1, ...)
 	lg <- length(group.names)
 	xy.groups <- cbind(cos(2*pi/lg*(0:(lg-1))), sin(2*pi/lg*(0:(lg-1))))

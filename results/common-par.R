@@ -16,7 +16,7 @@ cache.dir <- default.cache.dir # defined in ../src/cache.R
 window.avg <- 1 # Size of the moving average window
 window.norm <- 10 # Size of the window for reaction norms
 first.gen  <- 10000  # First generation for the time series
-deltaG     <- 1000 # When tracking evolutionary change
+deltaG     <- 500 # When tracking evolutionary change
 
 connect.threshold <- 0.1
 connect.env       <- 0.5
@@ -26,6 +26,7 @@ corr.threshold    <- 0.2
 cex.legend <- 0.8
 panel.width  <- 4
 panel.height <- 4
+mar.notitle <- c(4, 4, 0.5, 0.5)
 
 col.sel <- c(c="blue", s="blue", p="red", n="black")
 lty.sel <- c(c=1, s=1, p=2, n=3)
@@ -37,7 +38,7 @@ col.algo <- c( # modularity algorithms
 	fastgreedy="darkolivegreen",
 	labelprop="lightblue")
 	
-col.gl <- c(gain="orange", loss="darkgray")
+col.gl <- c(Gain="orange", Loss="darkgray")
 col.cor <- c("red", "white", "green") # for correlations -1, 0, 1
 
 # Consistent caption text

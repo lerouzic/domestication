@@ -2,35 +2,22 @@
 
 # Figure L: Evolution of genetic variance-covariance
 
-library(ade4) # for mantel.rtest
-
 source("./common-fig.R")
 
 source("../src/analysis_networks.R")
 
-
 scenarios <- c("default","nobot","noselc")
 
-pdf("figL.pdf", width=12, height=4)
-	layout(rbind(1:3))
-	
-	plot.Gdiff(scenarios, deltaG=deltaG, xaxt="n")
-	
-	generation.axis()
-	bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
-	selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
-	
-	legend(x="topright",legend = legname(scenarios), lty=lty.sce[scenarios], col=col.sce[scenarios], bty="n")
-	subpanel("A")
-	
-	
+pdf("figL.pdf", width=2*panel.width, height=panel.height)
+	layout(rbind(1:2))
+
 	plot.GPC(scenarios, PC=1, xaxt="n")	
 	
 	generation.axis()
 	bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
 	selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
 
-	subpanel("B")
+	subpanel("A")
 	
 	
 	plot.Grank(scenarios, xaxt="n")	
@@ -39,7 +26,7 @@ pdf("figL.pdf", width=12, height=4)
 	bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
 	selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
 
-	subpanel("C")
+	subpanel("B")
 	
 dev.off()
 
