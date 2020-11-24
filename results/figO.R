@@ -2,7 +2,7 @@
 
 source("./common-fig.R")
 
-scenarios <- c("default","nomut","smallsel","strongsel")
+scenarios <- c("default","nomut","smallsel","strongsel","strongbot","largenet")
 
 y.factor.molec <- c('(""%*% 10^{-4})' = 10000)
 y.factor.expr  <- c('(""%*% 10^{-3})' = 1000)
@@ -17,7 +17,7 @@ ylim.fitness <- c(0, 1)
 ylim.molec   <- c(0, y.factor.molec*1.1e-4)
 ylim.expr    <- c(0, y.factor.expr*1e-3)
 
-pdf("figO.pdf", width=4*length(scenarios), height = 3*4)
+pdf("figO.pdf", width=2*length(scenarios), height = 2*4)
 
 layout(matrix(1:(4*length(scenarios)), ncol=length(scenarios), byrow=FALSE))
 par(mar=c(0.5, 0.5, 0.5, 0.5), oma=c(5, 4, 3, 0))
@@ -30,7 +30,7 @@ for (mysim in scenarios) {
 	selectionchange.plot(meansim.all[[mysim]], y=1, cex=1.5)
 	title(legname(mysim), xpd=NA, line=2)
 	
-	plot.fitness(mysim, ylim=ylim.fitness, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.fitness else "", xpd=if(firstcol) NA else FALSE)
+	plot.fitness(mysim, ylim=ylim.fitness, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.fitness else "", xpd=if(firstcol) NA else FALSE, lty=1)
 	bottleneck.plot(Ndyn.all[[mysim]], y=1, lwd=2)
 	selectionchange.plot(meansim.all[[mysim]], y=1, cex=1.5)	
 

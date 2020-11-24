@@ -83,14 +83,14 @@ plot.N <- function(mysim, ylab="Population size", xlab="Generations", ylim=c(0, 
 			col="blue")
 }
 
-plot.fitness <- function(mysims, ylab="Fitness", xlab="Generations", ylim=c(0,1), ...) {
+plot.fitness <- function(mysims, ylab="Fitness", xlab="Generations", ylim=c(0,1), lty=NULL, ...) {
 	gen <-  meansim.all[[mysims[[1]]]][,"Gen"]
 	
 	plot(NULL, xlab=xlab, ylab=ylab, xlim=c(first.gen, max(gen)), ylim=ylim, ...)
 
 	for (mysim in mysims) {
 		mfit <- meansim.all[[mysim]][,"MFit"]
-		lines(gen, mfit, lty=lty.sce[mysim])
+		lines(gen, mfit, lty=if(is.null(lty)) lty.sce[mysim] else lty)
 	}
 }
 
