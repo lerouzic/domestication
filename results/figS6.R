@@ -13,7 +13,7 @@ ylab.molec   <- parse(text=paste0('"', "Molecular variance", ' "*', names(y.fact
 ylab.expr    <- parse(text=paste0('"', "Expression variance", ' "*', names(y.factor.expr)))
 
 ylim.N       <- c(0, 22000)
-ylim.fitness <- c(0, 1)
+ylim.fitness <- c(1e-3, 1)
 ylim.molec   <- c(0, y.factor.molec*1.1e-4)
 ylim.expr    <- c(0, y.factor.expr*1e-3)
 
@@ -30,7 +30,7 @@ for (mysim in scenarios) {
 	selectionchange.plot(meansim.all[[mysim]], y=1, cex=1.5)
 	title(legname(mysim), xpd=NA, line=2)
 	
-	plot.fitness(mysim, ylim=ylim.fitness, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.fitness else "", xpd=if(firstcol) NA else FALSE, lty=1)
+	plot.fitness(mysim, ylim=ylim.fitness, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.fitness else "", xpd=if(firstcol) NA else FALSE, lty=1, log="y")
 	bottleneck.plot(Ndyn.all[[mysim]], y=1, lwd=2)
 	selectionchange.plot(meansim.all[[mysim]], y=1, cex=1.5)	
 

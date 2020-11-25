@@ -8,7 +8,7 @@ source("../src/analysis_networks.R")
 
 scenarios <- c("default", "nobot", "noselc")
 
-pdf("figE.pdf", width=panel.width, height=panel.height)
+pdf("figS4A.pdf", width=panel.width, height=panel.height)
 	par(mar=mar.notitle)
 
 	plot.nconn(scenarios, xaxt="n")
