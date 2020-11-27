@@ -187,7 +187,7 @@ plot.nconn <- function(mysims, ylim=NULL, xlab="Generation", ylab="Nb connection
 	
 	plot(NULL, 
 		xlim=c(first.gen, max(as.numeric(names(nconn.all[[1]])))), 
-		ylim=c(0, max(unlist(nconn.all))), 
+		ylim=if(is.null(ylim)) c(0, max(unlist(nconn.all))) else ylim, 
 		xlab=xlab, ylab=ylab, ...)
 	for (mysim in mysims) {
 		lines(as.numeric(names(nconn.all[[mysim]])),  nconn.all[[mysim]],  col=col.sce[mysim],  lty=lty.sce[mysim])
