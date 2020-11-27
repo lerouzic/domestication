@@ -1,7 +1,6 @@
 
 source("./common-par.R")
 
-source("../src/cache.R")
 source("../src/analysis_tools.R")
 source("../src/analysis_networks.R")
 
