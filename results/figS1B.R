@@ -9,7 +9,7 @@ scenarios <- c("default", "nobot", "noselc")
 pdf("figS1B.pdf", width=panel.width, height=panel.height)
 	par(mar=mar.notitle)
 	
-	plot.fitness(scenarios, xaxt="n", xlab="")
+	plot.fitness(scenarios, xaxt="n", xlab="Generation")
 	
 	generation.axis()
 	bottleneck.plot(Ndyn.all[["default"]], y=1, lwd=2)

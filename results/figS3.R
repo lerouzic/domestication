@@ -38,7 +38,7 @@ pdf("figS3.pdf", width=1.5*panel.width, height=1.5*panel.height)
 	
 	### Panel C: no selection change #######################################
 	
-	plot.var.gene("noselc", what="expression", ylim=ylim, ylab=ylab, y.factor=y.factor, xlab="", xaxt="n", xpd=NA)
+	plot.var.gene("noselc", what="expression", ylim=ylim, ylab=ylab, y.factor=y.factor, xlab="Generation", xaxt="n", xpd=NA)
 	generation.axis()
 	bottleneck.plot(Ndyn.all[["noselc"]], y=0, lwd=2)
 	
@@ -46,7 +46,7 @@ pdf("figS3.pdf", width=1.5*panel.width, height=1.5*panel.height)
 	
 	### Panel D: no selection ##############################################
 	
-	plot.var.gene("nosel", what="expression", ylim=ylim, ylab="", y.factor=y.factor, xlab="", xaxt="n", yaxt="n", xpd=NA)
+	plot.var.gene("nosel", what="expression", ylim=ylim, ylab="", y.factor=y.factor, xlab="Generation", xaxt="n", yaxt="n", xpd=NA)
 	generation.axis()
 	bottleneck.plot(Ndyn.all[["nosel"]], y=0, lwd=2)
 	subpanel("D")

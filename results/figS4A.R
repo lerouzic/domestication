@@ -11,7 +11,7 @@ scenarios <- c("default", "nobot", "noselc")
 pdf("figS4A.pdf", width=panel.width, height=panel.height)
 	par(mar=mar.notitle)
 
-	plot.nconn(scenarios, xaxt="n")
+	plot.nconn(scenarios, xaxt="n", ylim=c(40,60))
 	
 	generation.axis()
 	bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
