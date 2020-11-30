@@ -4,7 +4,7 @@ source("./common-par.R")
 source("../src/analysis_tools.R")
 source("../src/analysis_networks.R")
 
-cor2dist <- function(r) as.dist(sqrt(2*(1-r)))
+cor2dist <- function(r) as.dist(sqrt(2*abs(1-r)))
 covtransf <- function(x) cor2dist(cov2cor(x))
 
 

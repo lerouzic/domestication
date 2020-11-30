@@ -160,7 +160,7 @@ plot.var.gene <- function(mysim, what=c("molecular", "expression")[1], ylim=NULL
 
 
 # Reaction norm, several simulations possible
-plot.norm <- function(mysims, ylim=c(0, 1.2), xlab="Generation", ylab="|Reaction norm|", ...) {
+plot.norm <- function(mysims, ylim=c(0, 1.2), xlab="Generation", ylab="|Reaction norm|", lty=NULL, ...) {
 	gen <-  as.numeric(meansim.all[[mysims[1]]][,"Gen"])
 	
 	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
@@ -168,18 +168,18 @@ plot.norm <- function(mysims, ylim=c(0, 1.2), xlab="Generation", ylab="|Reaction
 	for (mysim in mysims) {
 		mean.norm <-  mean.norm.cache(outdir.all[[mysim]], FUN.to.apply=abs, sliding=TRUE, window.size=window.norm, mc.cores=mc.cores)
 
-		yy.pp <- rowMeans(mean.norm[,selpattern.all[[mysim]]=="pp"])
-		yy.ps <- rowMeans(mean.norm[,selpattern.all[[mysim]]=="ps"])
-		yy.pn <- rowMeans(mean.norm[,selpattern.all[[mysim]]=="pn"])
+		yy.pp <- rowMeans(mean.norm[,selpattern.all[[mysim]]=="pp",drop=FALSE])
+		yy.ps <- rowMeans(mean.norm[,selpattern.all[[mysim]]=="ps",drop=FALSE])
+		yy.pn <- rowMeans(mean.norm[,selpattern.all[[mysim]]=="pn",drop=FALSE])
 		
-		lines(as.numeric(rownames(mean.norm)), yy.pp, col=col.sel["p"], lty=lty.sce[mysim])
-		lines(as.numeric(rownames(mean.norm)), yy.ps, col=col.sel["s"], lty=lty.sce[mysim])
-		lines(as.numeric(rownames(mean.norm)), yy.pn, col=col.sel["n"], lty=lty.sce[mysim])
+		lines(as.numeric(rownames(mean.norm)), yy.pp, col=col.sel["p"], lty=if(is.null(lty)) lty.sce[mysim] else lty)
+		lines(as.numeric(rownames(mean.norm)), yy.ps, col=col.sel["s"], lty=if(is.null(lty)) lty.sce[mysim] else lty)
+		lines(as.numeric(rownames(mean.norm)), yy.pn, col=col.sel["n"], lty=if(is.null(lty)) lty.sce[mysim] else lty)
 	}
 }
 
 # Plots the dynamics of the number of connections. 
-plot.nconn <- function(mysims, ylim=NULL, xlab="Generation", ylab="Nb connections", ...) {
+plot.nconn <- function(mysims, ylim=NULL, xlab="Generation", ylab="Nb connections", lty=NULL, col=NULL, ...) {
 	nconn.all <- sapply(mysims, function(mysim) {
 		mean.connect  <- mean.connect.cache(outdir.all[[mysim]],  mc.cores=mc.cores)
 		mov.avg(mean.connect,  as.numeric(names(mean.connect)),  size=window.avg, min.gen=0)
@@ -190,7 +190,7 @@ plot.nconn <- function(mysims, ylim=NULL, xlab="Generation", ylab="Nb connection
 		ylim=if(is.null(ylim)) c(0, max(unlist(nconn.all))) else ylim, 
 		xlab=xlab, ylab=ylab, ...)
 	for (mysim in mysims) {
-		lines(as.numeric(names(nconn.all[[mysim]])),  nconn.all[[mysim]],  col=col.sce[mysim],  lty=lty.sce[mysim])
+		lines(as.numeric(names(nconn.all[[mysim]])),  nconn.all[[mysim]],  col=if(is.null(col)) col.sce[mysim] else col, lty=if(is.null(lty)) lty.sce[mysim] else lty)
 	}
 }
 
@@ -244,7 +244,7 @@ plot.inout.change <- function(mysim, mysim.ref=NULL, regimes=c("s","p","n"), xla
 		pch=1, col=col.sel[regimes], cex=2)
 }
 
-plot.inout.gainloss <- function(mysims, deltaG=NA, xlab="Generation", ylab="Nb connections", ylim=NULL, ...) {
+plot.inout.gainloss <- function(mysims, deltaG=NA, xlab="Generation", ylab="Nb connections", ylim=NULL, lty=NULL, ...) {
 	
 	iogl <- sapply(mysims, function(mysim) {
 		out.files  <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]],  full.names=TRUE, recursive=FALSE), full.names=TRUE)
@@ -258,8 +258,8 @@ plot.inout.gainloss <- function(mysims, deltaG=NA, xlab="Generation", ylab="Nb c
 	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 	
 	for (mysim in mysims) {
-		lines(gen, iogl[[mysim]][,"gain"], lty=lty.sce[mysim], col=col.gl["Gain"])
-		lines(gen, iogl[[mysim]][,"loss"], lty=lty.sce[mysim], col=col.gl["Loss"])		
+		lines(gen, iogl[[mysim]][,"gain"], lty=if(is.null(lty)) lty.sce[mysim] else lty, col=col.gl["Gain"])
+		lines(gen, iogl[[mysim]][,"loss"], lty=if(is.null(lty)) lty.sce[mysim] else lty, col=col.gl["Loss"])		
 	}	
 }
 
@@ -435,7 +435,7 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus),
 }
 
 
-plot.Gdiff <- function(mysims, deltaG=NA, xlab="Generation", ylab="Change in G matrix", ylim=c(0,1), ...) {
+plot.Gdiff <- function(mysims, deltaG=NA, xlab="Generation", ylab="Change in G matrix", ylim=c(0,1), col=NULL, lty=NULL, ...) {
 	gd <- sapply(mysims, function(mysim) {
 		out.files  <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]],  full.names=TRUE, recursive=FALSE), full.names=TRUE)
 		mean.Gdiff.dyn.cache(out.files, deltaG, mc.cores=mc.cores)
@@ -446,7 +446,7 @@ plot.Gdiff <- function(mysims, deltaG=NA, xlab="Generation", ylab="Change in G m
 	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 	
 	for (mysim in mysims) {
-		lines(gen, gd[[mysim]], lty=lty.sce[mysim], col=col.sce[mysim])
+		lines(gen, gd[[mysim]], lty=if(is.null(lty)) lty.sce[mysim] else lty, col=if(is.null(col)) col.sce[mysim] else col)
 	}	
 }
 

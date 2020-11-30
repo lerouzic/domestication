@@ -228,11 +228,13 @@ mean.delta.inout.dyn.cache <- function(files, deltaG=NA, mc.cores=1) {
 
 delta.Gdiff <- function(G, G.ref) {
 	# A bit of cleaning is necessary : first generation and "environmental" gene can mess up the vcov
-	if (any(is.na(G)) || any(is.na(G.ref))) return(NA)
+	if (any(!is.finite(G)) || any(!is.finite(G.ref))) return(NA)
 	diag(G)[diag(G) < 1e-8] <- 1e-8
 	diag(G.ref)[diag(G.ref) < 1e-8] <- 1e-8
 	# covtransf is defined in common-precalc.R, it turns vcov into distance matrices
-	1 - mantel.rtest(covtransf(G), covtransf(G.ref), nrepet=1)$obs
+	mt <- try(mantel.rtest(covtransf(G), covtransf(G.ref), nrepet=1)$obs)
+	if (class(mt) == "try-error") mt <- 1
+	1 - mt
 }
 
 delta.Gdiff.dyn <- function(out.table, deltaG=NA, mc.cores=1) {
@@ -251,10 +253,11 @@ mean.Gdiff.dyn <- function(files, deltaG=NA, mc.cores=1) {
 		tt <- read.table(ff, header=TRUE)
 		delta.Gdiff.dyn(tt, deltaG, mc.cores=1)
 	}, mc.cores=mc.cores)
+
 	ansl <- sapply(ans, length)
 	ans <- ans[ansl == max(ansl)]
 	aa <- do.call(rbind, ans)
-	colMeans(aa)	
+	colMeans(aa, na.rm=TRUE)
 }
 
 mean.Gdiff.dyn.cache <- function(files, deltaG=NA, mc.cores=1) {
