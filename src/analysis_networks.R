@@ -81,7 +81,6 @@ Wlist.table <- function(out.table) {
 Wlist.files <- function(files) {
 	ans <- mclapply(files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
-		browser()
 		Wlist.table(tt)
 		rm(tt); gc()
 	}, mc.cores=1)	
@@ -95,6 +94,7 @@ Ggen.files <- function(files, gen, mc.cores=1) {
 		rm(tt); gc()
 		cc <- matrix(unlist(cc), ncol=sqrt(length(cc)), byrow=TRUE)
 		diag(cc)[diag(cc) < 1e-6] <- 1
+		if (any(is.na(cc)) || ncol(x) != nrow(x)) cc <- NA
 		cc
 	}, mc.cores=1)
 	ans[!sapply(ans, function(x) length(x) == 1 && is.na(x))]
@@ -225,6 +225,37 @@ mean.delta.inout.dyn <- function(files, deltaG=NA, mc.cores=1) {
 mean.delta.inout.dyn.cache <- function(files, deltaG=NA, mc.cores=1) {
 	cache.fun(mean.delta.inout.dyn, files=files, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-dinout")
 }
+
+
+delta.Wdiff <- function(W, W.ref) {
+	# Euclidian distance line by line
+	sqrt(rowSums((W-W.ref)^2))
+}
+
+delta.Wdiff.dyn <- function(out.table, deltaG=NA, mc.cores=1) {
+	gen <- out.table[,"Gen"]
+	seqgen <- seq(1, length(gen), length.out=min(length(gen), 1+gen[length(gen)] %/% deltaG))
+	listW <- Wlist.table(out.table[seqgen,])
+	
+	ans <- mclapply(1:(length(listW)-1), function(i) delta.Wdiff(listW[[i+1]], listW[[i]]), mc.cores=mc.cores)
+	names(ans) <- as.character(gen[seqgen])[-1]
+	do.call(rbind, ans)		
+}
+
+mean.Wdiff.dyn <- function(files, deltaG=NA, mc.cores=1) {
+	ans <- mclapply(files, function(ff) {
+		tt <- read.table(ff, header=TRUE)
+		delta.Wdiff.dyn(tt, deltaG, mc.cores=1)
+	}, mc.cores=mc.cores)
+	
+	arr <- do.call(abind, c(ans, list(along=3)))
+	rowMeans(arr, dims=2)
+}
+
+mean.Wdiff.dyn.cache <- function(files, deltaG=NA, mc.cores=1) {
+	cache.fun(mean.Wdiff.dyn, files=files, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-Wdiff")
+}
+
 
 delta.Gdiff <- function(G, G.ref) {
 	# A bit of cleaning is necessary : first generation and "environmental" gene can mess up the vcov

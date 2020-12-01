@@ -159,6 +159,36 @@ plot.var.gene <- function(mysim, what=c("molecular", "expression")[1], ylim=NULL
 }
 
 
+plot.evol.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Evolutionary change", ...) {
+	
+	out.files.mysim <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]], full.names=TRUE, recursive=FALSE), full.names=TRUE)
+	ev.genes <- mean.Wdiff.dyn.cache(out.files.mysim, deltaG, mc.cores=mc.cores)[,-1]
+
+	gen <- as.numeric(rownames(ev.genes))
+	sel.change.gen <- try(selectionchange.detect(meansim.all[[mysim]]), silent=TRUE)
+	if (class(sel.change.gen) == "try-error") sel.change.gen <- max(gen)
+	sel.pattern <- selpattern.all[[mysim]]
+	sel.pattern[sel.pattern == "cc"] <- "ss" # No need to distinguish constant and stable?
+	sel.before <- substr(sel.pattern, 1, 1)
+	
+	if(is.null(ylim)) ylim <- c(0, max(ev.genes))
+	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	
+	for (cc in unique(sel.before)) {
+		yy <- (rowMeans(ev.genes[,sel.before==cc,drop=FALSE]))[gen <= sel.change.gen]
+		my.yy <- mov.avg(yy, gen[gen <= sel.change.gen], size=window.avg, min.gen=0)
+		lines(as.numeric(names(my.yy)), my.yy, lty=1, col=col.sel[cc])
+	}
+	if (sel.change.gen < max(gen))
+		for (cc in unique(sel.pattern)) {
+			yy <- (rowMeans(ev.genes[,sel.pattern==cc,drop=FALSE]))[gen >= sel.change.gen]
+			my.yy <- mov.avg(yy, gen[gen >= sel.change.gen], size=window.avg, min.gen=0)
+			mysel.before <- substr(cc, 1, 1)
+			mysel.after  <- substr(cc, 2, 2)
+			lines(as.numeric(names(my.yy)), my.yy, lty=lty.sel[mysel.after], col=col.sel[mysel.before])
+		}
+}
+
 # Reaction norm, several simulations possible
 plot.norm <- function(mysims, ylim=c(0, 1.2), xlab="Generation", ylab="|Reaction norm|", lty=NULL, ...) {
 	gen <-  as.numeric(meansim.all[[mysims[1]]][,"Gen"])
