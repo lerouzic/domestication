@@ -4,7 +4,8 @@
 
 source("./common-fig.R")
 
-pdf("figS.pdf", width=panel.width, height=panel.height)
+pdf("figS.pdf", width=3*panel.width, height=panel.height)
+	layout(t(1:3))
 	par(mar=mar.notitle)
 	
 	ylab <- "Molecular variance"
@@ -16,6 +17,18 @@ pdf("figS.pdf", width=panel.width, height=panel.height)
 	
 	bottleneck.plot(Ndyn.all[["default"]], y=0.95*ylim[2], lwd=2)
 	selectionchange.plot(meansim.all[["default"]], y=0.95*ylim[2], cex=1.5)
+	generation.axis()
+
+
+	plot.var.neutral.gene("nobot", xaxt="n", ylab=ylab, ylim=ylim, y.factor=y.factor)
+	
+	selectionchange.plot(meansim.all[["nobot"]], y=0.95*ylim[2], cex=1.5)
+	generation.axis()
+
+
+	plot.var.neutral.gene("noselc", xaxt="n", ylab=ylab, ylim=ylim, y.factor=y.factor)
+	
+	bottleneck.plot(Ndyn.all[["noselc"]], y=0.95*ylim[2], lwd=2)
 	generation.axis()
 
 dev.off()
