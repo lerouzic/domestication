@@ -21,8 +21,10 @@ layout(matrix(1:(4*length(scenarios)), ncol=length(scenarios), byrow=FALSE))
 par(mar=c(0.5, 0.5, 0.5, 0.5), oma=c(5, 4, 3, 0))
 
 for (mysim in scenarios) {
+
   firstcol <- mysim == scenarios[1]
-  
+  if (mysim == "largenet") mc.cores <- 1
+
   plot.norm(mysim,ylim=ylim.norm,xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.norm else "", xpd=if(firstcol) NA else FALSE, lty=1)
   bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
   selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
