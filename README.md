@@ -4,6 +4,22 @@ Gene network &amp; Domestication project, involving Ewen Burban, Maud Tenaillon,
 
 This directory contains all the material to run and analyse the simulations.
 
+Structure of the sub-directories:
+* **param**: parameter files for the simulations
+* **src**  : R helper source files for various calculations + symbolic link to the C++ simulation software
+* **results**: R scripts for figures
+* **cache**: cache directory, contains the simulation results (cache/sim*) + results of heavy calculations when generating figures (cache/Rcache*)
+
+Dependencies 
+* The simulation program Simul_Prog and its dependencies
+* A recent version of R (> 3.4)
+* The following R libraries:
+** parallel
+** digest
+** ade4
+** igraph
+** Rcpp
+** inline
 
 ## Launching simulations
 
@@ -46,14 +62,6 @@ module load parallel
 parallel --shuf --joblog joblog2.log -j $SLURM_CPUS_PER_TASK --delay 20 -a simAll_2.sh
 ```
 
-Current simulations:
-* simAll_1 -> Taranis  (done)
-* simAll_2 -> IFBcore  (done)
-* simAll_3 -> Toutatis (done)
-* simAll_4 -> IFBcore  (done)
-* simAll_5 -> IFBcore  (done)
-* simAll_6 -> IFBCore  (done)
-* simAll_7 -> IFBcore  (done)
-* simAll_8 -> IFBCore  (done)
-* simAll_9 -> Toutatis (done)
-* simAll_10-> Taranis  (ongoing)
+## Generating figures
+
+Each figure has an associated R script : figX.R, which generates figX.pdf. Run them individually (`Rscript figX.R`) or all at once (`for i in fig*.R; do Rscript $i; done`. Running figures the first time should be slow, and much faster the next time because of the storage of intermediate results in the cache directory. 
