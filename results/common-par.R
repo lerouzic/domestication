@@ -39,7 +39,7 @@ col.algo <- c( # modularity algorithms
 	labelprop="lightblue")
 	
 col.gl <- c(Gain="orange", Loss="darkgray")
-col.cor <- c("red", "white", "green") # for correlations -1, 0, 1
+col.cor <- c("red", "white", "black") # for correlations -1, 0, 1
 
 # Consistent caption text
 legname <- function(nn) {
