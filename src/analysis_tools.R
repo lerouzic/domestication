@@ -186,6 +186,31 @@ molec.variation <- function(out.table) {
 	t(apply(out.table[,allvar], 1, function(x) { rowMeans(matrix(x, ncol=n.genes, byrow=TRUE)) }))
 }
 
+molec.variation.neutral <- function(out.table, expr.thresh) {
+	allvar <- colnames(out.table)[grep(colnames(out.table), pattern="VarAll")]
+	avg.expr <- colMeans(out.table[,grepl(colnames(out.table), pattern="MPhen")])[-1]
+	target.genes <- 1 + which(avg.expr <= expr.thresh)
+	if(length(target.genes) == 0) return(NULL)
+	ans <- t(apply(out.table[,allvar], 1, function(vv) { mv <- matrix(vv, byrow=TRUE, ncol=sqrt(length(vv))); rowMeans(mv[,target.genes,drop=FALSE]) }))
+	rownames(ans) <- as.character(out.table[,"Gen"])
+	ans
+}
+
+molec.variation.neutral.files <- function(files, expr.thresh, mc.cores=1) {
+	ans <- mclapply(files, function(ff) {
+			tt <- read.table(ff, header=TRUE)
+			mvn <- molec.variation.neutral(tt, expr.thresh)
+			rm(tt); gc()
+			mvn
+		}, mc.cores=mc.cores)
+	arr <- do.call(abind, c(ans, list(along=3)))
+	rowMeans(arr, dims=2)
+}
+
+molec.variation.neutral.files.cache <- function(files, expr.thresh, mc.cores=1) {
+	cache.fun(molec.variation.neutral.files, files=files, expr.thresh=expr.thresh, mc.cores=mc.cores, cache.subdir="Rcache-vneutral")
+}
+
 # Reaction norm (over a given time window)
 reaction.norm <- function(partial.out.table, signal.gene="MPhen1") {
 	.reac.norm <- function(x, signal) coef(lm(x ~ signal))[2]
