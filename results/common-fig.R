@@ -154,7 +154,7 @@ plot.var.gene <- function(mysim, what=c("molecular", "expression")[1], ylim=NULL
 			my.yy <- mov.avg(yy, gen[gen > sel.change.gen], size=window.avg, min.gen=0)
 			mysel.before <- substr(cc, 1, 1)
 			mysel.after  <- substr(cc, 2, 2)
-			lines(as.numeric(names(my.yy)), my.yy, lty=lty.sel[mysel.before], col=col.sel[mysel.after])
+			lines(as.numeric(names(my.yy)), my.yy, lty=lty.sel[mysel.after], col=col.sel[mysel.before])
 		}
 }
 
