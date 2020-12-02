@@ -196,8 +196,10 @@ molec.variation.neutral <- function(out.table, expr.thresh) {
 	ans
 }
 
-molec.variation.neutral.files <- function(files, expr.thresh, mc.cores=1) {
-	ans <- mclapply(files, function(ff) {
+molec.variation.neutral.files <- function(out.dir, expr.thresh, mc.cores=1) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	ans <- mclapply(out.files, function(ff) {
 			tt <- read.table(ff, header=TRUE)
 			mvn <- molec.variation.neutral(tt, expr.thresh)
 			rm(tt); gc()
@@ -207,8 +209,8 @@ molec.variation.neutral.files <- function(files, expr.thresh, mc.cores=1) {
 	rowMeans(arr, dims=2)
 }
 
-molec.variation.neutral.files.cache <- function(files, expr.thresh, mc.cores=1) {
-	cache.fun(molec.variation.neutral.files, files=files, expr.thresh=expr.thresh, mc.cores=mc.cores, cache.subdir="Rcache-vneutral")
+molec.variation.neutral.files.cache <- function(out.dir, expr.thresh, mc.cores=1) {
+	cache.fun(molec.variation.neutral.files, out.dir=out.dir, expr.thresh=expr.thresh, mc.cores=mc.cores, cache.subdir="Rcache-vneutral")
 }
 
 # Reaction norm (over a given time window)

@@ -23,6 +23,10 @@ source("./common-precalc.R")
 ### plot.var.gene(x, what)  :
 #        dynamics of variance for simulation x, one color per gene group
 #        what can be "molecular" or "expression"
+### plot.var.neutral(v):
+#        dynamics of the molecular variance, focusing on quasi-neutral sites
+### plot.var.neutral.gene(x):
+#        the same, focusing on a single simulation and splitting according to gene selection regime
 ### plot.norm(v)      :
 #        dynamics of the absolute value of reaction norms for plastic genes for simulations v
 ### plot.nconn(v)     :
@@ -158,10 +162,25 @@ plot.var.gene <- function(mysim, what=c("molecular", "expression")[1], ylim=NULL
 		}
 }
 
+
+plot.var.neutral <- function(mysims,  ylim=NULL, xlab="Generation", ylab="Molecular variance", expr.thresh=0.1, y.factor=1, ...) {
+	
+	for (mysim in mysims) {
+		var.data <- molec.variation.neutral.files.cache(outdir.all[[mysim]], expr.thresh=expr.thresh, mc.cores=mc.cores)[,-1]
+		gen <- as.numeric(rownames(var.data))
+		
+		if (mysim == mysims[1]) { # not very clean
+			if (is.null(ylim)) ylim <- c(0, y.factor*max(unlist(var.data)))
+			plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
+		}
+		lines(gen, y.factor*rowMeans(var.data), lty=lty.sce[mysim], col=col.sce[mysim])
+	}
+}
+
+
 plot.var.neutral.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Molecular variance", expr.thresh=0.1, y.factor=1, ...) {
 
-	out.files.mysim <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]], full.names=TRUE, recursive=FALSE), full.names=TRUE)
-	var.data <- molec.variation.neutral.files.cache(out.files.mysim, expr.thresh=expr.thresh, mc.cores=mc.cores)[,-1]
+	var.data <- molec.variation.neutral.files.cache(outdir.all[[mysim]], expr.thresh=expr.thresh, mc.cores=mc.cores)[,-1]
 	
 	gen <- as.numeric(rownames(var.data))
 	sel.change.gen <- try(selectionchange.detect(meansim.all[[mysim]]), silent=TRUE)
@@ -188,7 +207,22 @@ plot.var.neutral.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Mol
 			lines(as.numeric(names(my.yy)), my.yy, lty=lty.sel[mysel.after], col=col.sel[mysel.before])
 		}
 }
+
+
+plot.evol <- function(mysims, ylim=NULL, xlab="Generation", ylab="Evolutionary change", ...) {
 	
+	gen <-  as.numeric(meansim.all[[mysims[1]]][,"Gen"]) # Just for the x scaling
+	
+	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	
+	for (mysim in mysims) {
+		out.files.mysim <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]], full.names=TRUE, recursive=FALSE), full.names=TRUE)
+		ev.genes <- mean.Wdiff.dyn.cache(out.files.mysim, deltaG, mc.cores=mc.cores)[,-1]
+		
+		lines(as.numeric(rownames(ev.genes)), rowMeans(ev.genes), lty=lty.sce[mysim], col=col.sce[mysim])
+	}
+}
+
 
 plot.evol.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Evolutionary change", ...) {
 	
