@@ -17,8 +17,10 @@ pdf("figS.pdf", width=panel.width, height=panel.height)
 	
 	plot.var.neutral(scenarios, xaxt="n", ylab=ylab, ylim=ylim, y.factor=y.factor, expr.thresh=expr.thresh)
 	
-	bottleneck.plot(Ndyn.all[["default"]], y=0.95*ylim[2], lwd=2)
-	selectionchange.plot(meansim.all[["default"]], y=0.95*ylim[2], cex=1.5)
+	bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
+	selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
 	generation.axis()
+
+	legend("topright", lty=lty.sce[scenarios], col=col.sce[scenarios], legend=legname(scenarios), bty="n", cex=cex.legend)
 
 dev.off()
