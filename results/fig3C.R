@@ -8,11 +8,10 @@ source("../src/analysis_networks.R")
 
 mysim <- "default"
 
-out.files <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]], full.names=TRUE, recursive=FALSE), full.names=TRUE)
 genselchange <- selectionchange.detect(meansim.all[[mysim]])
 
-Wlist.before.dom <- Wgen.files.cache(out.files, gen=genselchange)
-Wlist.after.dom  <- Wgen.files.cache(out.files, gen=meansim.all[[mysim]][nrow(meansim.all[[mysim]]),"Gen"])
+Wlist.before.dom <- Wgen.files.cache(outdir.all[[mysim]], gen=genselchange)
+Wlist.after.dom  <- Wgen.files.cache(outdir.all[[mysim]], gen=meansim.all[[mysim]][nrow(meansim.all[[mysim]]),"Gen"])
 
 segreg <- selectionregime.detect(meansim.all[[mysim]])
 sel.before.dom <- sapply(strsplit(segreg, ""), "[",1)

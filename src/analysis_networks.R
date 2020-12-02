@@ -52,8 +52,10 @@ model.M2 <- function(W, S0=rep(a, nrow(W)), a=0.2, env=0.5, steps=20, measure=4,
 
 # Extraction of W and G matrices from files
 
-Wgen.files <- function(files, gen) {
-	ans <- mclapply(files, function(ff) {
+Wgen.files <- function(out.dir, gen) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		if (!gen %in% tt[,"Gen"]) return(NULL)
 		W <- tt[tt[,"Gen"] == gen, grepl(colnames(tt), pattern="MeanAll")]
@@ -63,8 +65,8 @@ Wgen.files <- function(files, gen) {
 	ans[!sapply(ans, function(x) length(x) == 1 && is.na(x))]
 }
 
-Wgen.files.cache <- function(files, gen) {
-	cache.fun(Wgen.files, files=files, gen=gen, cache.subdir="Rcache-Wgen")
+Wgen.files.cache <- function(out.dir, gen) {
+	cache.fun(Wgen.files, out.dir=out.dir, gen=gen, cache.subdir="Rcache-Wgen")
 }
 
 Wlist.table <- function(out.table) {
@@ -78,16 +80,20 @@ Wlist.table <- function(out.table) {
 	ans
 }
 
-Wlist.files <- function(files) {
-	ans <- mclapply(files, function(ff) {
+Wlist.files <- function(out.dir) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		Wlist.table(tt)
 		rm(tt); gc()
-	}, mc.cores=1)	
+	}, mc.cores=1)
 }
 
-Ggen.files <- function(files, gen, mc.cores=1) {
-	ans <- mclapply(files, function(ff) {
+Ggen.files <- function(out.dir, gen, mc.cores=1) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		if (!gen %in% tt[,"Gen"]) return(NULL)
 		cc <- tt[tt[,"Gen"] == gen, grepl(colnames(tt), pattern="CovPhen")]
@@ -100,8 +106,8 @@ Ggen.files <- function(files, gen, mc.cores=1) {
 	ans[!sapply(ans, function(x) length(x) == 1 && is.na(x))]
 }
 
-Ggen.files.cache <- function(files, gen, mc.cores=1) {
-	cache.fun(Ggen.files, files=files, gen=gen, mc.cores=mc.cores, cache.subdir="Rcache-Ggen")
+Ggen.files.cache <- function(out.dir, gen, mc.cores=1) {
+	cache.fun(Ggen.files, out.dir=out.dir, gen=gen, mc.cores=mc.cores, cache.subdir="Rcache-Ggen")
 }
 
 Glist.table <- function(out.table) {
@@ -115,12 +121,14 @@ Glist.table <- function(out.table) {
 	ans
 }
 
-
-Glist.files <- function(files, mc.cores=1) {
-	ans <- mclapply(files, function(ff) {
+Glist.files <- function(out.dir) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
-		Glist.table(tt)
+		gl <- Glist.table(tt)
 		rm(tt); gc()
+		gl
 	}, mc.cores=mc.cores)	
 }
 
@@ -175,8 +183,10 @@ inout.connections <- function(W, ...) {
 }
 
 # in/out connections at a specific generation
-inout.gen <- function(files, gen, mc.cores=1) {
-	ans <- mclapply(files, function(ff) {
+inout.gen <- function(out.dir, gen, mc.cores=1) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		if (!gen %in% tt$Gen) return(NA)
 		W <- tt[tt[,"Gen"] == gen, grepl(colnames(tt), pattern="MeanAll")]
@@ -187,8 +197,8 @@ inout.gen <- function(files, gen, mc.cores=1) {
 	ans[!sapply(ans, function(x) length(x) < 2 || is.na(x))]
 }
 
-inout.gen.cache <- function(files, gen, mc.cores=1) {
-	cache.fun(inout.gen,files=files, gen=gen, mc.cores=mc.cores, cache.subdir="Rcache-inout")
+inout.gen.cache <- function(out.dir, gen, mc.cores=1) {
+	cache.fun(inout.gen, out.dir=out.dir, gen=gen, mc.cores=mc.cores, cache.subdir="Rcache-inout")
 }
 
 delta.inout <- function(W, Wref) {
@@ -210,8 +220,10 @@ delta.inout.dyn <- function(out.table, deltaG=1, mc.cores=1) {
 	ans
 }
 
-mean.delta.inout.dyn <- function(files, deltaG=NA, mc.cores=1) {
-	ans <- mclapply(files, function(ff) {
+mean.delta.inout.dyn <- function(out.dir, deltaG=NA, mc.cores=1) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		delta.inout.dyn(tt, deltaG, mc.cores=1)
 	}, mc.cores=mc.cores)
@@ -221,8 +233,8 @@ mean.delta.inout.dyn <- function(files, deltaG=NA, mc.cores=1) {
 	rowMeans(aa, dims=2)
 }
 
-mean.delta.inout.dyn.cache <- function(files, deltaG=NA, mc.cores=1) {
-	cache.fun(mean.delta.inout.dyn, files=files, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-dinout")
+mean.delta.inout.dyn.cache <- function(out.dir, deltaG=NA, mc.cores=1) {
+	cache.fun(mean.delta.inout.dyn, out.dir=out.dir, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-dinout")
 }
 
 
@@ -241,8 +253,10 @@ delta.Wdiff.dyn <- function(out.table, deltaG=NA, mc.cores=1) {
 	do.call(rbind, ans)		
 }
 
-mean.Wdiff.dyn <- function(files, deltaG=NA, mc.cores=1) {
-	ans <- mclapply(files, function(ff) {
+mean.Wdiff.dyn <- function(out.dir, deltaG=NA, mc.cores=1) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		delta.Wdiff.dyn(tt, deltaG, mc.cores=1)
 	}, mc.cores=mc.cores)
@@ -251,8 +265,8 @@ mean.Wdiff.dyn <- function(files, deltaG=NA, mc.cores=1) {
 	rowMeans(arr, dims=2)
 }
 
-mean.Wdiff.dyn.cache <- function(files, deltaG=NA, mc.cores=1) {
-	cache.fun(mean.Wdiff.dyn, files=files, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-Wdiff")
+mean.Wdiff.dyn.cache <- function(out.dir, deltaG=NA, mc.cores=1) {
+	cache.fun(mean.Wdiff.dyn, out.dir=out.dir, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-Wdiff")
 }
 
 
@@ -278,8 +292,10 @@ delta.Gdiff.dyn <- function(out.table, deltaG=NA, mc.cores=1) {
 	ans	
 }
 
-mean.Gdiff.dyn <- function(files, deltaG=NA, mc.cores=1) {
-	ans <- mclapply(files, function(ff) {
+mean.Gdiff.dyn <- function(out.dir, deltaG=NA, mc.cores=1) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		delta.Gdiff.dyn(tt, deltaG, mc.cores=1)
 	}, mc.cores=mc.cores)
@@ -290,8 +306,8 @@ mean.Gdiff.dyn <- function(files, deltaG=NA, mc.cores=1) {
 	colMeans(aa, na.rm=TRUE)
 }
 
-mean.Gdiff.dyn.cache <- function(files, deltaG=NA, mc.cores=1) {
-	cache.fun(mean.Gdiff.dyn, files=files, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-Gdiff")
+mean.Gdiff.dyn.cache <- function(out.dir, deltaG=NA, mc.cores=1) {
+	cache.fun(mean.Gdiff.dyn, out.dir=out.dir, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-Gdiff")
 }
 
 Gcor.dyn <- function(out.table) {
@@ -340,19 +356,21 @@ propPC.dyn <- function(out.table, PC=1, mc.cores=1) {
 	aa
 }
 
-mean.propPC.dyn <- function(files, PC=1, mc.cores=1) {
-	ans <- mclapply(files, function(ff) {
+mean.propPC.dyn <- function(out.files, PC=1, mc.cores=1) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		propPC.dyn(tt, PC=PC, mc.cores=1)
 	}, mc.cores=mc.cores)
 	ansl <- sapply(ans, length)
 	ans <- ans[ansl == max(ansl)]
 	aa <- do.call(rbind, ans)
-	colMeans(aa)	
+	colMeans(aa)
 }
 
-mean.propPC.dyn.cache <- function(files, PC=1, mc.cores=1) {
-	cache.fun(mean.propPC.dyn, files=files, PC=PC, mc.cores=mc.cores, cache.subdir="Rcache-propPC")
+mean.propPC.dyn.cache <- function(out.dir, PC=1, mc.cores=1) {
+	cache.fun(mean.propPC.dyn, out.dir=out.dir, PC=PC, mc.cores=mc.cores, cache.subdir="Rcache-propPC")
 }
 
 erankG.dyn <- function(out.table, mc.cores=1) {
@@ -379,23 +397,21 @@ erankG.dyn <- function(out.table, mc.cores=1) {
 }
 
 
-mean.erankG.dyn <- function(files, mc.cores=1) {
-	ans <- mclapply(files, function(ff) {
+mean.erankG.dyn <- function(out.dir, mc.cores=1) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		erankG.dyn(tt, mc.cores=1)
 	}, mc.cores=mc.cores)
 	ansl <- sapply(ans, length)
 	ans <- ans[ansl == max(ansl)]
 	aa <- do.call(rbind, ans)
-	colMeans(aa)	
+	colMeans(aa)
 }
 
-mean.erankG.dyn.cache <- function(files, mc.cores=1) {
-	cache.fun(mean.erankG.dyn, files=files, mc.cores=mc.cores, cache.subdir="Rcache-erankG")
-}
-
-mean.propPC.dyn.cache <- function(files, PC=1, mc.cores=1) {
-	cache.fun(mean.propPC.dyn, files=files, PC=PC, mc.cores=mc.cores, cache.subdir="Rcache-propPC")
+mean.erankG.dyn.cache <- function(out.dir, mc.cores=1) {
+	cache.fun(mean.erankG.dyn, out.dir=out.dir, mc.cores=mc.cores, cache.subdir="Rcache-erankG")
 }
 
 
@@ -444,16 +460,19 @@ communities.dyn <- function(out.table, directed=FALSE, mc.cores=1) {
 	comm
 }
 
-communities.dyn.files <- function(files, directed=FALSE, mc.cores=1) {
-	 mclapply(files, function(ff) {
+communities.dyn.files <- function(out.dir, directed=FALSE, mc.cores=1) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	 mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		cc <- communities.dyn(tt, directed=directed, mc.cores=1)
+		rm(tt); gc()
 		return(cc)
 		}, mc.cores=mc.cores)
 }
 
-communities.dyn.files.cache <- function(files, directed=FALSE, mc.cores=1) {
-	cache.fun(communities.dyn.files, files=files, directed=directed, mc.cores=mc.cores, cache.subdir="Rcache-commdyn")
+communities.dyn.files.cache <- function(out.dir, directed=FALSE, mc.cores=1) {
+	cache.fun(communities.dyn.files, out.dir=out.dir, directed=directed, mc.cores=mc.cores, cache.subdir="Rcache-commdyn")
 }
 
 numconn.groups <- function(W, groups, ...) {

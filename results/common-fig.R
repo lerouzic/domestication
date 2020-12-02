@@ -216,8 +216,7 @@ plot.evol <- function(mysims, ylim=NULL, xlab="Generation", ylab="Evolutionary c
 	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 	
 	for (mysim in mysims) {
-		out.files.mysim <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]], full.names=TRUE, recursive=FALSE), full.names=TRUE)
-		ev.genes <- mean.Wdiff.dyn.cache(out.files.mysim, deltaG, mc.cores=mc.cores)[,-1]
+		ev.genes <- mean.Wdiff.dyn.cache(outdir.all[[mysim]], deltaG, mc.cores=mc.cores)[,-1]
 		
 		lines(as.numeric(rownames(ev.genes)), rowMeans(ev.genes), lty=lty.sce[mysim], col=col.sce[mysim])
 	}
@@ -226,8 +225,7 @@ plot.evol <- function(mysims, ylim=NULL, xlab="Generation", ylab="Evolutionary c
 
 plot.evol.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Evolutionary change", ...) {
 	
-	out.files.mysim <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]], full.names=TRUE, recursive=FALSE), full.names=TRUE)
-	ev.genes <- mean.Wdiff.dyn.cache(out.files.mysim, deltaG, mc.cores=mc.cores)[,-1]
+	ev.genes <- mean.Wdiff.dyn.cache(outdir.all[[mysim]], deltaG, mc.cores=mc.cores)[,-1]
 
 	gen <- as.numeric(rownames(ev.genes))
 	sel.change.gen <- try(selectionchange.detect(meansim.all[[mysim]]), silent=TRUE)
@@ -295,7 +293,6 @@ plot.inout.change <- function(mysim, mysim.ref=NULL, regimes=c("s","p","n"), xla
 	mean.inout <- function(x)
 		list(connect.in = rowMeans(sapply(x, "[[", "connect.in")), connect.out=rowMeans(sapply(x, "[[", "connect.out")))
 	
-	out.files.mysim <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]], full.names=TRUE, recursive=FALSE), full.names=TRUE)
 	genselchange <- selectionchange.detect(meansim.all[[mysim]])
 	
 	before.dom      <- inout.gen.cache(out.files.mysim, gen=genselchange, mc.cores=mc.cores)
@@ -305,8 +302,7 @@ plot.inout.change <- function(mysim, mysim.ref=NULL, regimes=c("s","p","n"), xla
 
 	mean.after.ref <- NULL
 	if (!is.null(mysim.ref)) {
-		out.files.ref <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim.ref]], full.names=TRUE, recursive=FALSE), full.names=TRUE)
-		mean.after.ref <- mean.inout(inout.gen.cache(out.files.ref, gen=meansim.all[[mysim.ref]][nrow(meansim.all[[mysim.ref]]),"Gen"], mc.cores=mc.cores))
+		mean.after.ref <- mean.inout(inout.gen.cache(outdir.all[[mysim.ref]], gen=meansim.all[[mysim.ref]][nrow(meansim.all[[mysim.ref]]),"Gen"], mc.cores=mc.cores))
 	}
 	
 	if (is.null(xlim)) 
@@ -342,8 +338,7 @@ plot.inout.change <- function(mysim, mysim.ref=NULL, regimes=c("s","p","n"), xla
 plot.inout.gainloss <- function(mysims, deltaG=NA, xlab="Generation", ylab="Nb connections", ylim=NULL, lty=NULL, ...) {
 	
 	iogl <- sapply(mysims, function(mysim) {
-		out.files  <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]],  full.names=TRUE, recursive=FALSE), full.names=TRUE)
-		fl <- mean.delta.inout.dyn.cache(out.files, deltaG, mc.cores=mc.cores)
+		fl <- mean.delta.inout.dyn.cache(outdir.all[[mysim]], deltaG, mc.cores=mc.cores)
 	}, USE.NAMES=TRUE, simplify=FALSE)
 	
 	gen <-as.numeric(rownames(iogl[[1]]))
@@ -361,8 +356,7 @@ plot.inout.gainloss <- function(mysims, deltaG=NA, xlab="Generation", ylab="Nb c
 plot.network.feature <- function(mysims, what=c("nbconn", "modularity")[1], algos=names(col.algo), ylab=NULL, xlab="Generation", ylim=NULL, ...) {
 	
 	modn <- sapply(mysims, function(mysim) {
-		out.files <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]], full.names=TRUE, recursive=FALSE), full.names=TRUE)
-		comm      <- communities.dyn.files.cache(out.files, mc.cores=mc.cores)
+		comm  <- communities.dyn.files.cache(outdir.all[[mysim]], mc.cores=mc.cores)
 		sapply(algos, function(algo) {
 			colMeans(do.call(rbind, mclapply(comm, function(cc) sapply(cc, function(ccc) {
 				if (what=="nbconn")
@@ -532,8 +526,7 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus),
 
 plot.Gdiff <- function(mysims, deltaG=NA, xlab="Generation", ylab="Change in G matrix", ylim=c(0,1), col=NULL, lty=NULL, ...) {
 	gd <- sapply(mysims, function(mysim) {
-		out.files  <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]],  full.names=TRUE, recursive=FALSE), full.names=TRUE)
-		mean.Gdiff.dyn.cache(out.files, deltaG, mc.cores=mc.cores)
+		mean.Gdiff.dyn.cache(outdir.all[[mysim]], deltaG, mc.cores=mc.cores)
 	}, USE.NAMES=TRUE, simplify=FALSE)
 	
 	gen <-as.numeric(names(gd[[1]]))
@@ -547,8 +540,7 @@ plot.Gdiff <- function(mysims, deltaG=NA, xlab="Generation", ylab="Change in G m
 
 plot.GPC <- function(mysims, PC=1, xlab="Generation", ylab="Proportion of total variance", ylim=c(0,1), ...) {
 	gpc <- sapply(mysims, function(mysim) {
-		out.files  <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]],  full.names=TRUE, recursive=FALSE), full.names=TRUE)
-		mean.propPC.dyn.cache(out.files, PC, mc.cores=mc.cores)
+		mean.propPC.dyn.cache(outdir.all[[mysim]], PC, mc.cores=mc.cores)
 	}, USE.NAMES=TRUE, simplify=FALSE)
 	
 	gen <-as.numeric(names(gpc[[1]]))
@@ -576,8 +568,7 @@ plot.Gcor <- function(mysims, xlab="Generations", ylab="Generic correlations", y
 
 plot.Grank <- function(mysims, xlab="Generation", ylab="Effective rank of G", ylim=NULL, ...) {
 	gr <- sapply(mysims, function(mysim) {
-		out.files  <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]],  full.names=TRUE, recursive=FALSE), full.names=TRUE)
-		mean.erankG.dyn.cache(out.files, mc.cores=mc.cores)
+		mean.erankG.dyn.cache(outdir.all[[mysim]], mc.cores=mc.cores)
 	}, USE.NAMES=TRUE, simplify=FALSE)	
 	
 	gen <-as.numeric(names(gr[[1]]))
@@ -594,9 +585,8 @@ plot.Gmat <- function(mysim, gen, absolute=TRUE, cols=NULL) {
 		cols <- colorRampPalette(col.cor[(if(absolute) 2 else 1):length(col.cor)])(1001)
 
 	st <- if (absolute) 0 else -1
-	out.files <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]], full.names=TRUE, recursive=FALSE), full.names=TRUE)
 	
-	Glist <- Ggen.files.cache(out.files, gen, mc.cores=mc.cores)
+	Glist <- Ggen.files.cache(outdir.all[[mysim]], gen, mc.cores=mc.cores)
 	Glist <- lapply(Glist, function(G) if (absolute) abs(cov2cor(G)) else cov2cor(G))
 	
 	Gmean <- rowMeans(do.call(abind, c(Glist, list(along=3))), dims=2)
