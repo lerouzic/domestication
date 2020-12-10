@@ -99,8 +99,7 @@ Ggen.files <- function(out.dir, gen, mc.cores=1) {
 		cc <- tt[tt[,"Gen"] == gen, grepl(colnames(tt), pattern="CovPhen")]
 		rm(tt); gc()
 		cc <- matrix(unlist(cc), ncol=sqrt(length(cc)), byrow=TRUE)
-		diag(cc)[diag(cc) < 1e-6] <- 1
-		if (any(is.na(cc)) || ncol(x) != nrow(x)) cc <- NA
+		diag(cc)[diag(cc) < 1e-12] <- 1e-12
 		cc
 	}, mc.cores=1)
 	ans[!sapply(ans, function(x) length(x) == 1 && is.na(x))]

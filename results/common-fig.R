@@ -66,10 +66,17 @@ generation.axis <- function(show.bottleneck=FALSE, ...) {
 	axis(1, at=toshow, labels = toshow - mxx, ...)
 }
 
-subpanel <- function(x) {
-	title(outer=FALSE,adj=0.025 ,main=x,cex.main=1.4,col="black",line=-1)
+subpanel <- function(x, adj=0.025, col="black") {
+	title(outer=FALSE, adj=adj ,main=x,cex.main=1.4,col.main=col,line=-1)
 }
 
+avgcol <- function(c1, c2) {
+	rgb(t(mapply(c1,c2,FUN=function(x,y) colorRamp(c(x,y))(0.5))), max=255)
+}
+
+lighten.col <- function(colors, factor=0.5) {
+    sapply(colors, function(col) { cc <- col2rgb(col); rgb(t(cc + (255 - cc)*factor),max=255) })
+}
 
 # Total population size and effective population size
 plot.N <- function(mysim, ylab="Population size", xlab="Generations", ylim=c(0, max(Ndyn.all[[mysim]])), ...) {
@@ -581,19 +588,33 @@ plot.Grank <- function(mysims, xlab="Generation", ylab="Effective rank of G", yl
 	}		
 }
 
-plot.Gmat <- function(mysim, gen, absolute=TRUE, cols=NULL) {
+plot.Gmat <- function(mysim, gen, absolute=TRUE, cols=NULL, ...) {
+	.transfG <- function(G)  if (absolute) abs(cov2cor(G)) else cov2cor(G)
+	
+	stopifnot(length(gen) <= 2) # if one gen: displays a cor matrix, if 2 gens: below and above diag. 
+	
 	if(is.null(cols))
 		cols <- colorRampPalette(col.cor[(if(absolute) 2 else 1):length(col.cor)])(1001)
 
 	st <- if (absolute) 0 else -1
 	
-	Glist <- Ggen.files.cache(outdir.all[[mysim]], gen, mc.cores=mc.cores)
-	Glist <- lapply(Glist, function(G) if (absolute) abs(cov2cor(G)) else cov2cor(G))
+	Glist1 <- Ggen.files.cache(outdir.all[[mysim]], gen[1], mc.cores=mc.cores)
+	Glist1 <- lapply(Glist1, .transfG)
 	
-	Gmean <- rowMeans(do.call(abind, c(Glist, list(along=3))), dims=2)
+	if (length(gen) == 2) {
+		Glist2 <- Ggen.files.cache(outdir.all[[mysim]], gen[2], mc.cores=mc.cores)
+		Glist2 <- lapply(Glist2, .transfG)
+	}
+	
+	Gmean <- rowMeans(do.call(abind, c(Glist1, list(along=3))), dims=2)
+	if (length(gen) == 2) {
+		Gmean2 <- rowMeans(do.call(abind, c(Glist2, list(along=3))), dims=2)
+		Gmean[upper.tri(Gmean)] <- Gmean2[upper.tri(Gmean2)]
+	}
+	
 	ng <- ncol(Gmean)-1
 	
-	image(x=1:ng, y=1:ng, t(Gmean[(ng+1):2,2:(ng+1)]), axes=FALSE, xlab="", ylab="", zlim=c(st, 1), col=cols)
+	image(x=1:ng, y=1:ng, t(Gmean[(ng+1):2,2:(ng+1)]), axes=FALSE, xlab="", ylab="", zlim=c(st, 1), col=cols, ...)
 }
 
 plot.Gmat.legend <- function(absolute=TRUE, ylab="Genetic correlation", cols=NULL) {
@@ -603,4 +624,36 @@ plot.Gmat.legend <- function(absolute=TRUE, ylab="Genetic correlation", cols=NUL
 	st <- if (absolute) 0 else -1
 	yl <- paste0(if (absolute) "|" else "", ylab, if (absolute) "|" else "")
 	image(y=seq(st, 1, length.out=length(cols)), z=t(as.matrix(seq(st, 1, length.out=length(cols)-1))), zlim=c(st,1), col=cols, xaxt="n", xlab="", ylab=yl)
+}
+
+plot.Gmat.all <- function(mysim, gens, absolute=TRUE, cols, sel1, sel2=sel1, pch=c(same=1, diff=2), ylim=NULL, xlab="", ylab=NA, ...) {
+	.transfG <- function(G)  if (absolute) abs(cov2cor(G)) else cov2cor(G)
+		
+	stopifnot(length(gens) == 2)
+
+	st <- if (absolute) 0 else -1
+	if (is.na(ylab)) ylab <- paste0(if(absolute)  "|", "Genetic correlation", if(absolute) "|")
+		
+	Glist1 <- Ggen.files.cache(outdir.all[[mysim]], gens[1], mc.cores=mc.cores)
+	Glist1 <- lapply(Glist1, .transfG)
+	Gmean1 <- rowMeans(do.call(abind, c(Glist1, list(along=3))), dims=2)[-1,-1]
+	
+	Glist2 <- Ggen.files.cache(outdir.all[[mysim]], gens[2], mc.cores=mc.cores)
+	Glist2 <- lapply(Glist2, .transfG)
+	Gmean2 <- rowMeans(do.call(abind, c(Glist2, list(along=3))), dims=2)[-1,-1]
+
+	ng <- ncol(Gmean1)
+
+	plot(NULL, xlim=c(-0.2,1.2), ylim=if(is.null(ylim)) c(st, 1) else ylim, xaxt="n", xlab=xlab, ylab=ylab, ...)
+	
+	for (i1 in 1:(ng-1))
+		for (i2 in (i1+1):ng) {
+			avgcol1 <- avgcol(cols[sel1[i1]], cols[sel1[i2]])
+			avgcol2 <- avgcol(cols[sel2[i1]], cols[sel2[i2]])
+			dx <- rnorm(1,0,sd=0.02)
+			lines(x=dx+c(0,1), y=c(Gmean1[i1,i2], Gmean2[i1,i2]), lty=1, col=avgcol(avgcol1, avgcol2))
+			points(x=dx+0, y=Gmean1[i1,i2], col=avgcol1, pch=if(sel1[i1]==sel1[i2]) pch[1] else pch[2])
+			points(x=dx+1, y=Gmean2[i1,i2], col=avgcol2, pch=if(sel2[i1]==sel2[i2]) pch[1] else pch[2])	
+		}
+	axis(1, at=c(0,1), c("Before domestication", "Present"))
 }
