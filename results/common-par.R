@@ -2,7 +2,6 @@
       
 suppressMessages(library(parallel))    # for mclapply
 suppressMessages(library(digest))      # to generate cache file names
-suppressMessages(library(ellipse))     # plotting ellipses (?)
 suppressMessages(library(ade4))        # for mantel.rtest
 suppressMessages(library(igraph))      # graph topology calculation
 suppressMessages(library(Rcpp))        # fast model
@@ -38,7 +37,7 @@ col.algo <- c( # modularity algorithms
 	fastgreedy="darkolivegreen",
 	labelprop="lightblue")
 	
-col.gl <- c(Gain="orange", Loss="darkgray")
+col.gl <- c(Gain="deeppink", Loss="seagreen4")
 col.cor <- c("red", "white", "black") # for correlations -1, 0, 1
 
 # Consistent caption text

@@ -343,13 +343,14 @@ plot.inout.gainloss <- function(mysims, deltaG=NA, xlab="Generation", ylab="Nb c
 	
 	gen <-as.numeric(rownames(iogl[[1]]))
 	if (is.null(ylim))
-		ylim <- c(0, max(unlist(iogl)))
+		ylim <- c(-1,1)*max(unlist(iogl))
 			
 	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	abline(h=0, col="darkgray", lty=3)
 	
 	for (mysim in mysims) {
 		lines(gen, iogl[[mysim]][,"gain"], lty=if(is.null(lty)) lty.sce[mysim] else lty, col=col.gl["Gain"])
-		lines(gen, iogl[[mysim]][,"loss"], lty=if(is.null(lty)) lty.sce[mysim] else lty, col=col.gl["Loss"])		
+		lines(gen, -iogl[[mysim]][,"loss"], lty=if(is.null(lty)) lty.sce[mysim] else lty, col=col.gl["Loss"])		
 	}	
 }
 
