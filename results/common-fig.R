@@ -560,7 +560,7 @@ plot.GPC <- function(mysims, PC=1, xlab="Generation", ylab="Proportion of total 
 	}	
 }
 
-plot.Gcor <- function(mysims, xlab="Generations", ylab="Generic correlations", ylim=NULL, ...) {
+plot.Gcor <- function(mysims, xlab="Generations", ylab="Genetic correlations", ylim=NULL, ...) {
 	ggc <- lapply(setNames(nm=mysims), function(mysim) mean.Gcor.dyn.files.cache(outdir.all[[mysim]], mc.cores=mc.cores))
 	
 	gen <- as.numeric(names(ggc[[1]]))
