@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# Figure S4B: in and out connections before/after domestication
+# Figure: in and out connections before/after domestication
 
 source("./common-fig.R")
 

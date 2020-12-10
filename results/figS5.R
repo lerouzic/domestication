@@ -1,61 +1,54 @@
 #!/usr/bin/env Rscript
 
-# Figure S5: G matrix before/after domestication
+# Figure: evolution of gene expression variation during domestication
+
+# Four panels: Default, no bottleneck, no change in selection, no selection. 
 
 source("./common-fig.R")
 
-source("../src/analysis_networks.R")
-
-# Plotting correlations
-absolute <- TRUE     # absolute value for correlations? 
-mysim <- "default"
-
-gen.dom <- selectionchange.detect(meansim.all[[mysim]])
-gen.end <- meansim.all[[mysim]][nrow(meansim.all[[mysim]]),"Gen"]
-segreg <- selectionregime.detect(meansim.all[[mysim]])
-
-ng <- length(segreg)-1
-
-sel.before.dom <- sapply(strsplit(segreg, ""), "[",1)
-sel.after.dom  <- sapply(strsplit(segreg, ""), "[",2)
-sel.before.dom[sel.before.dom == "c"] <- "s" # constant and stable should be the same
-sel.after.dom [sel.after.dom  == "c"] <- "s"
-sel.before.dom[1] <- sel.after.dom[1] <- "e" # The algorithm cannot know that the first guy is environment
-sel.after.dom <- ifelse(sel.before.dom != sel.after.dom, toupper(sel.after.dom), sel.after.dom)
-
-cex.axis <- 0.6
-
-pdf("figS5.pdf", width=2.2*panel.width, height=panel.height)
-	rl <- 0.45 #relative width of panels 2 and 3 
-	layout(t(1:3), width=c(0.08, rl, rl))
+pdf("figS5.pdf", width=1.5*panel.width, height=1.5*panel.height)
+	layout(rbind(1:2,3:4))
 	
-	par(mar=c(1, 4, 1, 0.1))
-	plot.Gmat.legend(absolute=absolute)
-	subpanel("A", adj=0.5, col="white")
+	par(mar=c(0.1, 0.1, 0.5, 0.5), oma=c(5, 5, 0, 1))
 	
-	par(mar=c(1, 2, 1, 1))
-	plot.Gmat("default", c(gen.dom, gen.end), absolute=absolute, asp=1)
-	axis(1, at=1:ng, sel.before.dom[-1], cex.axis=cex.axis, tick=FALSE, line=-1)
-	axis(2, at=1:ng, rev(sel.before.dom[-1]), cex.axis=cex.axis, tick=FALSE, line=-1)
-	axis(3, at=1:ng, sel.after.dom[-1], cex.axis=cex.axis, tick=FALSE, line=-1)
-	axis(4, at=1:ng, rev(sel.after.dom[-1]), cex.axis=cex.axis, tick=FALSE, line=-1)
-
-	text(2, 2, "Before domestication", pos=4)
-	text(ng-2, ng-2, "Present", pos=2)
-
-	my.col.sel <- col.sel[unique(tolower(c(sel.before.dom,sel.after.dom)))]
-	my.col.sel <- lighten.col(my.col.sel[!is.na(my.col.sel)], factor=0.3)
-
-	par(mar=mar.notitle)
+	y.factor <- c('(""%*% 10^{-3})' = 1000)
+	ylab <- "Expression variance"
+	if (y.factor != 1) ylab <- parse(text=paste0('"',ylab, ' "*', names(y.factor)))
+	ylim <- c(0, 1e-3)*y.factor
 	
-	plot.Gmat.all("default", gens=c(gen.dom, gen.end), absolute=absolute, 
-		cols=my.col.sel, sel1=sel.before.dom, sel2=tolower(sel.after.dom), ylim=c(0,0.8))
+	sel.pat <- substr(selpattern.all[["default"]], 1, 1)
+	sel.pat[sel.pat == "c"] <- "s" # No need to distinguish constant and stable? 
+	
+	### Panel A: default ###################################################
+	
+	plot.var.gene("default", what="expression", ylim=ylim, ylab=ylab, y.factor=y.factor, xlab="", xaxt="n", xpd=NA)
+	bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
+	selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
+	legend("topright", lty=c(0, 1, 1, 1), col=c(0, col.sel[unique(sel.pat)]), legend=c("Before dom:", "Stable","Plastic", "Non-selected"), cex=cex.legend, bty="n")
+	
+	subpanel("A")
+	
+	### Panel B: no bottleneck #############################################
+	
+	plot.var.gene("nobot", what="expression", ylim=ylim, ylab="", y.factor=y.factor, xlab="", yaxt="n", xaxt="n", xpd=NA)
+	selectionchange.plot(meansim.all[["nobot"]], y=0, cex=1.5)
+	legend("topright", lty=c(0, lty.sel[unique(sel.pat)]), col=c(0, 1, 1, 1), legend=c("After dom:", "Stable","Plastic", "Non-selected"), cex=cex.legend, bty="n")
+	
 	subpanel("B")
-		
-	par(fig=c(1-rl*0.2,1-rl*0.05,0.8,0.95), new=TRUE, mar=c(0,0,0,0))
-	plot(NULL, xlim=c(0,1), ylim=c(0,1), xlab="", ylab="", axes=FALSE, asp=1)
-	rasterImage(as.raster(outer(my.col.sel, my.col.sel, FUN=avgcol)),xleft=0,xright=1,ybottom=0,ytop=1,interpolate=FALSE)
-	axis(3, at=(0.5+0:(length(my.col.sel)-1))/length(my.col.sel), names(my.col.sel), tick=FALSE, line=-1)
-	axis(2, at=(0.5+0:(length(my.col.sel)-1))/length(my.col.sel), rev(names(my.col.sel)), tick=FALSE, line=-1)
+	
+	### Panel C: no selection change #######################################
+	
+	plot.var.gene("noselc", what="expression", ylim=ylim, ylab=ylab, y.factor=y.factor, xlab="Generation", xaxt="n", xpd=NA)
+	generation.axis()
+	bottleneck.plot(Ndyn.all[["noselc"]], y=0, lwd=2)
+	
+	subpanel("C")
+	
+	### Panel D: no selection ##############################################
+	
+	plot.var.gene("nosel", what="expression", ylim=ylim, ylab="", y.factor=y.factor, xlab="Generation", xaxt="n", yaxt="n", xpd=NA)
+	generation.axis()
+	bottleneck.plot(Ndyn.all[["nosel"]], y=0, lwd=2)
+	subpanel("D")
 
 dev.off()

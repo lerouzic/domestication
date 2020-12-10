@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# Figure S4: evolution of the network complexity (number of connections)
+# Figure: evolution of the network complexity (number of connections)
 
 source("./common-fig.R")
 

@@ -8,7 +8,7 @@ source("../src/analysis_networks.R")
 
 scenarios <- c("default", "nobot", "noselc")
 
-pdf("figT.pdf", width=panel.width, height=panel.height)
+pdf("fig4B.pdf", width=panel.width, height=panel.height)
 	par(mar=mar.notitle)
 	
 	plot.Gcor(scenarios, ylim=c(0,0.2), xaxt="n")

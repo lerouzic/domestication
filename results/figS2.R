@@ -1,53 +1,18 @@
 #!/usr/bin/env Rscript
 
-# Figure S2: evolution of molecular variation during domestication
+source("./common-par.R")
 
-# Four panels: Default, no bottleneck, no change in selection, no selection. 
+s <- c(blue=10, red=50)
+theta <- 0.5
 
-source("./common-fig.R")
-
-pdf("figS2.pdf", width=1.5*panel.width, height=1.5*panel.height)
-	layout(rbind(1:2,3:4))
+pdf("figS2.pdf", width=panel.width, height=panel.height)
+	par(mar=mar.notitle)
 	
-	par(mar=c(0.1, 0.1, 0.5, 0.5), oma=c(5, 5, 0, 1))
+	plot(NULL, xlab="Gene expression", ylab="Fitness", xlim=c(0,1), ylim=c(0,1))
 	
-	ylab <- "Molecular variance"
-	y.factor <- c('(""%*% 10^{-4})' = 10000)
-	if (y.factor != 1) ylab <- parse(text=paste0('"', ylab, ' "*', names(y.factor)))
-	ylim <- c(0, 1.4e-4)*y.factor
+	for (ns in names(s)) {
+		curve(exp(-s[ns]*(x-theta)^2), add=TRUE, xlim=c(0,1),lty=1, col=ns) 
+	}
 	
-	sel.pat <- substr(selpattern.all[["default"]], 1, 1)
-	sel.pat[sel.pat == "c"] <- "s" # No need to distinguish constant and stable? 
-	
-	### Panel A: default ###################################################
-	
-	plot.var.gene("default", what="molecular", ylim=ylim, ylab=ylab, y.factor=y.factor, xlab="", xaxt="n", xpd=NA)
-	bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
-	selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
-	legend("topright", lty=c(0, 1, 1, 1), col=c(0, col.sel[unique(sel.pat)]), legend=c("Before dom:", "Stable","Plastic", "Non-selected"), cex=cex.legend, bty="n")
-	
-	subpanel("A")
-	
-	### Panel B: no bottleneck #############################################
-	
-	plot.var.gene("nobot", what="molecular", ylim=ylim, ylab="", y.factor=y.factor, xlab="", yaxt="n", xaxt="n" ,xpd=NA)
-	selectionchange.plot(meansim.all[["nobot"]], y=0, cex=1.5)
-	legend("topright", lty=c(0, lty.sel[unique(sel.pat)]), col=c(0, 1, 1, 1), legend=c("After dom:", "Stable","Plastic", "Non-selected"), cex=cex.legend, bty="n")
-	
-	subpanel("B")
-	
-	### Panel C: no selection change #######################################
-	
-	plot.var.gene("noselc", what="molecular", ylim=ylim, ylab=ylab, y.factor=y.factor, xlab="Generation", xaxt="n", xpd=NA)
-	generation.axis()
-	bottleneck.plot(Ndyn.all[["noselc"]], y=0, lwd=2)
-	subpanel("C")
-	
-	### Panel D: no selection ##############################################
-	
-	plot.var.gene("nosel", what="molecular", ylim=ylim, ylab="", y.factor=y.factor, xlab="Generation", xaxt="n", yaxt="n", xpd=NA)
-	generation.axis()
-	bottleneck.plot(Ndyn.all[["nosel"]], y=0, lwd=2)
-	subpanel("D")
-
+	legend("topright", lty=1, col=names(s), legend=paste0("s=", s), cex=cex.legend, bty="n")
 dev.off()

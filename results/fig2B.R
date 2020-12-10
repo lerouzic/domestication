@@ -1,10 +1,10 @@
 #!/usr/bin/env Rscript
 
-# Figure D: evolution of the reaction norm
+# Figure: evolution of the reaction norm
 
 source("common-fig.R")
 
-pdf("fig2.pdf", width=panel.width, height=panel.height)
+pdf("fig2B.pdf", width=panel.width, height=panel.height)
 	par(mar=mar.notitle)
 	plot.norm(c("default", "nobot"), xlab="Generation", ylab="|reaction norm|", xaxt="n")
 	
@@ -14,4 +14,6 @@ pdf("fig2.pdf", width=panel.width, height=panel.height)
 	
 	legend("topright", pch=22, col=col.sel[c("p","n","s")], pt.bg=col.sel[c("p","n","s")], legend=c("Plastic->Plastic", "Plastic->Neutral", "Plastic->Stable"), bty="n", cex=cex.legend)
 	legend("topleft", lty=lty.sce[c("default","nobot")], col="darkgray", legend=legname(c("default", "nobot")), bty="n", cex=cex.legend)
+	
+	subpanel("B")
 dev.off()

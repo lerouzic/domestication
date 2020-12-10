@@ -6,7 +6,7 @@ source("./common-fig.R")
 
 mysim <- "default"
 
-pdf("figS1A.pdf", width=panel.width, height=panel.height)
+pdf("figS1.pdf", width=panel.width, height=panel.height)
 	par(mar=mar.notitle)
 	
 	plot.N(mysim, xaxt="n", xlab="Generation", ylim=c(0,22000))

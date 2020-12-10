@@ -1,54 +1,35 @@
 #!/usr/bin/env Rscript
 
-# Figure S3: evolution of gene expression variation during domestication
-
-# Four panels: Default, no bottleneck, no change in selection, no selection. 
+# Dynamics of the effective pop size
 
 source("./common-fig.R")
 
-pdf("figS3.pdf", width=1.5*panel.width, height=1.5*panel.height)
-	layout(rbind(1:2,3:4))
-	
-	par(mar=c(0.1, 0.1, 0.5, 0.5), oma=c(5, 5, 0, 1))
-	
-	y.factor <- c('(""%*% 10^{-3})' = 1000)
-	ylab <- "Expression variance"
-	if (y.factor != 1) ylab <- parse(text=paste0('"',ylab, ' "*', names(y.factor)))
-	ylim <- c(0, 1e-3)*y.factor
-	
-	sel.pat <- substr(selpattern.all[["default"]], 1, 1)
-	sel.pat[sel.pat == "c"] <- "s" # No need to distinguish constant and stable? 
-	
-	### Panel A: default ###################################################
-	
-	plot.var.gene("default", what="expression", ylim=ylim, ylab=ylab, y.factor=y.factor, xlab="", xaxt="n", xpd=NA)
-	bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
-	selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
-	legend("topright", lty=c(0, 1, 1, 1), col=c(0, col.sel[unique(sel.pat)]), legend=c("Before dom:", "Stable","Plastic", "Non-selected"), cex=cex.legend, bty="n")
-	
-	subpanel("A")
-	
-	### Panel B: no bottleneck #############################################
-	
-	plot.var.gene("nobot", what="expression", ylim=ylim, ylab="", y.factor=y.factor, xlab="", yaxt="n", xaxt="n", xpd=NA)
-	selectionchange.plot(meansim.all[["nobot"]], y=0, cex=1.5)
-	legend("topright", lty=c(0, lty.sel[unique(sel.pat)]), col=c(0, 1, 1, 1), legend=c("After dom:", "Stable","Plastic", "Non-selected"), cex=cex.legend, bty="n")
-	
-	subpanel("B")
-	
-	### Panel C: no selection change #######################################
-	
-	plot.var.gene("noselc", what="expression", ylim=ylim, ylab=ylab, y.factor=y.factor, xlab="Generation", xaxt="n", xpd=NA)
-	generation.axis()
-	bottleneck.plot(Ndyn.all[["noselc"]], y=0, lwd=2)
-	
-	subpanel("C")
-	
-	### Panel D: no selection ##############################################
-	
-	plot.var.gene("nosel", what="expression", ylim=ylim, ylab="", y.factor=y.factor, xlab="Generation", xaxt="n", yaxt="n", xpd=NA)
-	generation.axis()
-	bottleneck.plot(Ndyn.all[["nosel"]], y=0, lwd=2)
-	subpanel("D")
+mysim <- "default"
+col.opt <- c("white","blue")
 
+plot.dynopt <- function(out.table, xlab="Generation", ...) {
+	zz <- as.matrix(out.table[,grepl(colnames(out.table), pattern="FitOpt")])
+	zz <- zz[,ncol(zz):1]
+	image(x=out.table$Gen, y=1:ncol(zz), z=zz, col=colorRampPalette(col.opt)(100), zlim=c(0,1), xlim=c(first.gen, max(out.table$Gen)), xlab=xlab, yaxt="n", ylab="", ...)
+
+	segreg <- selectionregime.detect(out.table)
+	sel.before.dom <- sapply(strsplit(segreg, ""), "[",1)
+	sel.after.dom  <- sapply(strsplit(segreg, ""), "[",2)
+	sel.before.dom[1] <- sel.after.dom[1] <- "e" # The algorithm cannot know that the first guy is environment
+	sel.after.dom <- ifelse(sel.before.dom != sel.after.dom, toupper(sel.after.dom), sel.after.dom)
+	
+	axis(2, at=ncol(zz):1, label=sel.before.dom, tick=FALSE, cex.axis=0.7, line=-0.5, las=1)
+	axis(4, at=ncol(zz):1, label=sel.after.dom, tick=FALSE, cex.axis=0.7, line=-0.5, las=1)	
+}
+
+myfile <- list.files(pattern="out.*", path=onerep(outdir.all[[mysim]]),  full.names=TRUE, recursive=FALSE)
+mytab <- read.table(myfile, header=TRUE)
+
+pdf("figS3.pdf", width=panel.width, height=panel.height)
+	par(mar=c(4, 1, 0.5, 1))
+	plot.dynopt(mytab, xaxt="n" )
+
+	generation.axis()
+	bottleneck.plot(Ndyn.all[[mysim]], y=2, lwd=2)
+	selectionchange.plot(meansim.all[[mysim]], y=2, cex=1.5)
 dev.off()

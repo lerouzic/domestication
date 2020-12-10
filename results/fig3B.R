@@ -1,16 +1,20 @@
 #!/usr/bin/env Rscript
 
-# Figure 3B: Evolution of genetic variance-covariance
+source("../src/analysis_tools.R")
 
 source("./common-fig.R")
-source("../src/analysis_networks.R")
 
-scenarios <- c("default","nobot","noselc")
+scenarios <- c("default", "nobot", "noselc")
 
-pdf("fig3B.pdf", width=panel.width, height=panel.height)
+pdf(file="fig3B.pdf", height=panel.height, width=panel.width)
 	par(mar=mar.notitle)
-
-	plot.Gdiff(scenarios, deltaG=deltaG, xaxt="n", ylim=c(0,0.6))
+	
+	y.factor <- c('(""%*% 10^{-3})' = 1000)
+	ylab <- "Expression variance"
+	if (y.factor != 1) ylab <- parse(text=paste0('"', ylab, ' "*', names(y.factor)))
+	ylim <- c(0, 0.7e-3)*y.factor
+	
+	plot.var(scenarios, what="expression", y.factor=y.factor, ylab=ylab, ylim=ylim, xaxt="n")
 	
 	generation.axis()
 	bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
@@ -18,4 +22,5 @@ pdf("fig3B.pdf", width=panel.width, height=panel.height)
 	
 	legend(x="topright",legend = legname(scenarios), lty=lty.sce[scenarios], col=col.sce[scenarios], bty="n", cex=cex.legend)
 	subpanel("B")
+
 dev.off()

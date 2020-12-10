@@ -1,10 +1,10 @@
 #!/usr/bin/env Rscript
 
-# Figure R: Speed of evolution of the network
+# Figure: Speed of evolution of the network
 
 source("./common-fig.R")
 
-pdf("figR.pdf", width=panel.width, height=panel.height)
+pdf("fig2A.pdf", width=panel.width, height=panel.height)
 	par(mar=mar.notitle)
 	
 	plot.evol.gene("default", xaxt="n", ylim=c(0,0.25))
@@ -13,4 +13,5 @@ pdf("figR.pdf", width=panel.width, height=panel.height)
 	selectionchange.plot(meansim.all[["default"]], y=0.24, cex=1.5)
 	generation.axis()
 
+	subpanel("A")
 dev.off()

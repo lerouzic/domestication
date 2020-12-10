@@ -1,23 +1,26 @@
 #!/usr/bin/env Rscript
 
-# Figure 3A: evolution of the number of gained/lost connections
+# Figure: Molecular variance of neutral sites
 
 source("./common-fig.R")
 
-source("../src/analysis_networks.R")
-
 scenarios <- c("default", "nobot", "noselc")
+expr.thresh <- 0.1
 
 pdf("fig3A.pdf", width=panel.width, height=panel.height)
 	par(mar=mar.notitle)
 	
-	plot.inout.gainloss(scenarios, deltaG=deltaG, ylim=c(-16, 16), xaxt="n")
+	ylab <- "Molecular variance"
+	y.factor <- c('(""%*% 10^{-4})' = 10000)
+	if (y.factor != 1) ylab <- parse(text=paste0('"', ylab, ' "*', names(y.factor)))
+	ylim <- c(0, 1.5e-4)*y.factor
 	
-	legend("topright", lty=c(1,1,lty.sce[scenarios]), col=c(col.gl, rep("black", length(scenarios))), legend=legname(c(names(col.gl), scenarios)), cex=cex.legend, bty="n")
+	plot.var.neutral(scenarios, xaxt="n", ylab=ylab, ylim=ylim, y.factor=y.factor, expr.thresh=expr.thresh)
 	
+	bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
+	selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
 	generation.axis()
-	bottleneck.plot(Ndyn.all[["default"]], y=-15.5, lwd=2)
-	selectionchange.plot(meansim.all[["default"]], y=-15.5, cex=1.5)
 
-	subpanel("A")
+	legend("topright", lty=lty.sce[scenarios], col=col.sce[scenarios], legend=legname(scenarios), bty="n", cex=cex.legend)
+
 dev.off()
