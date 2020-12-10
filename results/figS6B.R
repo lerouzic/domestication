@@ -25,7 +25,7 @@ sel.after.dom <- ifelse(sel.before.dom != sel.after.dom, toupper(sel.after.dom),
 
 cex.axis <- 0.6
 
-pdf("figS6B.pdf", width=2.2*panel.width, height=panel.height)
+pdf("figS6B.pdf", width=1.2*panel.width, height=panel.height)
 	rl <- 0.1 #relative width of panel 1 (color scale) 
 	layout(t(1:2), width=c(rl, 1-rl))
 	

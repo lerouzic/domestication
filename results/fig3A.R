@@ -23,4 +23,5 @@ pdf("fig3A.pdf", width=panel.width, height=panel.height)
 
 	legend("topright", lty=lty.sce[scenarios], col=col.sce[scenarios], legend=legname(scenarios), bty="n", cex=cex.legend)
 
+	subpanel("A")
 dev.off()

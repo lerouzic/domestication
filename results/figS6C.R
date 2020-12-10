@@ -23,7 +23,7 @@ sel.after.dom [sel.after.dom  == "c"] <- "s"
 sel.before.dom[1] <- sel.after.dom[1] <- "e" # The algorithm cannot know that the first guy is environment
 sel.after.dom <- ifelse(sel.before.dom != sel.after.dom, toupper(sel.after.dom), sel.after.dom)
 
-pdf("figS6C.pdf", width=2.2*panel.width, height=panel.height)
+pdf("figS6C.pdf", width=panel.width, height=panel.height)
 	my.col.sel <- col.sel[unique(tolower(c(sel.before.dom,sel.after.dom)))]
 	my.col.sel <- lighten.col(my.col.sel[!is.na(my.col.sel)], factor=0.3)
 

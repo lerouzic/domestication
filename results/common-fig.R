@@ -302,9 +302,9 @@ plot.inout.change <- function(mysim, mysim.ref=NULL, regimes=c("s","p","n"), xla
 	
 	genselchange <- selectionchange.detect(meansim.all[[mysim]])
 	
-	before.dom      <- inout.gen.cache(out.files.mysim, gen=genselchange, mc.cores=mc.cores)
+	before.dom      <- inout.gen.cache(outdir.all[[mysim]], gen=genselchange, mc.cores=mc.cores)
 	mean.before.dom <- mean.inout (before.dom)
-	after.dom       <- inout.gen.cache(out.files.mysim, gen=meansim.all[[mysim]][nrow(meansim.all[[mysim]]),"Gen"], mc.cores=mc.cores)
+	after.dom       <- inout.gen.cache(outdir.all[[mysim]], gen=meansim.all[[mysim]][nrow(meansim.all[[mysim]]),"Gen"], mc.cores=mc.cores)
 	mean.after.dom  <- mean.inout (after.dom)
 
 	mean.after.ref <- NULL
