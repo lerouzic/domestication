@@ -116,13 +116,12 @@ Glist.table <- function(out.table) {
 }
 
 
-Glist.files <- function(files) {
+Glist.files <- function(files, mc.cores=1) {
 	ans <- mclapply(files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
-		browser()
 		Glist.table(tt)
 		rm(tt); gc()
-	}, mc.cores=1)	
+	}, mc.cores=mc.cores)	
 }
 
 
@@ -293,6 +292,39 @@ mean.Gdiff.dyn <- function(files, deltaG=NA, mc.cores=1) {
 
 mean.Gdiff.dyn.cache <- function(files, deltaG=NA, mc.cores=1) {
 	cache.fun(mean.Gdiff.dyn, files=files, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-Gdiff")
+}
+
+Gcor.dyn <- function(out.table) {
+	.meancor <- function(G) {
+		diag(G)[diag(G) < 1e-12] <- 1e-12 # Prevent numerical errors 
+		C <- cov2cor(G)
+		diag(C) <- NA # We don't want to count the diagonal when computing the mean
+		mean(abs(C), na.rm=TRUE)
+	}
+	Glist <- Glist.table(out.table)
+	sapply(Glist, .meancor)
+}
+
+
+mean.Gcor.dyn.files <- function(out.dir, mc.cores=1) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	ans <- mclapply(out.files, function(ff) {
+		tt <- read.table(ff, header=TRUE)
+		gc <- Gcor.dyn(tt)
+		rm(tt)
+		gc
+	}, mc.cores=mc.cores)
+	
+	ansl <- sapply(ans, length)
+	ans <- ans[ansl==max(ansl)]
+	aa <- do.call(rbind, ans)
+	
+	colMeans(aa, na.rm=TRUE)
+}
+
+mean.Gcor.dyn.files.cache <- function(out.dir, mc.cores=1) {
+	cache.fun(mean.Gcor.dyn.files, out.dir=out.dir, mc.cores=mc.cores, cache.subdir="Rcache-Gcor")
 }
 
 propPC.dyn <- function(out.table, PC=1, mc.cores=1) {

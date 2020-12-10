@@ -560,6 +560,20 @@ plot.GPC <- function(mysims, PC=1, xlab="Generation", ylab="Proportion of total 
 	}	
 }
 
+plot.Gcor <- function(mysims, xlab="Generations", ylab="Generic correlations", ylim=NULL, ...) {
+	ggc <- lapply(setNames(nm=mysims), function(mysim) mean.Gcor.dyn.files.cache(outdir.all[[mysim]], mc.cores=mc.cores))
+	
+	gen <- as.numeric(names(ggc[[1]]))
+	
+	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	
+	for (mysim in mysims) {
+		gc <- ggc[[mysim]]
+		
+		lines(gen, gc, lty=lty.sce[mysim], col=col.sce[mysim])
+	}
+}
+
 plot.Grank <- function(mysims, xlab="Generation", ylab="Effective rank of G", ylim=NULL, ...) {
 	gr <- sapply(mysims, function(mysim) {
 		out.files  <- list.files(pattern="out.*", path=list.dirs(outdir.all[[mysim]],  full.names=TRUE, recursive=FALSE), full.names=TRUE)
