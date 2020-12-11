@@ -19,4 +19,5 @@ pdf("fig4B.pdf", width=panel.width, height=panel.height)
 	bottleneck.plot(Ndyn.all[["default"]], y=0.05, lwd=2)
 	selectionchange.plot(meansim.all[["default"]], y=0.05, cex=1.5)
 
+	subpanel("B")
 dev.off()

@@ -15,7 +15,7 @@ pdf("figS4B.pdf", width=panel.width, height=panel.height)
 	
 	# all pch are hard-coded... Not very clean, but the figure is used only once.
 	legend("bottomright", pch=c(15,15,15,19,17,1), col=c(col.sel[regimes], rep("darkgray",3)), 	
-		legend=c(leg, "Before domestication", "Now", legname("noselc")), cex=cex.legend, bty="n")
+		legend=c(leg, "Before domestication", "Present", legname("noselc")), cex=cex.legend, bty="n")
 		
 	subpanel("B")
 	

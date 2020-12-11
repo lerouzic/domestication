@@ -36,6 +36,6 @@ pdf("fig4C.pdf", width=2*panel.width, height=panel.height)
 	subpanel("C")
 	
 	plot.numconn.groups(numconn.after.dom, numconn.ref=numconn.before.dom, group.names=group.names.after.dom)
-	title("Now")
+	title("Present")
 	
 dev.off()
