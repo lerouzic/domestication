@@ -394,7 +394,7 @@ plot.network.feature <- function(mysims, what=c("nbconn", "modularity")[1], algo
 
 plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), 
 								numconn.ref=NULL, directed=TRUE, ann.text=TRUE, col.scale.plus=NULL, col.scale.minus=NULL, 
-								lwd.arr=2, pos.shift.plus=0.80, pos.shift.minus=0.60, ...) {
+								lwd.arr=2, pos.shift.plus=0.80, pos.shift.minus=0.60, thresh=0.05, ...) {
 													
 	circ.arc <- function(theta1=0, theta2=2*pi, n=100) { tt <- seq(theta1, theta2, length.out=n); cbind(cos(tt), sin(tt)) }
 	posit.angle <- function(angle) { angle <- angle %% (2*pi); if (angle > pi/2 && angle <= 3*pi/2) angle <- angle + pi; angle %% (2*pi)}
@@ -412,7 +412,7 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus),
 		text.cex=0.7, 
 		col.plus=rev(col.scale.plus)[1], 
 		col.minus=rev(col.scale.minus)[1], 
-		thresh=0.05, 
+		thresh=thresh, 
 		digits=2)
 	
 	par(mar=c(0.1,0.1,2,0.1))
@@ -459,7 +459,7 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus),
 				}
 				
 				if (ann.text) {
-					if (numconn$plus[j,i] > ann.text.options$thresh) {
+#~ 					if (numconn$plus[j,i] > ann.text.options$thresh) {
 						txt.num <- if (!directed && j > i) {
 							if (is.null(numconn.ref))
 								numconn$minus[i,j]
@@ -472,6 +472,7 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus),
 								numconn$plus[j,i] - numconn.ref$plus[j,i]
 						}
 						txt.str <- sprintf(paste0("%", if (is.null(numconn.ref)) "" else "+", "1.", ann.text.options$digits, "f"), txt.num)
+						if (abs(txt.num) > ann.text.options$thresh)
 						text(x=(1-ann.text.options$pos.shift.plus)*x.i.plus+ann.text.options$pos.shift.plus*x.j.plus, 
 							y=(1-ann.text.options$pos.shift.plus)*y.i.plus+ann.text.options$pos.shift.plus*y.j.plus, 
 							txt.str, 
@@ -479,9 +480,11 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus),
 							col=if(!directed && j > i) ann.text.options$col.minus else ann.text.options$col.plus,
 							srt=180*(posit.angle(alpha)/pi))
 					}
-					if (numconn$minus[j,i] > ann.text.options$thresh && directed) {
+#~ 					if (numconn$minus[j,i] > ann.text.options$thresh && directed) {
+					if (directed) {
 						txt.num <- if (is.null(numconn.ref)) numconn$minus[j,i]	else numconn$minus[j,i] - numconn.ref$minus[j,i]
 						txt.str <- sprintf(paste0("%", if (is.null(numconn.ref)) "" else "+", "1.", ann.text.options$digits, "f"), txt.num)
+						if (abs(txt.num) > ann.text.options$thresh)
 						text(x=(1-ann.text.options$pos.shift.minus)*x.i.minus+ann.text.options$pos.shift.minus*x.j.minus, 
 							y=(1-ann.text.options$pos.shift.minus)*y.i.minus+ann.text.options$pos.shift.minus*y.j.minus, 
 							txt.str, 
@@ -489,7 +492,7 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus),
 							col=ann.text.options$col.minus,
 							srt=180*(posit.angle(alpha)/pi))
 					}
-				}
+#~ 				}
 			} else { # i == j
 				# angle of i around the circle
 				alpha <- (i-1)*2*pi/lg
@@ -507,24 +510,26 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus),
 					arrows(x0=cc.minus[2,1], x1=cc.minus[1,1], y0=cc.minus[2,2], y1=cc.minus[1,2], col=col.minus, length=0.05, angle=90, lwd=lwd.arr)
 				
 				if (ann.text) {
-					if (numconn$plus[i,i] > ann.text.options$thresh) {
+#~ 					if (numconn$plus[i,i] > ann.text.options$thresh) {
 						txt.num <- if (is.null(numconn.ref)) numconn$plus[i,i]	else numconn$plus[i,i] - numconn.ref$plus[i,i]
 						txt.str <- sprintf(paste0("%", if (is.null(numconn.ref)) "" else "+", "1.", ann.text.options$digits, "f"), txt.num)
+						if (is.finite(txt.num) && abs(txt.num) > ann.text.options$thresh)
 						text(x=cc.plus[round(ann.text.options$pos.shift.plus*nrow(cc.plus)),1], 
 							y=cc.plus[round(ann.text.options$pos.shift.plus*nrow(cc.plus)),2], 
 							txt.str, 
 							cex=ann.text.options$text.cex, 
 							col=ann.text.options$col.plus)
-					}
-					if (numconn$minus[i,i] > ann.text.options$thresh) {
+#~ 					}
+#~ 					if (numconn$minus[i,i] > ann.text.options$thresh) {
 						txt.num <- if (is.null(numconn.ref)) numconn$minus[i,i]	else numconn$minus[i,i] - numconn.ref$minus[i,i]
 						txt.str <- sprintf(paste0("%", if (is.null(numconn.ref)) "" else "+", "1.", ann.text.options$digits, "f"), txt.num)						
+						if (is.finite(txt.num) && abs(txt.num) > ann.text.options$thresh)
 						text(x=cc.minus[round(ann.text.options$pos.shift.minus*nrow(cc.minus)),1], 
 							y=cc.minus[round(ann.text.options$pos.shift.minus*nrow(cc.minus)),2], 
 							txt.str, 
 							cex=ann.text.options$text.cex, 
 							col=ann.text.options$col.minus)
-					}
+#~ 					}
 				}
 			}
 		}
