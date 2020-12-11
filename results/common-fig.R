@@ -66,8 +66,8 @@ generation.axis <- function(show.bottleneck=FALSE, ...) {
 	axis(1, at=toshow, labels = toshow - mxx, ...)
 }
 
-subpanel <- function(x, adj=0.025, col="black") {
-	title(outer=FALSE, adj=adj ,main=x,cex.main=1.4,col.main=col,line=-1)
+subpanel <- function(x, adj=0.025, col="black", line=-1) {
+	title(outer=FALSE, adj=adj ,main=x,cex.main=1.4,col.main=col,line=line)
 }
 
 avgcol <- function(c1, c2) {
