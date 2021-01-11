@@ -6,9 +6,9 @@ source("../src/analysis_networks.R")
 scenarios <- c("default","nomut","smallsel","strongsel","strongbot","largenet")
 
 
-ylim.inout.gainloss<-c(0,20)
+ylim.inout.gainloss<-c(-20,20)
 ylim.norm<-c(0,1.2)
-ylim.nconn<-c(0,60)
+ylim.nconn<-c(0,120)
 ylim.Gdiff<-c(0,0.8)
 
 ylab.inout.gainloss<-"nb connection"

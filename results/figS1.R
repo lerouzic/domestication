@@ -16,6 +16,4 @@ pdf("figS1.pdf", width=panel.width, height=panel.height)
 	selectionchange.plot(meansim.all[[mysim]], y=1, cex=1.5)
 	legend("bottomright", lty=1, col=c("black","blue"), legend=c("N", expression(N[e])), cex=cex.legend, bty="n")
 	
-	subpanel("A")
-
 dev.off()
