@@ -134,7 +134,7 @@ Glist.files <- function(out.dir) {
 
 # Network analysis
 
-cleanW <- function(W, epsilon, env, ...) {
+cleanW <- function(W, epsilon=connect.threshold, env=connect.env, ...) {
 	# ... are additional arguments to modelM2
 	if (is.na(epsilon)) epsilon <- sqrt((nrow(W)-1)*0.01^2)
 	distMat <- matrix(0, ncol=ncol(W), nrow=nrow(W))	
@@ -341,6 +341,63 @@ mean.Gcor.dyn.files <- function(out.dir, mc.cores=1) {
 mean.Gcor.dyn.files.cache <- function(out.dir, mc.cores=1) {
 	cache.fun(mean.Gcor.dyn.files, out.dir=out.dir, mc.cores=mc.cores, cache.subdir="Rcache-Gcor")
 }
+
+WFUN.dyn <- function(out.table, WFUN="mean", deltaG=1) {
+	gen <- out.table[,"Gen"]
+	seqgen <- seq(1, length(gen), length.out=min(length(gen), 1+gen[length(gen)] %/% deltaG))
+	listW <- Wlist.table(out.table[seqgen,])
+	ww <- unlist(lapply(listW, eval(parse(text=WFUN))))
+	ww
+}
+
+WFUN.dyn.files <- function(out.dir, WFUN="mean", deltaG=NA, mc.cores=1) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	ans <- mclapply(out.files, function(ff) {
+		tt <- read.table(ff, header=TRUE)
+		wm <- WFUN.dyn(tt, WFUN=WFUN, deltaG=deltaG)
+		rm(tt)
+		wm
+	}, mc.cores=mc.cores)
+	ansl <- sapply(ans, length)
+	ans <- ans[ansl==max(ansl)]
+	aa <- do.call(rbind, ans)
+	colMeans(aa, na.rm=TRUE)
+}
+
+WFUN.dyn.files.cache <- function(out.dir, WFUN="mean", deltaG=NA, mc.cores=1) {
+	cache.fun(WFUN.dyn.files, out.dir=out.dir, WFUN=WFUN, deltaG=deltaG, mc.cores=mc.cores, cache.subdir=paste0("Rcache-W", WFUN))
+}
+
+
+#~ netf.dyn <- function(out.table, what, directed=TRUE, deltaG=NA) {
+#~ 	gen <- out.table[,"Gen"]
+#~ 	seqgen <- seq(1, length(gen), length.out=min(length(gen), 1+gen[length(gen)] %/% deltaG))
+#~ 	listW <- Wlist.table(out.table[seqgen,])
+#~ 	ww <- unlist(lapply(listW, eval(parse(text=WFUN))))
+#~ 	ww
+#~ }
+
+#~ netf.dyn.files <- function(outdir, what, directed=TRUE, deltaG=NA, mc.cores=1) {
+#~ 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+#~ 	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+#~ 	ans <- mclapply(out.files, function(ff) {
+#~ 		tt <- read.table(ff, header=TRUE)
+#~ 		wm <- netf.dyn(tt, what=what, directed=directed, deltaG=deltaG)
+#~ 		rm(tt)
+#~ 		wm
+#~ 	}, mc.cores=mc.cores)
+#~ 	ansl <- sapply(ans, length)
+#~ 	ans <- ans[ansl==max(ansl)]
+#~ 	aa <- do.call(rbind, ans)
+#~ 	colMeans(aa, na.rm=TRUE)
+#~ }
+
+#~ netf.dyn.files.cache <- function(outdir, what, directed=TRUE, deltaG=NA, mc.cores=1) {
+#~ 	cache.fun(netf.dyn.files, out.dir=out.dir, what=what, directed=directed, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-netwf")
+#~ }
+
+
 
 propPC.dyn <- function(out.table, PC=1, mc.cores=1) {
 	gen <- out.table[,"Gen"]

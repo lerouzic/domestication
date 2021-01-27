@@ -361,35 +361,29 @@ plot.inout.gainloss <- function(mysims, deltaG=NA, xlab="Generation", ylab="Nb c
 	}	
 }
 
-plot.network.feature <- function(mysims, what=c("nbconn", "modularity")[1], algos=names(col.algo), ylab=NULL, xlab="Generation", ylim=NULL, ...) {
-	
-	modn <- sapply(mysims, function(mysim) {
-		comm  <- communities.dyn.files.cache(outdir.all[[mysim]], mc.cores=mc.cores)
-		sapply(algos, function(algo) {
-			colMeans(do.call(rbind, mclapply(comm, function(cc) sapply(cc, function(ccc) {
-				if (what=="nbconn")
-					length(igraph::communities(ccc[[algo]]))
-				else if (what=="modularity") 
-					igraph::modularity(ccc[[algo]])
-				else
-					NA
-			}), mc.cores=mc.cores)))}, simplify=FALSE)
-		}, USE.NAMES=TRUE, simplify=FALSE)
-		
-	gen <- meansim.all[[mysims[1]]][,"Gen"]
-	if (is.null(ylim)) 
-		ylim <- c(0, max(unlist(modn)))
-	if (is.null(ylab)) {
-		if (what=="nbconn")     ylab <- "Number connections"
-		if (what=="modularity") ylab <- "Modularity"
-	}
-	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab="Generation", ylab=ylab, xaxt="n")
-	for (cc in algos) {
-		for (mysim in mysims) {
-			my.modn  <- mov.avg(modn[[mysim]][[cc]],  as.numeric(names((modn[[mysim]][[cc]]))),  size=window.avg)
-			lines(as.numeric(names(my.modn)),  my.modn,  col=col.algo[cc], lty=lty.sce[mysim])
+plot.network.feature <- function(mysims, what=c("path"), directed=TRUE, deltaG=NA, ylab=what, xlab="Generation", ylim=NULL, lty=NULL, col=NULL, ...) {
+	callFUN <- if (what == "path") {
+			'function(w) igraph::average.path.length(igraph::graph_from_adjacency_matrix(sign(cleanW(w))))'
+		} else if (what == "diameter") {
+			'function(w) igraph::diameter(igraph::graph_from_adjacency_matrix(sign(cleanW(w))))'
+		} else if (what == "clusters") {
+			'function(w) igraph::clusters(igraph::graph_from_adjacency_matrix(sign(cleanW(w))))$no'
+		} else {
+			stop()
 		}
-	}	
+
+	netf.all <- sapply(mysims, function(mysim) {
+		netf  <- WFUN.dyn.files.cache(outdir.all[[mysim]], WFUN=callFUN, deltaG=deltaG, mc.cores=mc.cores)
+	}, USE.NAMES=TRUE, simplify=FALSE)
+	
+	plot(NULL, 
+		xlim=c(first.gen, max(as.numeric(names(netf.all[[1]])))), 
+		ylim=if(is.null(ylim)) c(0, max(unlist(netf.all), na.rm=TRUE)) else ylim, 
+		xlab=xlab, ylab=ylab, ...)
+	
+	for (mysim in mysims) {
+		lines(as.numeric(names(netf.all[[mysim]])), netf.all[[mysim]],  col=if(is.null(col)) col.sce[mysim] else col, lty=if(is.null(lty)) lty.sce[mysim] else lty)
+	}
 }
 
 plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus), 
@@ -576,6 +570,20 @@ plot.Gcor <- function(mysims, xlab="Generations", ylab="Genetic correlations", y
 		gc <- ggc[[mysim]]
 		
 		lines(gen, gc, lty=lty.sce[mysim], col=col.sce[mysim])
+	}
+}
+
+plot.WFUN <- function(mysims, WFUN="mean", deltaG=NA, xlab="Generation", ylab="FUN(regulation effect)", ylim=c(0,1), col=NULL, lty=NULL, ...) {
+	wm <- sapply(mysims, function(mysim) {
+		WFUN.dyn.files.cache(outdir.all[[mysim]], WFUN=WFUN, deltaG=deltaG, mc.cores=mc.cores)
+	}, USE.NAMES=TRUE, simplify=FALSE)
+
+	gen <-as.numeric(names(wm[[1]]))
+
+	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	
+	for (mysim in mysims) {
+		lines(gen, wm[[mysim]], lty=if(is.null(lty)) lty.sce[mysim] else lty, col=if(is.null(col)) col.sce[mysim] else col)
 	}
 }
 
