@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# Figure: Evolution of average regulation
+# Figure: Direct regulations
 
 source("./common-fig.R")
 
@@ -35,7 +35,7 @@ dev.off()
 pdf("figSS1c.pdf", width=panel.width, height=panel.height)
 	par(mar=mar.notitle)
 	
-	plot.WFUN(scenarios, WFUN="function(w) sum( abs(w) > 0.1)", ylim=c(0,100), xaxt="n", ylab="Number of non-null connextions")
+	plot.WFUN(scenarios, WFUN="function(w) sum( abs(w) > 0.1)", ylim=c(0,100), xaxt="n", ylab="Large regulation effects")
 	
 	legend("bottomright", lty=lty.sce[scenarios], col=col.sce[scenarios], legend=legname(scenarios), cex=cex.legend, bty="n")
 	
@@ -47,7 +47,7 @@ dev.off()
 pdf("figSS1d.pdf", width=panel.width, height=panel.height)
 	par(mar=mar.notitle)
 	
-	plot.WFUN(scenarios, WFUN="function(w) sum(w>0.1)", ylim=c(0,80), xaxt="n", ylab="Positive connections")
+	plot.WFUN(scenarios, WFUN="function(w) sum(w>0.1)", ylim=c(0,80), xaxt="n", ylab="Positive regulations")
 	
 	legend("bottomright", lty=lty.sce[scenarios], col=col.sce[scenarios], legend=legname(scenarios), cex=cex.legend, bty="n")
 	
@@ -59,7 +59,7 @@ dev.off()
 pdf("figSS1e.pdf", width=panel.width, height=panel.height)
 	par(mar=mar.notitle)
 	
-	plot.WFUN(scenarios, WFUN="function(w) sum(w < -0.1)", ylim=c(0,40), xaxt="n", ylab="Negative connections")
+	plot.WFUN(scenarios, WFUN="function(w) sum(w < -0.1)", ylim=c(0,40), xaxt="n", ylab="Negative regulations")
 	
 	legend("bottomright", lty=lty.sce[scenarios], col=col.sce[scenarios], legend=legname(scenarios), cex=cex.legend, bty="n")
 	
