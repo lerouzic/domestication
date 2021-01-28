@@ -368,6 +368,10 @@ plot.network.feature <- function(mysims, what=c("path"), directed=TRUE, deltaG=1
 			'function(w) igraph::diameter(igraph::graph_from_adjacency_matrix(sign(cleanW(w))))'
 		} else if (what == "clusters") {
 			'function(w) igraph::clusters(igraph::graph_from_adjacency_matrix(sign(cleanW(w))))$no'
+		} else if (what == "centralization") {
+			'function(w) igraph::centr_degree(igraph::graph_from_adjacency_matrix(sign(cleanW(w))))$centralization'
+		} else if (what == "modularity") {
+			'function(w) igraph::modularity(igraph::cluster_walktrap(igraph::graph_from_adjacency_matrix(sign(cleanW(w)))))'
 		} else {
 			stop()
 		}
