@@ -342,7 +342,7 @@ plot.inout.change <- function(mysim, mysim.ref=NULL, regimes=c("s","p","n"), xla
 		pch=1, col=col.sel[regimes], cex=2)
 }
 
-plot.inout.gainloss <- function(mysims, deltaG=NA, xlab="Generation", ylab="Nb connections", ylim=NULL, lty=NULL, ...) {
+plot.inout.gainloss <- function(mysims, deltaG=1, xlab="Generation", ylab="Nb connections", ylim=NULL, lty=NULL, ...) {
 	
 	iogl <- sapply(mysims, function(mysim) {
 		fl <- mean.delta.inout.dyn.cache(outdir.all[[mysim]], deltaG, mc.cores=mc.cores)
@@ -361,7 +361,7 @@ plot.inout.gainloss <- function(mysims, deltaG=NA, xlab="Generation", ylab="Nb c
 	}	
 }
 
-plot.network.feature <- function(mysims, what=c("path"), directed=TRUE, deltaG=NA, ylab=what, xlab="Generation", ylim=NULL, lty=NULL, col=NULL, ...) {
+plot.network.feature <- function(mysims, what=c("path"), directed=TRUE, deltaG=1, ylab=what, xlab="Generation", ylim=NULL, lty=NULL, col=NULL, ...) {
 	callFUN <- if (what == "path") {
 			'function(w) igraph::average.path.length(igraph::graph_from_adjacency_matrix(sign(cleanW(w))))'
 		} else if (what == "diameter") {
@@ -531,7 +531,7 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus),
 }
 
 
-plot.Gdiff <- function(mysims, deltaG=NA, xlab="Generation", ylab="Change in G matrix", ylim=c(0,1), col=NULL, lty=NULL, ...) {
+plot.Gdiff <- function(mysims, deltaG=1, xlab="Generation", ylab="Change in G matrix", ylim=c(0,1), col=NULL, lty=NULL, ...) {
 	gd <- sapply(mysims, function(mysim) {
 		mean.Gdiff.dyn.cache(outdir.all[[mysim]], deltaG, mc.cores=mc.cores)
 	}, USE.NAMES=TRUE, simplify=FALSE)
@@ -573,7 +573,7 @@ plot.Gcor <- function(mysims, xlab="Generations", ylab="Genetic correlations", y
 	}
 }
 
-plot.WFUN <- function(mysims, WFUN="mean", deltaG=NA, xlab="Generation", ylab="FUN(regulation effect)", ylim=c(0,1), col=NULL, lty=NULL, ...) {
+plot.WFUN <- function(mysims, WFUN="mean", deltaG=1, xlab="Generation", ylab="FUN(regulation effect)", ylim=c(0,1), col=NULL, lty=NULL, ...) {
 	wm <- sapply(mysims, function(mysim) {
 		WFUN.dyn.files.cache(outdir.all[[mysim]], WFUN=WFUN, deltaG=deltaG, mc.cores=mc.cores)
 	}, USE.NAMES=TRUE, simplify=FALSE)

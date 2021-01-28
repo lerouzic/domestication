@@ -350,7 +350,7 @@ WFUN.dyn <- function(out.table, WFUN="mean", deltaG=1) {
 	ww
 }
 
-WFUN.dyn.files <- function(out.dir, WFUN="mean", deltaG=NA, mc.cores=1) {
+WFUN.dyn.files <- function(out.dir, WFUN="mean", deltaG=1, mc.cores=1) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
 	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
 	ans <- mclapply(out.files, function(ff) {
@@ -365,7 +365,7 @@ WFUN.dyn.files <- function(out.dir, WFUN="mean", deltaG=NA, mc.cores=1) {
 	colMeans(aa, na.rm=TRUE)
 }
 
-WFUN.dyn.files.cache <- function(out.dir, WFUN="mean", deltaG=NA, mc.cores=1) {
+WFUN.dyn.files.cache <- function(out.dir, WFUN="mean", deltaG=1, mc.cores=1) {
 	cache.fun(WFUN.dyn.files, out.dir=out.dir, WFUN=WFUN, deltaG=deltaG, mc.cores=mc.cores, cache.subdir=paste0("Rcache-W", WFUN))
 }
 
