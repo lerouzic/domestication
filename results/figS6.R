@@ -28,12 +28,11 @@ cn <- colnames(numconn.before.dom$plus)
 group.names.before.dom <- setNames(cn, paste0(toupper(cn), "[", table(sel.before.dom)[cn], "]"))
 group.names.after.dom  <- setNames(cn, paste0(toupper(cn), "[", table(sel.after.dom)[cn],  "]"))
 
-pdf("fig4C.pdf", width=2*panel.width, height=panel.height)
+pdf("figS6.pdf", width=2*panel.width, height=panel.height)
 	layout(t(1:2))
 	
 	plot.numconn.groups(numconn.before.dom, group.names=group.names.before.dom, thresh=0.05)
 	title("Before domestication")
-	subpanel("C")
 	
 	plot.numconn.groups(numconn.after.dom, numconn.ref=numconn.before.dom, group.names=group.names.after.dom, thresh=0.02)
 	title("Present")

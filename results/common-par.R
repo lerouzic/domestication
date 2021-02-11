@@ -52,8 +52,8 @@ legname <- function(nn) {
 		strongsel="Strong selection",
 		strongbot="Strong bottleneck",
 		largenet="Large network", 
-		idplast ="Similar plasticity",
-		cstplast="Constant plasticity")
+		idplast ="Same number of\nplastic genes",
+		cstplast="Plastic genes unchanged")
 		
 	ifelse(nn %in% names(legn), legn[nn], nn)
 }

@@ -2,7 +2,7 @@
 
 source("./common-fig.R")
 
-scenarios <- c("default","nomut","smallsel","strongsel","strongbot","largenet")
+scenarios <- c("default","smallsel","largenet","idplast","cstplast")
 
 y.factor.molec <- c('(""%*% 10^{-4})' = 10000)
 y.factor.expr  <- c('(""%*% 10^{-3})' = 1000)
@@ -17,10 +17,10 @@ ylim.fitness <- c(1e-3, 1)
 ylim.molec   <- c(0, y.factor.molec*1.1e-4)
 ylim.expr    <- c(0, y.factor.expr*1e-3)
 
-pdf("figS7.pdf", width=2*length(scenarios), height = 2*4)
+pdf("figS9.pdf", width=2*length(scenarios), height = 2*4)
 
 layout(matrix(1:(4*length(scenarios)), ncol=length(scenarios), byrow=FALSE))
-par(mar=c(0.5, 0.5, 0.5, 0.5), oma=c(5, 4, 3, 0))
+par(mar=c(0.5, 0.5, 0.5, 0.5), oma=c(5, 4, 5, 0))
 
 for (mysim in scenarios) {
 	firstcol <- mysim == scenarios[1]

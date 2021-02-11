@@ -23,7 +23,7 @@ sel.after.dom [sel.after.dom  == "c"] <- "s"
 sel.before.dom[1] <- sel.after.dom[1] <- "e" # The algorithm cannot know that the first guy is environment
 sel.after.dom <- ifelse(sel.before.dom != sel.after.dom, toupper(sel.after.dom), sel.after.dom)
 
-pdf("figS6C.pdf", width=panel.width, height=panel.height)
+pdf("figS7B.pdf", width=panel.width, height=panel.height)
 	my.col.sel <- col.sel[unique(tolower(c(sel.before.dom,sel.after.dom)))]
 	my.col.sel <- lighten.col(my.col.sel[!is.na(my.col.sel)], factor=0.3)
 
@@ -31,7 +31,7 @@ pdf("figS6C.pdf", width=panel.width, height=panel.height)
 	
 	plot.Gmat.all("default", gens=c(gen.dom, gen.end), absolute=absolute, 
 		cols=my.col.sel, sel1=sel.before.dom, sel2=tolower(sel.after.dom), ylim=c(0,0.8))
-	subpanel("C")
+	subpanel("B")
 		
 	par(fig=c(0.8, 0.95, 0.8, 0.95), new=TRUE, mar=c(0,0,0,0))
 	plot(NULL, xlim=c(0,1), ylim=c(0,1), xlab="", ylab="", axes=FALSE, asp=1)

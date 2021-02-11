@@ -7,7 +7,7 @@ source("../src/analysis_networks.R")
 
 scenarios <- c("default","nobot","noselc")
 
-pdf("figS6A.pdf", width=panel.width, height=panel.height)
+pdf("figS7A.pdf", width=panel.width, height=panel.height)
 	par(mar=mar.notitle)
 
 	plot.Gdiff(scenarios, deltaG=deltaG, xaxt="n", ylim=c(0,0.6))
