@@ -20,7 +20,9 @@ simtag <- c(
 	smallsel="simSmallsel",
 	strongsel="simStrsel",
 	strongbot="simStrongbot",
-	largenet="simLargenet")
+	largenet="simLargenet", 
+	idplast ="simIdplast", 
+	cstplast="simCstplast")
 	
 outdir.all     <- lapply(simtag, function(nn) file.path(cache.dir, nn))
 meansim.all    <- lapply(outdir.all, function(od) mean.sim.cache(od, colnames.pattern=tokeep, mc.cores=mc.cores))

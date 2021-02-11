@@ -9,7 +9,7 @@ suppressMessages(library(inline))      # fact model
 
 source("../src/cache.R")
 
-mc.cores <- min(12, detectCores()-1)
+mc.cores <- min(32, detectCores()-1)
 cache.dir <- default.cache.dir # defined in ../src/cache.R
 
 window.avg <- 1 # Size of the moving average window
@@ -51,7 +51,9 @@ legname <- function(nn) {
 		smallsel="Less selected genes",
 		strongsel="Strong selection",
 		strongbot="Strong bottleneck",
-		largenet="Large network")
+		largenet="Large network", 
+		idplast ="Similar plasticity",
+		cstplast="Constant plasticity")
 		
 	ifelse(nn %in% names(legn), legn[nn], nn)
 }
