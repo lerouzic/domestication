@@ -14,8 +14,8 @@ pdf("figS4A.pdf", width=panel.width, height=panel.height)
 	plot.nconn(scenarios, xaxt="n", ylim=c(40,60))
 	
 	generation.axis()
-	bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
-	selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
+	bottleneck.plot(Ndyn.all[["default"]], y=58, lwd=2)
+	selectionchange.plot(meansim.all[["default"]], y=58, cex=1.5)
 	
 	legend("bottomright", lty=lty.sce[scenarios], col=col.sce[scenarios], legend=legname(scenarios), bty="n", cex=cex.legend)
 	

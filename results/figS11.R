@@ -8,12 +8,12 @@ scenarios <- c("default","smallsel","largenet","idplast","cstplast")
 
 ylim.inout.gainloss<-c(-20,20)
 ylim.norm<-c(0,1.2)
-ylim.nconn<-c(0,120)
+ylim.nclust<-c(6,12)
 ylim.Gdiff<-c(0,0.8)
 
 ylab.inout.gainloss<-"nb connection"
 ylab.norm<-"|reaction norm|"
-ylab.nconn<-"nb connection"
+ylab.nclust<-"nb clusters"
 ylab.Gdiff<-"Change in G matrix"
 
 pdf("figS11.pdf", width=2*length(scenarios), height = 2*4)
@@ -37,7 +37,7 @@ for (mysim in scenarios) {
   bottleneck.plot(Ndyn.all[["default"]], y=19, lwd=2)
   selectionchange.plot(meansim.all[["default"]], y=19, cex=1.5)
   
-  plot.nconn(mysim, ylim=ylim.nconn, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.nconn else "", xpd=if(firstcol) NA else FALSE, lty=1, col="black")
+  plot.network.feature(mysim, what="clusters", ylim=ylim.nclust, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.nclust else "", xpd=if(firstcol) NA else FALSE, lty=1, col="black")
   bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
   selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
   

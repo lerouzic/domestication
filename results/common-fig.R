@@ -279,7 +279,7 @@ plot.norm <- function(mysims, ylim=c(0, 1.2), xlab="Generation", ylab="|Reaction
 }
 
 # Plots the dynamics of the number of connections. 
-plot.nconn <- function(mysims, ylim=NULL, xlab="Generation", ylab="Nb connections", lty=NULL, col=NULL, ...) {
+plot.nconn <- function(mysims, ylim=NULL, xlab="Generation", ylab="Number of connections", lty=NULL, col=NULL, ...) {
 	nconn.all <- sapply(mysims, function(mysim) {
 		mean.connect  <- mean.connect.cache(outdir.all[[mysim]],  mc.cores=mc.cores)
 		mov.avg(mean.connect,  as.numeric(names(mean.connect)),  size=window.avg, min.gen=0)
