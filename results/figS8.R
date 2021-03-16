@@ -15,7 +15,7 @@ ylab.expr    <- parse(text=paste0('"', "Expression variance", ' "*', names(y.fac
 ylim.N       <- c(0, 22000)
 ylim.fitness <- c(1e-3, 1)
 ylim.molec   <- c(0, y.factor.molec*1.1e-4)
-ylim.expr    <- c(0, y.factor.expr*1e-3)
+ylim.expr    <- c(0, y.factor.expr*0.6e-3)
 
 pdf("figS8.pdf", width=2*length(scenarios), height = 2*4)
 
@@ -26,9 +26,9 @@ for (mysim in scenarios) {
 	firstcol <- mysim == scenarios[1]
 	
 	plot.N(mysim, ylim=ylim.N, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.N else "", xpd=if(firstcol) NA else FALSE)
-	bottleneck.plot(Ndyn.all[[mysim]], y=1, lwd=2)
-	selectionchange.plot(meansim.all[[mysim]], y=1, cex=1.5)
-	title(paste0(LETTERS[which(mysim) == scenario], ": ",legname(mysim)), xpd=NA, line=2)
+	bottleneck.plot(Ndyn.all[[mysim]], y=22000, lwd=2)
+	selectionchange.plot(meansim.all[[mysim]], y=22000, cex=1.5)
+	title(paste0(LETTERS[which(mysim == scenarios)], ": ",legname(mysim)), xpd=NA, line=2)
 	
 	plot.fitness(mysim, ylim=ylim.fitness, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.fitness else "", xpd=if(firstcol) NA else FALSE, lty=1, log="y")
 	bottleneck.plot(Ndyn.all[[mysim]], y=1, lwd=2)
@@ -39,8 +39,8 @@ for (mysim in scenarios) {
 	selectionchange.plot(meansim.all[[mysim]], y=1, cex=1.5)	
 
 	plot.var.gene(mysim, what="expression", y.factor=y.factor.expr, ylim=ylim.expr, xaxt="n", yaxt=if(firstcol) "s" else "n", ylab=if(firstcol) ylab.expr else "", xpd=NA)
-	bottleneck.plot(Ndyn.all[[mysim]], y=1, lwd=2)
-	selectionchange.plot(meansim.all[[mysim]], y=1, cex=1.5)	
+	bottleneck.plot(Ndyn.all[[mysim]], y=0.55, lwd=2)
+	selectionchange.plot(meansim.all[[mysim]], y=0.55, cex=1.5)	
 	generation.axis()	
 }
 

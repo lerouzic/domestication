@@ -6,10 +6,10 @@ source("../src/analysis_networks.R")
 scenarios <- c("default","smallsel","largenet","idplast","cstplast")
 
 
-ylim.inout.gainloss<-c(-20,20)
+ylim.inout.gainloss<-c(-25,25)
 ylim.norm<-c(0,1.2)
 ylim.nclust<-c(6,20)
-ylim.Gdiff<-c(0,0.8)
+ylim.Gdiff<-c(0,0.65)
 
 ylab.inout.gainloss<-"nb connection"
 ylab.norm<-"|reaction norm|"
@@ -31,15 +31,15 @@ for (mysim in scenarios) {
   plot.norm(mysim,ylim=ylim.norm,xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.norm else "", xpd=if(firstcol) NA else FALSE, lty=1)
   bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
   selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
-	title(paste0(LETTERS[which(mysim) == scenario], ": ",legname(mysim)), xpd=NA, line=2)
+	title(paste0(LETTERS[which(mysim == scenarios)], ": ",legname(mysim)), xpd=NA, line=2)
   
   plot.inout.gainloss(mysim, deltaG=deltaG, ylim=ylim.inout.gainloss,xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.inout.gainloss else "", xpd=if(firstcol) NA else FALSE, lty=1)
-  bottleneck.plot(Ndyn.all[["default"]], y=19, lwd=2)
-  selectionchange.plot(meansim.all[["default"]], y=19, cex=1.5)
+  bottleneck.plot(Ndyn.all[["default"]], y=24, lwd=2)
+  selectionchange.plot(meansim.all[["default"]], y=24, cex=1.5)
   
   plot.network.feature(mysim, what="clusters", ylim=ylim.nclust, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.nclust else "", xpd=if(firstcol) NA else FALSE, lty=1, col="black")
-  bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
-  selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
+  bottleneck.plot(Ndyn.all[["default"]], y=6, lwd=2)
+  selectionchange.plot(meansim.all[["default"]], y=6, cex=1.5)
   
   plot.Gdiff(mysim, deltaG=deltaG, ylim=ylim.Gdiff,xaxt="n", yaxt=if(firstcol) "s" else "n", ylab=if(firstcol) ylab.Gdiff else "", xpd=if(firstcol) NA else FALSE, lty=1, col="black")
   bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)

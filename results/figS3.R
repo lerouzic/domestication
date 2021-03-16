@@ -16,6 +16,7 @@ plot.dynopt <- function(out.table, xlab="Generation", ...) {
 	sel.before.dom <- sapply(strsplit(segreg, ""), "[",1)
 	sel.after.dom  <- sapply(strsplit(segreg, ""), "[",2)
 	sel.before.dom[1] <- sel.after.dom[1] <- "e" # The algorithm cannot know that the first guy is environment
+	sel.before.dom[sel.before.dom == "c"] <- sel.after.dom[sel.after.dom == "c"] <- "s"
 	sel.after.dom <- ifelse(sel.before.dom != sel.after.dom, toupper(sel.after.dom), sel.after.dom)
 	
 	axis(2, at=ncol(zz):1, label=sel.before.dom, tick=FALSE, cex.axis=0.7, line=-0.5, las=1)
