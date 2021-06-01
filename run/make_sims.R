@@ -36,7 +36,9 @@ all.sims <- rbind(
 	simNomut   = c("param0.txt", "extparam-nomut.txt"),
 	simStrsel  = c("param0.txt", "extparam-strongsel.txt"),
 	simIdplast = c("param0.txt", "extparam-idplast.txt"),
-	simCstplast= c("param0.txt", "extparam-cstplast.txt")
+	simCstplast= c("param0.txt", "extparam-cstplast.txt"),
+	simAfrice  = c("param-africe.txt", "extparam-africe.txt"),
+	simPemil   = c("param-pemil.txt", "extparam-pemil.txt")
 )
 
 for (sim.name in rownames(all.sims)) {
