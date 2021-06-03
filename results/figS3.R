@@ -10,7 +10,7 @@ col.opt <- c("white","blue")
 plot.dynopt <- function(out.table, xlab="Generation", ...) {
 	zz <- as.matrix(out.table[,grepl(colnames(out.table), pattern="FitOpt")])
 	zz <- zz[,ncol(zz):1]
-	image(x=out.table$Gen, y=1:ncol(zz), z=zz, col=colorRampPalette(col.opt)(100), zlim=c(0,1), xlim=c(first.gen, max(out.table$Gen)), xlab=xlab, yaxt="n", ylab="", ...)
+	image(x=out.table$Gen, y=1:ncol(zz), z=zz, col=colorRampPalette(col.opt)(100), zlim=c(0,1), xlim=c(first.gen(mysim), max(out.table$Gen)), xlab=xlab, yaxt="n", ylab="", ...)
 
 	segreg <- selectionregime.detect(out.table)
 	sel.before.dom <- sapply(strsplit(segreg, ""), "[",1)

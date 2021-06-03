@@ -14,7 +14,7 @@ cache.dir <- default.cache.dir # defined in ../src/cache.R
 
 window.avg <- 1 # Size of the moving average window
 window.norm <- 10 # Size of the window for reaction norms
-first.gen  <- 10000  # First generation for the time series
+show.gen  <- 12000  # Number of generations to show on the plots (the first generations (burn-in) are discarded
 deltaG     <- 500 # When tracking evolutionary change
 
 connect.threshold <- 0.1
@@ -53,7 +53,10 @@ legname <- function(nn) {
 		strongbot="Strong bottleneck",
 		largenet="Large network", 
 		idplast ="Same number of\nplastic genes",
-		cstplast="Plastic genes unchanged")
+		cstplast="Plastic genes unchanged", 
+		africe  ="African rice",
+		pemil   ="Pearl millet",
+		tomato  ="Tomato")
 		
 	ifelse(nn %in% names(legn), legn[nn], nn)
 }

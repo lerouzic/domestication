@@ -53,15 +53,22 @@ source("./common-precalc.R")
 #        color scale corresponding to plot.Gmat
 #      
 
+first.gen <- function(mysim) {
+	all.gen <- as.numeric(names(Ndyn.all[[mysim]]))
+	mxx <- max(all.gen)
+	ff <- mxx - show.gen
+	all.gen[which.min(abs(all.gen-ff))]
+}
 
-generation.axis <- function(show.bottleneck=FALSE, ...) {
-	mxx <- max(as.numeric(names(Ndyn.all[["default"]])))
+generation.axis <- function(show.bottleneck=FALSE, mysim="default", ...) {
+	mxx <- max(as.numeric(names(Ndyn.all[[mysim]])))
+	first.g <- first.gen(mysim)
 	if (show.bottleneck) {
-		bd <- unlist(bottleneck.detect(Ndyn.all[["default"]]))
-		toshow <- sort(c(first.gen, mxx, bd))
+		bd <- unlist(bottleneck.detect(Ndyn.all[[mysim]]))
+		toshow <- sort(c(first.g, mxx, bd))
 	} else {
-		toshow <- mxx - pretty(c(0, mxx - first.gen), n=3)
-		toshow <- toshow[toshow > first.gen]
+		toshow <- mxx - pretty(c(0, mxx - first.g), n=3)
+		toshow <- toshow[toshow > first.g]
 	}
 	axis(1, at=toshow, labels = toshow - mxx, ...)
 }
@@ -84,7 +91,7 @@ plot.N <- function(mysim, ylab="Population size", xlab="Generations", ylim=c(0, 
 	vfit <- meansim.all[[mysim]][,"VFit"]
 	gen <-  meansim.all[[mysim]][,"Gen"]
 	
-	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...) 
+	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...) 
 	
 	lines(	x=as.numeric(names(Ndyn.all[[mysim]])), 
 			y=Ndyn.all[[mysim]])
@@ -97,7 +104,7 @@ plot.N <- function(mysim, ylab="Population size", xlab="Generations", ylim=c(0, 
 plot.fitness <- function(mysims, ylab="Fitness", xlab="Generations", ylim=c(0,1), lty=NULL, ...) {
 	gen <-  meansim.all[[mysims[[1]]]][,"Gen"]
 	
-	plot(NULL, xlab=xlab, ylab=ylab, xlim=c(first.gen, max(gen)), ylim=ylim, ...)
+	plot(NULL, xlab=xlab, ylab=ylab, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, ...)
 
 	for (mysim in mysims) {
 		mfit <- meansim.all[[mysim]][,"MFit"]
@@ -122,7 +129,7 @@ plot.var <- function(mysims, what=c("molecular", "expression")[1], ylim=NULL, xl
 	
 	if (is.null(ylim)) ylim <- c(0, y.factor*max(unlist(var.data)))
 
-	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
+	plot(NULL, xlim=c(first.gen(mysims[1], max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
 	
 	for (mysim in mysims) {
 		yy <- rowMeans(var.data[[mysim]]*y.factor)
@@ -152,7 +159,7 @@ plot.var.gene <- function(mysim, what=c("molecular", "expression")[1], ylim=NULL
 
 	if (is.null(ylim)) ylim <- c(0, y.factor*max(var.data))
 
-	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
+	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
 	
 	for (cc in unique(sel.before)) {
 		yy <- (rowMeans(var.data[,sel.before==cc])*y.factor)[gen <= sel.change.gen]
@@ -178,7 +185,7 @@ plot.var.neutral <- function(mysims,  ylim=NULL, xlab="Generation", ylab="Molecu
 		
 		if (mysim == mysims[1]) { # not very clean
 			if (is.null(ylim)) ylim <- c(0, y.factor*max(unlist(var.data)))
-			plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
+			plot(NULL, xlim=c(first.gen(mysim), max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
 		}
 		lines(gen, y.factor*rowMeans(var.data), lty=lty.sce[mysim], col=col.sce[mysim])
 	}
@@ -198,7 +205,7 @@ plot.var.neutral.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Mol
 		
 	if (is.null(ylim)) ylim <- c(0, y.factor*max(var.data))
 
-	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
+	plot(NULL, xlim=c(first.gen(mysim), max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
 	
 	for (cc in unique(sel.before)) {
 		yy <- (rowMeans(var.data[,sel.before==cc])*y.factor)[gen <= sel.change.gen]
@@ -220,7 +227,7 @@ plot.evol <- function(mysims, ylim=NULL, xlab="Generation", ylab="Evolutionary c
 	
 	gen <-  as.numeric(meansim.all[[mysims[1]]][,"Gen"]) # Just for the x scaling
 	
-	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	plot(NULL, xlim=c(first.gen(mysim), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 	
 	for (mysim in mysims) {
 		ev.genes <- mean.Wdiff.dyn.cache(outdir.all[[mysim]], deltaG, mc.cores=mc.cores)[,-1]
@@ -242,7 +249,7 @@ plot.evol.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Evolutiona
 	sel.before <- substr(sel.pattern, 1, 1)
 	
 	if(is.null(ylim)) ylim <- c(0, max(ev.genes))
-	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	plot(NULL, xlim=c(first.gen(mysim), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 	
 	for (cc in unique(sel.before)) {
 		yy <- (rowMeans(ev.genes[,sel.before==cc,drop=FALSE]))[gen <= sel.change.gen]
@@ -263,7 +270,7 @@ plot.evol.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Evolutiona
 plot.norm <- function(mysims, ylim=c(0, 1.2), xlab="Generation", ylab="|Reaction norm|", lty=NULL, ...) {
 	gen <-  as.numeric(meansim.all[[mysims[1]]][,"Gen"])
 	
-	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 		
 	for (mysim in mysims) {
 		mean.norm <-  mean.norm.cache(outdir.all[[mysim]], FUN.to.apply=abs, sliding=TRUE, window.size=window.norm, mc.cores=mc.cores)
@@ -286,7 +293,7 @@ plot.nconn <- function(mysims, ylim=NULL, xlab="Generation", ylab="Number of con
 	}, USE.NAMES=TRUE, simplify=FALSE)
 	
 	plot(NULL, 
-		xlim=c(first.gen, max(as.numeric(names(nconn.all[[1]])))), 
+		xlim=c(first.gen(mysims[1]), max(as.numeric(names(nconn.all[[1]])))), 
 		ylim=if(is.null(ylim)) c(0, max(unlist(nconn.all))) else ylim, 
 		xlab=xlab, ylab=ylab, ...)
 	for (mysim in mysims) {
@@ -352,7 +359,7 @@ plot.inout.gainloss <- function(mysims, deltaG=1, xlab="Generation", ylab="Nb co
 	if (is.null(ylim))
 		ylim <- c(-1,1)*max(unlist(iogl))
 			
-	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	plot(NULL, xlim=c(first.gen[mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 	abline(h=0, col="darkgray", lty=3)
 	
 	for (mysim in mysims) {
@@ -381,7 +388,7 @@ plot.network.feature <- function(mysims, what=c("path"), directed=TRUE, deltaG=1
 	}, USE.NAMES=TRUE, simplify=FALSE)
 	
 	plot(NULL, 
-		xlim=c(first.gen, max(as.numeric(names(netf.all[[1]])))), 
+		xlim=c(first.gen(mysims[1]), max(as.numeric(names(netf.all[[1]])))), 
 		ylim=if(is.null(ylim)) c(0, max(unlist(netf.all), na.rm=TRUE)) else ylim, 
 		xlab=xlab, ylab=ylab, ...)
 	
@@ -542,7 +549,7 @@ plot.Gdiff <- function(mysims, deltaG=1, xlab="Generation", ylab="Change in G ma
 	
 	gen <-as.numeric(names(gd[[1]]))
 
-	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 	
 	for (mysim in mysims) {
 		lines(gen, gd[[mysim]], lty=if(is.null(lty)) lty.sce[mysim] else lty, col=if(is.null(col)) col.sce[mysim] else col)
@@ -556,7 +563,7 @@ plot.GPC <- function(mysims, PC=1, xlab="Generation", ylab="Proportion of total 
 	
 	gen <-as.numeric(names(gpc[[1]]))
 			
-	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 	
 	for (mysim in mysims) {
 		lines(gen, gpc[[mysim]], lty=lty.sce[mysim], col=col.sce[mysim])
@@ -568,7 +575,7 @@ plot.Gcor <- function(mysims, xlab="Generations", ylab="Genetic correlations", y
 	
 	gen <- as.numeric(names(ggc[[1]]))
 	
-	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 	
 	for (mysim in mysims) {
 		gc <- ggc[[mysim]]
@@ -584,7 +591,7 @@ plot.WFUN <- function(mysims, WFUN="mean", deltaG=1, xlab="Generation", ylab="FU
 
 	gen <-as.numeric(names(wm[[1]]))
 
-	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 	
 	for (mysim in mysims) {
 		lines(gen, wm[[mysim]], lty=if(is.null(lty)) lty.sce[mysim] else lty, col=if(is.null(col)) col.sce[mysim] else col)
@@ -598,7 +605,7 @@ plot.Grank <- function(mysims, xlab="Generation", ylab="Effective rank of G", yl
 	
 	gen <-as.numeric(names(gr[[1]]))
 	if (is.null(ylim)) ylim <- c(0, max(unlist(gr)))
-	plot(NULL, xlim=c(first.gen, max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 	
 	for (mysim in mysims) {
 		lines(gen, gr[[mysim]], lty=lty.sce[mysim], col=col.sce[mysim])
