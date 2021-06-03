@@ -279,9 +279,12 @@ create.paramseries <- function(param.template.file, extparam.file, simul.dir, ov
 		par.file.name <- c(par.file.name, file.path(repdir, .repFile(rep, gen)))
 		if (!file.exists(par.file.name[gen + 1]) || overwrite) {
 			optim <- make.randopt(optim, extparam$SCENARIO_PART2)
+			new.psize <- myparam$INIT_PSIZE
+			if ("PSIZE_AFTER" %in% names(extparam))
+				new.psize <- extparam$PSIZE_AFTER
 			write.param(par.file.name[gen + 1],
 				list(FITNESS_OPTIMUM = optim, 
-					INIT_PSIZE      = myparam$INIT_PSIZE,
+					INIT_PSIZE      = new.psize,
 					FILE_NEXTPAR    = suppressWarnings(normalizePath(file.path(repdir, .repFile(rep, gen + 1))))))
 			}
 		}
