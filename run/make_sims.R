@@ -39,6 +39,7 @@ all.sims <- rbind(
 	simCstplast= c("param0.txt", "extparam-cstplast.txt"),
 	simAfrice  = c("param-africe.txt", "extparam-africe.txt"),
 	simPemil   = c("param-pemil.txt", "extparam-pemil.txt"),
+	simTomato  = c("param-tomato.txt", "extparam-tomato.txt"),
 	simStep8   = c("param-8s.txt", "extparam0.txt"),
 	simStep24  = c("param-24s.txt", "extparam0.txt")
 )
