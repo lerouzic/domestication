@@ -91,7 +91,7 @@ plot.N <- function(mysim, ylab="Population size", xlab="Generations", ylim=c(0, 
 	vfit <- meansim.all[[mysim]][,"VFit"]
 	gen <-  meansim.all[[mysim]][,"Gen"]
 	
-	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...) 
+	plot(NULL, xlim=c(first.gen(mysim), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...) 
 	
 	lines(	x=as.numeric(names(Ndyn.all[[mysim]])), 
 			y=Ndyn.all[[mysim]])
@@ -102,7 +102,7 @@ plot.N <- function(mysim, ylab="Population size", xlab="Generations", ylim=c(0, 
 }
 
 plot.fitness <- function(mysims, ylab="Fitness", xlab="Generations", ylim=c(0,1), lty=NULL, ...) {
-	gen <-  meansim.all[[mysims[[1]]]][,"Gen"]
+	gen <-  meansim.all[[mysims[1]]][,"Gen"]
 	
 	plot(NULL, xlab=xlab, ylab=ylab, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, ...)
 
@@ -125,11 +125,11 @@ plot.var <- function(mysims, what=c("molecular", "expression")[1], ylim=NULL, xl
 		stop("plot.var: what= ", what, " is not a valid option.")
 	}
 
-	gen <- as.numeric(meansim.all[[mysims[[1]]]][,"Gen"])
+	gen <- as.numeric(meansim.all[[mysims[1]]][,"Gen"])
 	
 	if (is.null(ylim)) ylim <- c(0, y.factor*max(unlist(var.data)))
 
-	plot(NULL, xlim=c(first.gen(mysims[1], max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
+	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
 	
 	for (mysim in mysims) {
 		yy <- rowMeans(var.data[[mysim]]*y.factor)
@@ -159,7 +159,7 @@ plot.var.gene <- function(mysim, what=c("molecular", "expression")[1], ylim=NULL
 
 	if (is.null(ylim)) ylim <- c(0, y.factor*max(var.data))
 
-	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
+	plot(NULL, xlim=c(first.gen(mysim[1]), max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
 	
 	for (cc in unique(sel.before)) {
 		yy <- (rowMeans(var.data[,sel.before==cc])*y.factor)[gen <= sel.change.gen]
@@ -359,7 +359,7 @@ plot.inout.gainloss <- function(mysims, deltaG=1, xlab="Generation", ylab="Nb co
 	if (is.null(ylim))
 		ylim <- c(-1,1)*max(unlist(iogl))
 			
-	plot(NULL, xlim=c(first.gen[mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 	abline(h=0, col="darkgray", lty=3)
 	
 	for (mysim in mysims) {
