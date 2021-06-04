@@ -1,5 +1,6 @@
 /results/*.pdf
-/results/*launch.sh
+/results/*.png
+/run/*launch.sh
 /paper/*
 !/paper/*.tex
 !/paper/*.bib
