@@ -23,7 +23,16 @@ sel.after.dom [sel.after.dom  == "c"] <- "s"
 sel.before.dom[1] <- sel.after.dom[1] <- "e" # The algorithm cannot know that the first guy is environment
 sel.after.dom <- ifelse(sel.before.dom != sel.after.dom, toupper(sel.after.dom), sel.after.dom)
 
-cex.axis <- 0.5
+cex.axis <- 0.7
+
+plot.axis <- function(side, x, ...) {
+	# R does not like narrow labels for axes. This is a workaround,
+	# calling 'axis' for odd and even labels successively
+	odd  <- seq(1, length(x), 2)
+	even <- seq(2, length(x), 2)
+	axis(side=side, at=(1:ng)[odd], label=x[odd], cex.axis=cex.axis, tick=FALSE, ...)
+	axis(side=side, at=(1:ng)[even], label=x[even], cex.axis=cex.axis, tick=FALSE, ...)
+}
 
 pdf("fig4B.pdf", width=1.2*panel.width, height=panel.height)
 	rl <- 0.2 #relative width of panel 1 (color scale) 
@@ -33,13 +42,13 @@ pdf("fig4B.pdf", width=1.2*panel.width, height=panel.height)
 	plot.Gmat.legend(absolute=absolute)
 	subpanel("B", line=1)
 	
-	par(mar=c(1, 2, 1, 1))
+	par(mar=c(1, 1, 1, 1))
 	plot.Gmat("default", c(gen.dom, gen.end), absolute=absolute, asp=1)
 	# Cosmetic adjustments that depend on the exact plot dimensions
-	axis(1, at=1:ng, sel.before.dom[-1], cex.axis=cex.axis, tick=FALSE, line=-2.3)
-	axis(2, at=1:ng, rev(sel.before.dom[-1]), cex.axis=cex.axis, tick=FALSE, line=-1)
-	axis(3, at=1:ng, sel.after.dom[-1], cex.axis=cex.axis, tick=FALSE, line=-2)
-	axis(4, at=1:ng, rev(sel.after.dom[-1]), cex.axis=cex.axis, tick=FALSE, line=-1.3)
+	plot.axis(1, sel.before.dom[-1], line=-1.7)
+	plot.axis(2, rev(sel.before.dom[-1]), line=-1)
+	plot.axis(3, sel.after.dom[-1], line=-1.3)
+	plot.axis(4, rev(sel.after.dom[-1]), line=-1.3)	
 
 	text(2, 2, "Before domestication", pos=4)
 	text(ng-2, ng-2, "Present", pos=2)
