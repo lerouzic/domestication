@@ -50,6 +50,10 @@ replicate.var <- function(tt) {
 	.rowVars(arr, dims=2)
 }
 
+replicate.quantile <- function(tt, quant) {
+	replicate.apply(tt, quantile, prob=quant)
+}
+
 # Reconstructs the dynamics of the population size N from a replicate directory 
 # (takes a bit of time due to the number of files)
 get.Ndyn <- function(repdir) {
@@ -162,6 +166,20 @@ mean.sim.cache <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=c
 	cache.fun(mean.sim, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-means")
 }
 
+quantile.sim <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, colnames.pattern=NULL) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	tt <- results.table(out.files, mc.cores, max.reps, colnames.pattern=colnames.pattern)
+	ans <- replicate.quantile(tt, quant)
+	rm(tt)
+	gc()
+	return(ans)
+}
+
+quantile.sim.cache <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, colnames.pattern=colnames.pattern) {
+	cache.fun(quantile.sim, out.dir=out.dir, quant=quant, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-quantiles")
+}
+
 # variance of all data tables from a directory
 var.sim <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
@@ -248,4 +266,19 @@ mean.norm <- function(out.dir, max.reps=Inf, FUN.to.apply=identity, mc.cores=1, 
 
 mean.norm.cache <- function(out.dir, max.reps=Inf, FUN.to.apply=identity, mc.cores=1, sliding=TRUE, window.size=10) {
 	cache.fun(mean.norm, out.dir=out.dir, max.reps=max.reps, FUN.to.apply=FUN.to.apply, mc.cores=mc.cores, sliding=sliding, window.size=window.size, cache.subdir="Rcache-norm")
+}
+
+quantile.norm <- function(out.dir, quant=0.5, max.reps=Inf, FUN.to.apply=identity, mc.cores=1, sliding=TRUE, window.size=10) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	tt <- results.table(out.files, mc.cores, max.reps)
+	nn <- mclapply(tt, reaction.norm.dyn, window.size=window.size, sliding=sliding, mc.cores=mc.cores)
+	ans <- replicate.quantile(lapply(nn, FUN.to.apply), quant)
+	rm(tt)
+	gc()
+	return(ans)
+}
+
+quantile.norm.cache <- function(out.dir, qant=0.5, max.reps=Inf, FUN.to.apply=identity, mc.cores=1, sliding=TRUE, window.size=10) {
+	cache.fun(quantile.norm, out.dir=out.dir, quant=quant, max.reps=max.reps, FUN.to.apply=FUN.to.apply, mc.cores=mc.cores, sliding=sliding, window.size=window.size, cache.subdir="Rcache-norm")
 }

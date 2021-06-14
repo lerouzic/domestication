@@ -17,6 +17,8 @@ window.norm <- 10 # Size of the window for reaction norms
 show.gen  <- 12000  # Number of generations to show on the plots (the first generations (burn-in) are discarded
 deltaG     <- 500 # When tracking evolutionary change
 
+quantiles <- c(0.10, 0.90)
+
 connect.threshold <- 0.1
 connect.env       <- 0.5
 

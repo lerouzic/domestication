@@ -85,6 +85,15 @@ lighten.col <- function(colors, factor=0.5) {
     sapply(colors, function(col) { cc <- col2rgb(col); rgb(t(cc + (255 - cc)*factor),max=255) })
 }
 
+makeTransparent<-function(someColor, alpha=100)
+{
+	# From https://stackoverflow.com/questions/8047668/transparent-equivalent-of-given-color
+	# Author: Nick Sabbe
+	# Licence : CC-attribution-SA from the conditions of the website
+	newColor<-col2rgb(someColor)
+	apply(newColor, 2, function(curcoldata){rgb(red=curcoldata[1], green=curcoldata[2], blue=curcoldata[3],alpha=alpha, maxColorValue=255)})
+}
+
 # Total population size and effective population size
 plot.N <- function(mysim, ylab="Population size", xlab="Generations", ylim=c(0, max(Ndyn.all[[mysim]])), ...) {
 	mfit <- meansim.all[[mysim]][,"MFit"]
@@ -267,7 +276,7 @@ plot.evol.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Evolutiona
 }
 
 # Reaction norm, several simulations possible
-plot.norm <- function(mysims, ylim=c(0, 1.2), xlab="Generation", ylab="|Reaction norm|", lty=NULL, ...) {
+plot.norm <- function(mysims, ylim=c(0, 1.2), xlab="Generation", ylab="|Reaction norm|", lty=NULL, quantiles=FALSE, ...) {
 	gen <-  as.numeric(meansim.all[[mysims[1]]][,"Gen"])
 	
 	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
@@ -279,9 +288,24 @@ plot.norm <- function(mysims, ylim=c(0, 1.2), xlab="Generation", ylab="|Reaction
 		yy.ps <- rowMeans(mean.norm[,selpattern.all[[mysim]]=="ps",drop=FALSE])
 		yy.pn <- rowMeans(mean.norm[,selpattern.all[[mysim]]=="pn",drop=FALSE])
 		
-		lines(as.numeric(rownames(mean.norm)), yy.pp, col=col.sel["p"], lty=if(is.null(lty)) lty.sce[mysim] else lty)
-		lines(as.numeric(rownames(mean.norm)), yy.ps, col=col.sel["s"], lty=if(is.null(lty)) lty.sce[mysim] else lty)
-		lines(as.numeric(rownames(mean.norm)), yy.pn, col=col.sel["n"], lty=if(is.null(lty)) lty.sce[mysim] else lty)
+		xx <- as.numeric(rownames(mean.norm))
+		
+		lines(xx, yy.pp, col=col.sel["p"], lty=if(is.null(lty)) lty.sce[mysim] else lty)
+		lines(xx, yy.ps, col=col.sel["s"], lty=if(is.null(lty)) lty.sce[mysim] else lty)
+		lines(xx, yy.pn, col=col.sel["n"], lty=if(is.null(lty)) lty.sce[mysim] else lty)
+		
+		if (quantiles) {
+				q1.norm <- quantile.norm.cache(outdir.all[[mysim]], quant=quantiles[1], FUN.to.apply=abs, sliding=TRUE, window.size=window.norm, mc.cores=mc.cores)
+				q2.norm <- quantile.norm.cache(outdir.all[[mysim]], quant=quantiles[2], FUN.to.apply=abs, sliding=TRUE, window.size=window.norm, mc.cores=mc.cores)
+			
+				yy.pp <- c(rowMeans(q1.norm[,selpattern.all[[mysim]]=="pp",drop=FALSE]), rev(rowMeans(q2.norm[,selpattern.all[[mysim]]=="pp",drop=FALSE]))
+				yy.ps <- c(rowMeans(q1.norm[,selpattern.all[[mysim]]=="ps",drop=FALSE]), rev(rowMeans(q2.norm[,selpattern.all[[mysim]]=="ps",drop=FALSE]))
+				yy.pn <- c(rowMeans(q1.norm[,selpattern.all[[mysim]]=="pn",drop=FALSE]), rev(rowMeans(q2.norm[,selpattern.all[[mysim]]=="pn",drop=FALSE]))
+				
+				polygon(c(xx, rev(xx)), yy.pp, border=NA, col=makeTransparent(col.sel["p"]))
+				polygon(c(xx, rev(xx)), yy.ps, border=NA, col=makeTransparent(col.sel["s"]))
+				polygon(c(xx, rev(xx)), yy.pn, border=NA, col=makeTransparent(col.sel["n"]))
+		}
 	}
 }
 
