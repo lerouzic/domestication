@@ -31,10 +31,9 @@ ylim.Gdiff<-c(0,0.65)
 
 pdf("figS14.pdf", width=2*2*length(scenarios), height = 2*4)
 
-layout(cbind(
-	matrix(1:(4*length(scenarios)), ncol=length(scenarios), byrow=FALSE),
-	4*length(scenarios) + 1 + matrix(1:(4*length(scenarios)), ncol=length(scenarios), byrow=FALSE)
-	))
+layout(
+	matrix(1:(8*length(scenarios)), ncol=2*length(scenarios), byrow=FALSE)
+	)
 par(mar=c(0.5, 0.5, 0.5, 0.5), oma=c(5, 4, 5, 0))
 
 for (mysim in scenarios) {
