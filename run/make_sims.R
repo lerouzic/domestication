@@ -41,7 +41,9 @@ all.sims <- rbind(
 	simPemil   = c("param-pemil.txt", "extparam-pemil.txt"),
 	simTomato  = c("param-tomato.txt", "extparam-tomato.txt"),
 	simStep8   = c("param-8s.txt", "extparam0.txt"),
-	simStep24  = c("param-24s.txt", "extparam0.txt")
+	simStep24  = c("param-24s.txt", "extparam0.txt"),
+	simNostab  = c("param-nostab.txt", "extparam0.txt"),
+	simStab2   = c("param-stab2.txt", "extparam0.txt")
 )
 
 for (sim.name in rownames(all.sims)) {
