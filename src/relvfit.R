@@ -2,14 +2,14 @@
 
 
 relvfit <- function(out.table) {
-	out.table[,"Vfit"]/(out.table[,"Mfit"]^2)
+	out.table[,"VFit"]/(out.table[,"MFit"]^2)
 }
 
 relvfit.dir <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=NULL) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
 	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
 	tt <- results.table(out.files, mc.cores, max.reps, colnames.pattern=colnames.pattern)
-	ans <- lapply(tt, relfit)
+	ans <- lapply(tt, relvfit)
 	rm(tt)
 	gc()
 	return(ans)
@@ -21,7 +21,7 @@ relvfit.mean <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=NUL
 }
 
 relvfit.mean.cache <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=NULL)
-	relvfit.mean(out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-relvfit-mean")
+	cache.fun(relvfit.mean, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-relvfit")
 
 relvfit.quantile <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, colnames.pattern=NULL) {
 	data <- relvfit.dir(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=NULL)
@@ -29,4 +29,4 @@ relvfit.quantile <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, colna
 }
 
 relvfit.quantile.cache <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, colnames.pattern=NULL)
-	relvfit.mean(out.dir=out.dir, quant=quant, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-relvfit-quantile")
+	cache.fun(relvfit.quantile, out.dir=out.dir, quant=quant, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-relvfit")

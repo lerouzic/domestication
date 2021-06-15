@@ -24,7 +24,7 @@ for (mysim in scenarios) {
 
   firstcol <- mysim == scenarios[1]
 
-  plot.norm(mysim, quantiles=TRUE, ylim=ylim.norm,xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.norm else "", xpd=if(firstcol) NA else FALSE, lty=1)
+  plot.norm(mysim, show.quantiles=TRUE, ylim=ylim.norm,xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.norm else "", xpd=if(firstcol) NA else FALSE, lty=1)
   bottleneck.plot(Ndyn.all[[mysim]], y=0, lwd=2)
   selectionchange.plot(meansim.all[[mysim]], y=0, cex=1.5)
 	title(paste0(LETTERS[which(mysim == scenarios)], ": ",legname(mysim)), xpd=NA, line=2)

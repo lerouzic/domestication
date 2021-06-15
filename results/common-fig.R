@@ -4,6 +4,8 @@
 source("./common-precalc.R")
 
 source("../src/relvfit.R")
+source("../src/reactnorm.R")
+
 
 # List of user-friendly functions
 # (x: scalar, v: scalar or vector) 
@@ -281,13 +283,13 @@ plot.evol.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Evolutiona
 }
 
 # Reaction norm, several simulations possible
-plot.norm <- function(mysims, ylim=c(0, 1.2), xlab="Generation", ylab="|Reaction norm|", lty=NULL, quantiles=FALSE, ...) {
+plot.norm <- function(mysims, ylim=c(0, 1.2), xlab="Generation", ylab="|Reaction norm|", lty=NULL, show.quantiles=FALSE, ...) {
 	gen <-  as.numeric(meansim.all[[mysims[1]]][,"Gen"])
 	
 	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 		
 	for (mysim in mysims) {
-		mean.norm <-  mean.norm.cache(outdir.all[[mysim]], FUN.to.apply=abs, sliding=TRUE, window.size=window.norm, mc.cores=mc.cores)
+		mean.norm <-  reaction.norm.mean.cache(outdir.all[[mysim]], FUN.to.apply=abs, sliding=TRUE, window.size=window.norm, mc.cores=mc.cores)
 
 		yy.pp <- rowMeans(mean.norm[,selpattern.all[[mysim]]=="pp",drop=FALSE])
 		yy.ps <- rowMeans(mean.norm[,selpattern.all[[mysim]]=="ps",drop=FALSE])
@@ -299,10 +301,10 @@ plot.norm <- function(mysims, ylim=c(0, 1.2), xlab="Generation", ylab="|Reaction
 		lines(xx, yy.ps, col=col.sel["s"], lty=if(is.null(lty)) lty.sce[mysim] else lty)
 		lines(xx, yy.pn, col=col.sel["n"], lty=if(is.null(lty)) lty.sce[mysim] else lty)
 		
-		if (quantiles) {
-				q1.norm <- quantile.norm.cache(outdir.all[[mysim]], quant=quantiles[1], FUN.to.apply=abs, sliding=TRUE, window.size=window.norm, mc.cores=mc.cores)
-				q2.norm <- quantile.norm.cache(outdir.all[[mysim]], quant=quantiles[2], FUN.to.apply=abs, sliding=TRUE, window.size=window.norm, mc.cores=mc.cores)
-			
+		if (show.quantiles) {
+				q1.norm <- reaction.norm.quantile.cache(outdir.all[[mysim]], quant=quantiles[1], FUN.to.apply=abs, sliding=TRUE, window.size=window.norm, mc.cores=mc.cores)
+				q2.norm <- reaction.norm.quantile.cache(outdir.all[[mysim]], quant=quantiles[2], FUN.to.apply=abs, sliding=TRUE, window.size=window.norm, mc.cores=mc.cores)
+
 				yy.pp <- c(rowMeans(q1.norm[,selpattern.all[[mysim]]=="pp",drop=FALSE]), rev(rowMeans(q2.norm[,selpattern.all[[mysim]]=="pp",drop=FALSE])))
 				yy.ps <- c(rowMeans(q1.norm[,selpattern.all[[mysim]]=="ps",drop=FALSE]), rev(rowMeans(q2.norm[,selpattern.all[[mysim]]=="ps",drop=FALSE])))
 				yy.pn <- c(rowMeans(q1.norm[,selpattern.all[[mysim]]=="pn",drop=FALSE]), rev(rowMeans(q2.norm[,selpattern.all[[mysim]]=="pn",drop=FALSE])))
