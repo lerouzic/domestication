@@ -3,6 +3,8 @@
 
 source("./common-precalc.R")
 
+source("../src/relvfit.R")
+
 # List of user-friendly functions
 # (x: scalar, v: scalar or vector) 
 # more options are available in most cases
@@ -95,9 +97,10 @@ makeTransparent<-function(someColor, alpha=100)
 }
 
 # Total population size and effective population size
-plot.N <- function(mysim, ylab="Population size", xlab="Generations", ylim=c(0, max(Ndyn.all[[mysim]])), ...) {
-	mfit <- meansim.all[[mysim]][,"MFit"]
-	vfit <- meansim.all[[mysim]][,"VFit"]
+plot.N <- function(mysim, ylab="Population size", xlab="Generations", ylim=c(0, max(Ndyn.all[[mysim]])), show.quantiles=FALSE, ...) {
+	vfit  <-  relvfit.mean.cache(outdir.all[[mysim]])
+	q1vfit <- relvfit.quantile.cache(outdir.all[[mysim]], quant=quantiles[1])
+	q2vfit <- relvfit.quantile.cache(outdir.all[[mysim]], quant=quantiles[2])
 	gen <-  meansim.all[[mysim]][,"Gen"]
 	
 	plot(NULL, xlim=c(first.gen(mysim), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...) 
@@ -106,8 +109,10 @@ plot.N <- function(mysim, ylab="Population size", xlab="Generations", ylim=c(0, 
 			y=Ndyn.all[[mysim]])
 			
 	lines(	x=gen, 
-			y=Ndyn.all[[mysim]][as.character(gen)]/(1+4*vfit/mfit/mfit), 
+			y=Ndyn.all[[mysim]][as.character(gen)]/(1+4*vfit), 
 			col="blue")
+	if(show.quantiles)
+		polygon(c(gen, rev(gen)), c(q1vfit, rev(q2vfit)), border=NA, col=makeTransparent("blue"))
 }
 
 plot.fitness <- function(mysims, ylab="Fitness", xlab="Generations", ylim=c(0,1), lty=NULL, ...) {

@@ -180,6 +180,7 @@ quantile.sim.cache <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, col
 	cache.fun(quantile.sim, out.dir=out.dir, quant=quant, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-quantiles")
 }
 
+
 # variance of all data tables from a directory
 var.sim <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1) {
 	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
@@ -190,6 +191,9 @@ var.sim <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1) {
 	gc()
 	return(ans)
 }
+
+
+
 
 # Phenotypic (expression) variation
 pheno.variation <- function(out.table) {

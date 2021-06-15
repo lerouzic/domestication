@@ -25,7 +25,7 @@ par(mar=c(0.5, 0.5, 0.5, 0.5), oma=c(5, 4, 3, 0))
 for (mysim in scenarios) {
 	firstcol <- mysim == scenarios[1]
 	
-	plot.N(mysim, ylim=ylim.N, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.N else "", xpd=if(firstcol) NA else FALSE)
+	plot.N(mysim, ylim=ylim.N, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.N else "", xpd=if(firstcol) NA else FALSE, show.quantiles=TRUE)
 	bottleneck.plot(Ndyn.all[[mysim]], y=22000, lwd=2)
 	selectionchange.plot(meansim.all[[mysim]], y=22000, cex=1.5)
 	title(paste0(LETTERS[which(mysim == scenarios)], ": ",legname(mysim)), xpd=NA, line=2)
