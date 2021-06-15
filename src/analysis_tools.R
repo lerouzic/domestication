@@ -279,6 +279,6 @@ quantile.norm <- function(out.dir, quant=0.5, max.reps=Inf, FUN.to.apply=identit
 	return(ans)
 }
 
-quantile.norm.cache <- function(out.dir, qant=0.5, max.reps=Inf, FUN.to.apply=identity, mc.cores=1, sliding=TRUE, window.size=10) {
+quantile.norm.cache <- function(out.dir, quant=0.5, max.reps=Inf, FUN.to.apply=identity, mc.cores=1, sliding=TRUE, window.size=10) {
 	cache.fun(quantile.norm, out.dir=out.dir, quant=quant, max.reps=max.reps, FUN.to.apply=FUN.to.apply, mc.cores=mc.cores, sliding=sliding, window.size=window.size, cache.subdir="Rcache-norm")
 }

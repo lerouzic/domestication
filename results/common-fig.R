@@ -298,9 +298,9 @@ plot.norm <- function(mysims, ylim=c(0, 1.2), xlab="Generation", ylab="|Reaction
 				q1.norm <- quantile.norm.cache(outdir.all[[mysim]], quant=quantiles[1], FUN.to.apply=abs, sliding=TRUE, window.size=window.norm, mc.cores=mc.cores)
 				q2.norm <- quantile.norm.cache(outdir.all[[mysim]], quant=quantiles[2], FUN.to.apply=abs, sliding=TRUE, window.size=window.norm, mc.cores=mc.cores)
 			
-				yy.pp <- c(rowMeans(q1.norm[,selpattern.all[[mysim]]=="pp",drop=FALSE]), rev(rowMeans(q2.norm[,selpattern.all[[mysim]]=="pp",drop=FALSE]))
-				yy.ps <- c(rowMeans(q1.norm[,selpattern.all[[mysim]]=="ps",drop=FALSE]), rev(rowMeans(q2.norm[,selpattern.all[[mysim]]=="ps",drop=FALSE]))
-				yy.pn <- c(rowMeans(q1.norm[,selpattern.all[[mysim]]=="pn",drop=FALSE]), rev(rowMeans(q2.norm[,selpattern.all[[mysim]]=="pn",drop=FALSE]))
+				yy.pp <- c(rowMeans(q1.norm[,selpattern.all[[mysim]]=="pp",drop=FALSE]), rev(rowMeans(q2.norm[,selpattern.all[[mysim]]=="pp",drop=FALSE])))
+				yy.ps <- c(rowMeans(q1.norm[,selpattern.all[[mysim]]=="ps",drop=FALSE]), rev(rowMeans(q2.norm[,selpattern.all[[mysim]]=="ps",drop=FALSE])))
+				yy.pn <- c(rowMeans(q1.norm[,selpattern.all[[mysim]]=="pn",drop=FALSE]), rev(rowMeans(q2.norm[,selpattern.all[[mysim]]=="pn",drop=FALSE])))
 				
 				polygon(c(xx, rev(xx)), yy.pp, border=NA, col=makeTransparent(col.sel["p"]))
 				polygon(c(xx, rev(xx)), yy.ps, border=NA, col=makeTransparent(col.sel["s"]))
