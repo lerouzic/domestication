@@ -5,6 +5,7 @@ source("./common-precalc.R")
 
 source("../src/relvfit.R")
 source("../src/reactnorm.R")
+source("../src/connect.R")
 
 
 # List of user-friendly functions
@@ -317,10 +318,10 @@ plot.norm <- function(mysims, ylim=c(0, 1.2), xlab="Generation", ylab="|Reaction
 }
 
 # Plots the dynamics of the number of connections. 
-plot.nconn <- function(mysims, ylim=NULL, xlab="Generation", ylab="Number of connections", lty=NULL, col=NULL, ...) {
+plot.nconn <- function(mysims, ylim=NULL, xlab="Generation", ylab="Number of connections", lty=NULL, col=NULL, show.quantiles=FALSE, ...) {
 	nconn.all <- sapply(mysims, function(mysim) {
-		mean.connect  <- mean.connect.cache(outdir.all[[mysim]],  mc.cores=mc.cores)
-		mov.avg(mean.connect,  as.numeric(names(mean.connect)),  size=window.avg, min.gen=0)
+		mean.connect  <- number.connections.mean.cache(outdir.all[[mysim]],  mc.cores=mc.cores)
+#~ 		mov.avg(mean.connect,  as.numeric(names(mean.connect)),  size=window.avg, min.gen=0)
 	}, USE.NAMES=TRUE, simplify=FALSE)
 	
 	plot(NULL, 
@@ -328,7 +329,14 @@ plot.nconn <- function(mysims, ylim=NULL, xlab="Generation", ylab="Number of con
 		ylim=if(is.null(ylim)) c(0, max(unlist(nconn.all))) else ylim, 
 		xlab=xlab, ylab=ylab, ...)
 	for (mysim in mysims) {
-		lines(as.numeric(names(nconn.all[[mysim]])),  nconn.all[[mysim]],  col=if(is.null(col)) col.sce[mysim] else col, lty=if(is.null(lty)) lty.sce[mysim] else lty)
+		mycol <- if(is.null(col)) col.sce[mysim] else col
+		lines(as.numeric(names(nconn.all[[mysim]])),  nconn.all[[mysim]],  col=mycol, lty=if(is.null(lty)) lty.sce[mysim] else lty)
+		if (show.quantiles) {
+			q1 <- number.connections.quantile.cache(outdir.all[[mysim]], quant=quantiles[1], mc.cores=mc.cores)
+			q2 <- number.connections.quantile.cache(outdir.all[[mysim]], quant=quantiles[2], mc.cores=mc.cores)
+			xx <- as.numeric(names(q1))
+			polygon(c(xx, rev(xx)), c(q1, rev(q2)), col=makeTransparent(mycol), border=NA)
+		}
 	}
 }
 
@@ -380,10 +388,10 @@ plot.inout.change <- function(mysim, mysim.ref=NULL, regimes=c("s","p","n"), xla
 		pch=1, col=col.sel[regimes], cex=2)
 }
 
-plot.inout.gainloss <- function(mysims, deltaG=1, xlab="Generation", ylab="Nb connections", ylim=NULL, lty=NULL, ...) {
+plot.inout.gainloss <- function(mysims, deltaG=1, xlab="Generation", ylab="Nb connections", ylim=NULL, lty=NULL, show.quantiles=FALSE, ...) {
 	
 	iogl <- sapply(mysims, function(mysim) {
-		fl <- mean.delta.inout.dyn.cache(outdir.all[[mysim]], deltaG, mc.cores=mc.cores)
+		fl <- delta.inout.mean.cache(outdir.all[[mysim]], deltaG, mc.cores=mc.cores)
 	}, USE.NAMES=TRUE, simplify=FALSE)
 	
 	gen <-as.numeric(rownames(iogl[[1]]))
@@ -395,8 +403,15 @@ plot.inout.gainloss <- function(mysims, deltaG=1, xlab="Generation", ylab="Nb co
 	
 	for (mysim in mysims) {
 		lines(gen, iogl[[mysim]][,"gain"], lty=if(is.null(lty)) lty.sce[mysim] else lty, col=col.gl["Gain"])
-		lines(gen, -iogl[[mysim]][,"loss"], lty=if(is.null(lty)) lty.sce[mysim] else lty, col=col.gl["Loss"])		
-	}	
+		lines(gen, -iogl[[mysim]][,"loss"], lty=if(is.null(lty)) lty.sce[mysim] else lty, col=col.gl["Loss"])
+		if (show.quantiles) {
+			q1 <- delta.inout.quantile.cache(outdir.all[[mysim]], quant=quantiles[1], deltaG=deltaG, mc.cores=mc.cores)
+			q2 <- delta.inout.quantile.cache(outdir.all[[mysim]], quant=quantiles[2], deltaG=deltaG, mc.cores=mc.cores)
+			xx <- as.numeric(rownames(q1))
+			polygon(c(xx, rev(xx)), c(q1[,"gain"], rev(q2[,"gain"])), col=makeTransparent(col.gl["Gain"]), border=NA)
+			polygon(c(xx, rev(xx)), c(-q1[,"loss"], rev(-q2[,"loss"])), col=makeTransparent(col.gl["Loss"]), border=NA)
+		}
+	}
 }
 
 plot.network.feature <- function(mysims, what=c("path"), directed=TRUE, deltaG=1, ylab=what, xlab="Generation", ylim=NULL, lty=NULL, col=NULL, ...) {

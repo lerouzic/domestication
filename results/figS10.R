@@ -29,7 +29,7 @@ for (mysim in scenarios) {
   selectionchange.plot(meansim.all[[mysim]], y=0, cex=1.5)
 	title(paste0(LETTERS[which(mysim == scenarios)], ": ",legname(mysim)), xpd=NA, line=2)
   
-  plot.inout.gainloss(mysim, deltaG=deltaG, ylim=ylim.inout.gainloss,xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.inout.gainloss else "", xpd=if(firstcol) NA else FALSE, lty=1)
+  plot.inout.gainloss(mysim, show.quantiles=TRUE, deltaG=deltaG, ylim=ylim.inout.gainloss,xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.inout.gainloss else "", xpd=if(firstcol) NA else FALSE, lty=1)
   bottleneck.plot(Ndyn.all[[mysim]], y=24, lwd=2)
   selectionchange.plot(meansim.all[[mysim]], y=24, cex=1.5)
   

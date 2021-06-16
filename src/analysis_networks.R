@@ -157,24 +157,6 @@ cleanW.cache <- function(W, epsilon=connect.threshold, env=connect.env, ...) {
 	cache.fun(cleanW, W=W, epsilon=epsilon, env=env, ..., cache.subdir="Rcache-cleanW")
 }
 
-number.connections <- function(W, ...) {
-	cW <- cleanW.cache(W=W, ...)
-	sum(cW != 0)
-}
-
-number.connections.dyn <- function(out.table) { 
-	W.table <- out.table[,grepl(colnames(out.table), pattern="MeanAll")]
-	
-	net.size <- sqrt(ncol(W.table))
-	nb.conn <- sapply(1:nrow(W.table), function(i) { 
-			W <- matrix(unlist(W.table[i,]), ncol=net.size, byrow=TRUE)
-			if(nrow(W) != ncol(W)) return(NA)
-			ans <- try(number.connections(W))
-			if (class(ans) == "try-error") NA else ans
-		})
-	names(nb.conn) <- as.character(out.table[,"Gen"])
-	nb.conn
-}
 
 inout.connections <- function(W, ...) {
 	cW <- cleanW.cache(W=W, ...)
@@ -471,21 +453,7 @@ mean.erankG.dyn.cache <- function(out.dir, mc.cores=1) {
 }
 
 
-# Average out all network connections from a directory 
-mean.connect <- function(out.dir, max.reps=Inf, mc.cores=1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
-	tt <- results.table(out.files, mc.cores, max.reps)
-	nn <- mclapply(tt, number.connections.dyn, mc.cores=mc.cores)
-	ans <- colMeans(do.call(rbind, nn), na.rm=TRUE)
-	rm(tt)
-	gc()
-	return(ans)
-}
 
-mean.connect.cache <- function(out.dir, max.reps=Inf, mc.cores=1) {
-	cache.fun(mean.connect, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, cache.subdir="Rcache-connect")
-}
 
 # Returns a list of complex community objects according to several igraph algorithms
 communities <- function(W, directed=FALSE, ...) {
