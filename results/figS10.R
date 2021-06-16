@@ -33,11 +33,11 @@ for (mysim in scenarios) {
   bottleneck.plot(Ndyn.all[[mysim]], y=24, lwd=2)
   selectionchange.plot(meansim.all[[mysim]], y=24, cex=1.5)
   
-  plot.network.feature(mysim, what="clusters", ylim=ylim.nclust, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.nclust else "", xpd=if(firstcol) NA else FALSE, lty=1, col="black")
+  plot.network.feature(mysim, show.quantiles=TRUE, what="clusters", ylim=ylim.nclust, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.nclust else "", xpd=if(firstcol) NA else FALSE, lty=1, col="black")
   bottleneck.plot(Ndyn.all[[mysim]], y=6, lwd=2)
   selectionchange.plot(meansim.all[[mysim]], y=6, cex=1.5)
   
-  plot.Gdiff(mysim, deltaG=deltaG, ylim=ylim.Gdiff,xaxt="n", yaxt=if(firstcol) "s" else "n", ylab=if(firstcol) ylab.Gdiff else "", xpd=NA, lty=1, col="black")
+  plot.Gdiff(mysim, show.quantiles=TRUE, deltaG=deltaG, ylim=ylim.Gdiff,xaxt="n", yaxt=if(firstcol) "s" else "n", ylab=if(firstcol) ylab.Gdiff else "", xpd=NA, lty=1, col="black")
   bottleneck.plot(Ndyn.all[[mysim]], y=0, lwd=2)
   selectionchange.plot(meansim.all[[mysim]], y=0, cex=1.5)
   generation.axis(mysim=mysim)

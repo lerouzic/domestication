@@ -26,12 +26,12 @@ par(mar=c(0.5, 0.5, 0.5, 0.5), oma=c(5, 4, 5, 0))
 for (mysim in scenarios) {
 	firstcol <- mysim == scenarios[1]
 	
-	plot.N(mysim, ylim=ylim.N, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.N else "", xpd=if(firstcol) NA else FALSE)
+	plot.N(mysim, show.quantiles=TRUE, ylim=ylim.N, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.N else "", xpd=if(firstcol) NA else FALSE)
 	bottleneck.plot(Ndyn.all[[mysim]], y=22000, lwd=2)
 	selectionchange.plot(meansim.all[[mysim]], y=22000, cex=1.5)
 	title(paste0(LETTERS[which(mysim == scenarios)], ": ", if (mysim=="default") "Maize" else legname(mysim)), xpd=NA, line=2)
 	
-	plot.fitness(mysim, ylim=ylim.fitness, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.fitness else "", xpd=if(firstcol) NA else FALSE, lty=1, log="y")
+	plot.fitness(mysim, show.quantiles=TRUE, ylim=ylim.fitness, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.fitness else "", xpd=if(firstcol) NA else FALSE, lty=1, log="y")
 	bottleneck.plot(Ndyn.all[[mysim]], y=1, lwd=2)
 	selectionchange.plot(meansim.all[[mysim]], y=1, cex=1.5)	
 

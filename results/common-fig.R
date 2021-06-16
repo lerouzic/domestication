@@ -6,6 +6,8 @@ source("./common-precalc.R")
 source("../src/relvfit.R")
 source("../src/reactnorm.R")
 source("../src/connect.R")
+source("../src/network.R")
+source("../src/evolGW.R")
 
 
 # List of user-friendly functions
@@ -100,7 +102,7 @@ makeTransparent<-function(someColor, alpha=100)
 }
 
 # Total population size and effective population size
-plot.N <- function(mysim, ylab="Population size", xlab="Generations", ylim=c(0, max(Ndyn.all[[mysim]])), show.quantiles=FALSE, ...) {
+plot.N <- function(mysim, ylab="Population size", xlab="Generations", ylim=c(0, max(Ndyn.all[[mysim]])), show.quantiles=FALSE, print.Ne=TRUE, ...) {
 	vfit  <-  relvfit.mean.cache(outdir.all[[mysim]])
 	q1vfit <- relvfit.quantile.cache(outdir.all[[mysim]], quant=quantiles[1])
 	q2vfit <- relvfit.quantile.cache(outdir.all[[mysim]], quant=quantiles[2])
@@ -108,17 +110,28 @@ plot.N <- function(mysim, ylab="Population size", xlab="Generations", ylim=c(0, 
 	
 	plot(NULL, xlim=c(first.gen(mysim), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...) 
 	
+	nn <- Ndyn.all[[mysim]][as.character(gen)]
+	
 	lines(	x=as.numeric(names(Ndyn.all[[mysim]])), 
 			y=Ndyn.all[[mysim]])
-			
+	
+	Ne <- nn/(1+4*vfit)
 	lines(	x=gen, 
-			y=Ndyn.all[[mysim]][as.character(gen)]/(1+4*vfit), 
+			y=Ne, 
 			col="blue")
-	if(show.quantiles)
-		polygon(c(gen, rev(gen)), c(q1vfit, rev(q2vfit)), border=NA, col=makeTransparent("blue"))
+	if(show.quantiles) {
+		polygon(c(gen, rev(gen)), c(nn, rev(nn))/(1+4*c(q1vfit, rev(q2vfit))), border=NA, col=makeTransparent("blue"))
+	}
+	if (print.Ne) {
+		my.Ne <- Ne[which(names(Ne) == as.character(first.gen(mysim))):length(Ne)]
+		Ne.ref <- min(my.Ne[1], my.Ne[length(my.Ne)])
+		gen.bottle <- range(which(my.Ne < 0.90*Ne.ref))
+		Ne.bottle <- 1/(mean(1/my.Ne[gen.bottle[1]:gen.bottle[2]]))
+		text(x=mean(as.numeric(names(my.Ne[gen.bottle]))), y=min(nn), paste0("Ne =\n", round(Ne.bottle)), pos=3)
+	}
 }
 
-plot.fitness <- function(mysims, ylab="Fitness", xlab="Generations", ylim=c(0,1), lty=NULL, ...) {
+plot.fitness <- function(mysims, show.quantiles=FALSE, ylab="Fitness", xlab="Generations", ylim=c(0,1), lty=NULL, ...) {
 	gen <-  meansim.all[[mysims[1]]][,"Gen"]
 	
 	plot(NULL, xlab=xlab, ylab=ylab, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, ...)
@@ -126,6 +139,12 @@ plot.fitness <- function(mysims, ylab="Fitness", xlab="Generations", ylim=c(0,1)
 	for (mysim in mysims) {
 		mfit <- meansim.all[[mysim]][,"MFit"]
 		lines(gen, mfit, lty=if(is.null(lty)) lty.sce[mysim] else lty)
+		if (show.quantiles) {
+			q1 <- quantile.sim.cache(outdir.all[[mysim]], quant=quantiles[1], mc.cores=mc.cores)[,"MFit"]
+			q2 <- quantile.sim.cache(outdir.all[[mysim]], quant=quantiles[2], mc.cores=mc.cores)[,"MFit"]
+			
+			polygon(c(gen, rev(gen)), c(q1, rev(q2)), col=makeTransparent("black"), border=NA)
+		}
 	}
 }
 
@@ -414,7 +433,7 @@ plot.inout.gainloss <- function(mysims, deltaG=1, xlab="Generation", ylab="Nb co
 	}
 }
 
-plot.network.feature <- function(mysims, what=c("path"), directed=TRUE, deltaG=1, ylab=what, xlab="Generation", ylim=NULL, lty=NULL, col=NULL, ...) {
+plot.network.feature <- function(mysims, what=c("path"), directed=TRUE, deltaG=1, ylab=what, xlab="Generation", ylim=NULL, lty=NULL, col=NULL, show.quantiles=FALSE, ...) {
 	callFUN <- if (what == "path") {
 			'function(w) igraph::average.path.length(igraph::graph_from_adjacency_matrix(sign(cleanW(w))))'
 		} else if (what == "diameter") {
@@ -430,16 +449,23 @@ plot.network.feature <- function(mysims, what=c("path"), directed=TRUE, deltaG=1
 		}
 
 	netf.all <- sapply(mysims, function(mysim) {
-		netf  <- WFUN.dyn.files.cache(outdir.all[[mysim]], WFUN=callFUN, deltaG=deltaG, mc.cores=mc.cores)
+		list(mean = WFUN.mean.cache(outdir.all[[mysim]], WFUN=callFUN, deltaG=deltaG, mc.cores=mc.cores, cache.subdir=paste0("Rcache-", what)),
+					q1    = if (show.quantiles) WFUN.quantile.cache(outdir.all[[mysim]], quant=quantiles[1], WFUN=callFUN, deltaG=deltaG, mc.cores=mc.cores, cache.subdir=paste0("Rcache-", what)) else NA,
+					q2    = if (show.quantiles) WFUN.quantile.cache(outdir.all[[mysim]], quant=quantiles[2], WFUN=callFUN, deltaG=deltaG, mc.cores=mc.cores, cache.subdir=paste0("Rcache-", what)) else NA)
 	}, USE.NAMES=TRUE, simplify=FALSE)
-	
+
 	plot(NULL, 
-		xlim=c(first.gen(mysims[1]), max(as.numeric(names(netf.all[[1]])))), 
+		xlim=c(first.gen(mysims[1]), max(as.numeric(names(netf.all[[1]]$mean)))), 
 		ylim=if(is.null(ylim)) c(0, max(unlist(netf.all), na.rm=TRUE)) else ylim, 
 		xlab=xlab, ylab=ylab, ...)
 	
 	for (mysim in mysims) {
-		lines(as.numeric(names(netf.all[[mysim]])), netf.all[[mysim]],  col=if(is.null(col)) col.sce[mysim] else col, lty=if(is.null(lty)) lty.sce[mysim] else lty)
+		xx <- as.numeric(names(netf.all[[mysim]]$mean))
+		mycol <- if(is.null(col)) col.sce[mysim] else col
+		lines(xx, netf.all[[mysim]]$mean,  col=mycol, lty=if(is.null(lty)) lty.sce[mysim] else lty)
+		if (show.quantiles) {
+			polygon(c(xx, rev(xx)), c(netf.all[[mysim]]$q1, rev(netf.all[[mysim]]$q2)), col=makeTransparent(mycol), border=NA)
+		}
 	}
 }
 
@@ -588,18 +614,25 @@ plot.numconn.groups <- function(numconn, group.names=colnames(numconn$plus),
 }
 
 
-plot.Gdiff <- function(mysims, deltaG=1, xlab="Generation", ylab="Change in G matrix", ylim=c(0,1), col=NULL, lty=NULL, ...) {
+plot.Gdiff <- function(mysims, show.quantiles=FALSE, deltaG=1, xlab="Generation", ylab="Change in G matrix", ylim=c(0,1), col=NULL, lty=NULL, ...) {
 	gd <- sapply(mysims, function(mysim) {
-		mean.Gdiff.dyn.cache(outdir.all[[mysim]], deltaG, mc.cores=mc.cores)
+		list(
+			mean = Gdiff.mean.cache(outdir.all[[mysim]], deltaG, mc.cores=mc.cores),
+			q1   = if (show.quantiles) Gdiff.quantile.cache(outdir.all[[mysim]], quant=quantiles[1], deltaG, mc.cores=mc.cores) else NA,
+			q2   = if (show.quantiles) Gdiff.quantile.cache(outdir.all[[mysim]], quant=quantiles[2], deltaG, mc.cores=mc.cores) else NA)
 	}, USE.NAMES=TRUE, simplify=FALSE)
 	
-	gen <-as.numeric(names(gd[[1]]))
+	gen <-as.numeric(names(gd[[1]]$mean))
 
 	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 	
 	for (mysim in mysims) {
-		lines(gen, gd[[mysim]], lty=if(is.null(lty)) lty.sce[mysim] else lty, col=if(is.null(col)) col.sce[mysim] else col)
-	}	
+		mycol <- if(is.null(col)) col.sce[mysim] else col
+		lines(gen, gd[[mysim]]$mean, lty=if(is.null(lty)) lty.sce[mysim] else lty, col=mycol)
+		if (show.quantiles) {
+			polygon(c(gen, rev(gen)), c(gd[[mysim]]$q1, rev(gd[[mysim]]$q2)), col=makeTransparent(mycol),  border=NA)
+		}
+	}
 }
 
 plot.GPC <- function(mysims, PC=1, xlab="Generation", ylab="Proportion of total variance", ylim=c(0,1), ...) {

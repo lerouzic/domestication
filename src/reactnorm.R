@@ -38,7 +38,7 @@ reaction.norm.mean <- function(out.dir, max.reps=Inf, FUN.to.apply=identity, mc.
 }
 
 reaction.norm.mean.cache <- function(out.dir, max.reps=Inf, FUN.to.apply=identity, mc.cores=1, sliding=TRUE, window.size=10) {
-	cache.fun(mean.norm, out.dir=out.dir, max.reps=max.reps, FUN.to.apply=FUN.to.apply, mc.cores=mc.cores, sliding=sliding, window.size=window.size, cache.subdir="Rcache-norm")
+	cache.fun(reaction.norm.mean, out.dir=out.dir, max.reps=max.reps, FUN.to.apply=FUN.to.apply, mc.cores=mc.cores, sliding=sliding, window.size=window.size, cache.subdir="Rcache-norm")
 }
 
 reaction.norm.quantile <- function(out.dir, quant=0.5, max.reps=Inf, FUN.to.apply=identity, mc.cores=1, sliding=TRUE, window.size=10) {

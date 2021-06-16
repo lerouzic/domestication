@@ -77,6 +77,7 @@ get.Ndyn <- function(repdir) {
 		unlink(ll)
 	myN <- na.omit(myN)[cumsum(!is.na(myN))] # Replace NAs by the last non-NA
 	names(myN) <- sapply(regmatches(ll, regexec(ll, pattern="gen(\\d+)")), "[", 2)
+	names(myN) <- as.character(as.numeric(names(myN)))
 	myN
 }
 
@@ -176,7 +177,7 @@ quantile.sim <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, colnames.
 	return(ans)
 }
 
-quantile.sim.cache <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, colnames.pattern=colnames.pattern) {
+quantile.sim.cache <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, colnames.pattern=NULL) {
 	cache.fun(quantile.sim, out.dir=out.dir, quant=quant, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-quantiles")
 }
 

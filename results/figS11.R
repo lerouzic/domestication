@@ -28,20 +28,20 @@ for (mysim in scenarios) {
   mc.cores <- mem.mc.cores
   if (mysim == "largenet") mc.cores <- min(16, mem.mc.cores)
 
-  plot.norm(mysim,ylim=ylim.norm,xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.norm else "", xpd=if(firstcol) NA else FALSE, lty=1)
+  plot.norm(mysim, show.quantiles=TRUE, ylim=ylim.norm,xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.norm else "", xpd=if(firstcol) NA else FALSE, lty=1)
   bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
   selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
 	title(paste0(LETTERS[which(mysim == scenarios)], ": ",legname(mysim)), xpd=NA, line=2)
   
-  plot.inout.gainloss(mysim, deltaG=deltaG, ylim=ylim.inout.gainloss,xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.inout.gainloss else "", xpd=if(firstcol) NA else FALSE, lty=1)
+  plot.inout.gainloss(mysim, show.quantiles=TRUE, deltaG=deltaG, ylim=ylim.inout.gainloss,xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.inout.gainloss else "", xpd=if(firstcol) NA else FALSE, lty=1)
   bottleneck.plot(Ndyn.all[["default"]], y=24, lwd=2)
   selectionchange.plot(meansim.all[["default"]], y=24, cex=1.5)
   
-  plot.network.feature(mysim, what="clusters", ylim=ylim.nclust, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.nclust else "", xpd=if(firstcol) NA else FALSE, lty=1, col="black")
+  plot.network.feature(mysim, show.quantiles=TRUE, what="clusters", ylim=ylim.nclust, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.nclust else "", xpd=if(firstcol) NA else FALSE, lty=1, col="black")
   bottleneck.plot(Ndyn.all[["default"]], y=6, lwd=2)
   selectionchange.plot(meansim.all[["default"]], y=6, cex=1.5)
   
-  plot.Gdiff(mysim, deltaG=deltaG, ylim=ylim.Gdiff,xaxt="n", yaxt=if(firstcol) "s" else "n", ylab=if(firstcol) ylab.Gdiff else "", xpd=if(firstcol) NA else FALSE, lty=1, col="black")
+  plot.Gdiff(mysim, show.quantiles=TRUE, deltaG=deltaG, ylim=ylim.Gdiff,xaxt="n", yaxt=if(firstcol) "s" else "n", ylab=if(firstcol) ylab.Gdiff else "", xpd=if(firstcol) NA else FALSE, lty=1, col="black")
   bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
   selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
   generation.axis()
