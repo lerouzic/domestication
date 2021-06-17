@@ -27,7 +27,9 @@ simtag <- c(
 	pemil   ="simPemil",
 	tomato  ="simTomato",
 	step8   ="simStep8",
-	step24  ="simStep24"
+	step24  ="simStep24",
+	stab2   ="simStab2",
+	nostab  ="simNostab"
 	)
 	
 outdir.all     <- lapply(simtag, function(nn) file.path(cache.dir, nn))
