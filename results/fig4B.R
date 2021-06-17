@@ -38,11 +38,11 @@ pdf("fig4B.pdf", width=1.2*panel.width, height=panel.height)
 	rl <- 0.2 #relative width of panel 1 (color scale) 
 	layout(t(1:2), width=c(rl, 1-rl))
 	
-	par(mar=c(1, 4, 3, 0.1))
+	par(mar=c(1, 4, mar.notitle[3], 0.1))
 	plot.Gmat.legend(absolute=absolute)
 	subpanel("B", line=1)
 	
-	par(mar=c(1, 1, 1, 1))
+	par(mar=c(1, 1, mar.notitle[3], 1))
 	plot.Gmat("default", c(gen.dom, gen.end), absolute=absolute, asp=1)
 	# Cosmetic adjustments that depend on the exact plot dimensions
 	plot.axis(1, sel.before.dom[-1], line=-1.7)

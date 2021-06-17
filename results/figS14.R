@@ -18,7 +18,7 @@ ylim.fitness <- c(1e-3, 1)
 ylim.molec   <- c(0, y.factor.molec*1.1e-4)
 ylim.expr    <- c(0, y.factor.expr*0.6e-3)
 
-pdf("figS14.pdf", width=2*2*length(scenarios), height = 2*4)
+pdf("figS14.pdf", width=2*length(scenarios), height = 2*4)
 
 layout(
 	matrix(1:(4*length(scenarios)), ncol=length(scenarios), byrow=FALSE)
