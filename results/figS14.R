@@ -21,7 +21,7 @@ ylim.expr    <- c(0, y.factor.expr*0.6e-3)
 pdf("figS14.pdf", width=2*2*length(scenarios), height = 2*4)
 
 layout(
-	matrix(1:(4*length(scenarios)), ncol=2*length(scenarios), byrow=FALSE)
+	matrix(1:(4*length(scenarios)), ncol=length(scenarios), byrow=FALSE)
 	)
 par(mar=c(0.5, 0.5, 0.5, 0.5), oma=c(5, 4, 5, 0))
 
