@@ -16,8 +16,8 @@ pdf("fig2A.pdf", width=panel.width, height=panel.height)
 	selectionchange.plot(meansim.all[["default"]], y=0.24, cex=1.5)
 	generation.axis()
 	
-	legend("topright", lty=c(0, 1, 1, 1), col=c(0, col.sel[unique(sel.pat)]), legend=c("Before dom:", "Stable","Plastic", "Non-selected"), cex=cex.legend, bty="n")
-	legend("right", lty=c(0, lty.sel[unique(sel.pat)]), col=c(0, 1, 1, 1), legend=c("After dom:", "Stable","Plastic", "Non-selected"), cex=cex.legend, bty="n")
+	legend("topright", lty=c(0, lty.sel[unique(sel.pat)]), col=c(0,1,1,1), legend=c("Before dom:", "Stable","Plastic", "Non-selected"), cex=cex.legend, bty="n")
+	legend("right", lty=c(0,1,1,1), col=c(0, col.sel[unique(sel.pat)]), legend=c("After dom:", "Stable","Plastic", "Non-selected"), cex=cex.legend, bty="n")
 
 
 	subpanel("A")

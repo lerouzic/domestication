@@ -80,8 +80,8 @@ generation.axis <- function(show.bottleneck=FALSE, mysim="default", ...) {
 	axis(1, at=toshow, labels = toshow - mxx, ...)
 }
 
-subpanel <- function(x, adj=0.025, col="black", line=-1) {
-	title(outer=FALSE, adj=adj ,main=x,cex.main=1.4,col.main=col,line=line)
+subpanel <- function(x, adj=0.025, col="black", line=-1, outer=FALSE) {
+	title(adj=adj, main=x, cex.main=1.4, col.main=col, line=line, outer=outer)
 }
 
 avgcol <- function(c1, c2) {
@@ -290,7 +290,7 @@ plot.evol.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Evolutiona
 	for (cc in unique(sel.before)) {
 		yy <- (rowMeans(ev.genes[,sel.before==cc,drop=FALSE]))[gen <= sel.change.gen]
 		my.yy <- mov.avg(yy, gen[gen <= sel.change.gen], size=window.avg, min.gen=0)
-		lines(as.numeric(names(my.yy)), my.yy, lty=1, col=col.sel[cc])
+		lines(as.numeric(names(my.yy)), my.yy, col=1, lty=lty.sel[cc])
 	}
 	if (sel.change.gen < max(gen))
 		for (cc in unique(sel.pattern)) {
@@ -298,7 +298,7 @@ plot.evol.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Evolutiona
 			my.yy <- mov.avg(yy, gen[gen >= sel.change.gen], size=window.avg, min.gen=0)
 			mysel.before <- substr(cc, 1, 1)
 			mysel.after  <- substr(cc, 2, 2)
-			lines(as.numeric(names(my.yy)), my.yy, lty=lty.sel[mysel.after], col=col.sel[mysel.before])
+			lines(as.numeric(names(my.yy)), my.yy, col=col.sel[mysel.after], lty=lty.sel[mysel.before])
 		}
 }
 
