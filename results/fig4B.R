@@ -34,25 +34,24 @@ plot.axis <- function(side, x, ...) {
 	axis(side=side, at=(1:ng)[even], label=x[even], cex.axis=cex.axis, tick=FALSE, ...)
 }
 
-pdf("fig4B.pdf", width=1.2*panel.width, height=panel.height)
-	rl <- 0.2 #relative width of panel 1 (color scale) 
+pdf("fig4B.pdf", width=panel.width, height=panel.height)
+	rl <- 0.25 #relative width of panel 1 (color scale) 
 	layout(t(1:2), width=c(rl, 1-rl))
 	
-	par(mar=c(1, 4, mar.notitle[3], 0.1))
+	par(mar=c(3, 4, 3, 0.1))
 	plot.Gmat.legend(absolute=absolute)
-	subpanel("B", line=1)
-	
+	subpanel("B", line=1.5)
+		
 	par(mar=c(1, 1, mar.notitle[3], 1))
 	plot.Gmat("default", c(gen.dom, gen.end), absolute=absolute, asp=1)
 	# Cosmetic adjustments that depend on the exact plot dimensions
-	plot.axis(1, sel.before.dom[-1], line=-1.7)
+	plot.axis(1, sel.before.dom[-1], line=-3.9)
 	plot.axis(2, rev(sel.before.dom[-1]), line=-1)
-	plot.axis(3, sel.after.dom[-1], line=-1.3)
+	plot.axis(3, sel.after.dom[-1], line=-3.6)
 	plot.axis(4, rev(sel.after.dom[-1]), line=-1.3)	
 
 	text(2, 2, "Before domestication", pos=4)
 	text(ng-2, ng-2, "Present", pos=2)
-
 
 
 dev.off()
