@@ -36,15 +36,15 @@ plot.axis <- function(side, x, ...) {
 }
 
 lines.sep <- function(side, sel, ...) {
-	sep <- which(diff(charToRaw(toupper(sel))) != 0)
+	sep <- which(diff(sapply(toupper(sel), function(cc) strtoi(charToRaw(cc), 16L))) != 0)
 	if (side == 1)
-		arrows(x0=sep+0.5, x1=sep+0.5, y0=0.5, y1=length(sep)-sep-1, length=0, ...)
+		arrows(x0=sep+0.5, x1=sep+0.5, y0=0.5, y1=length(sel)-sep+0.5, length=0, ...)
 	if (side == 2)
-		arrows(x0=0.5, x1=length(sep)-sep-1, y0=sep+0.5, y1=sep+0.5, length=0, ...)
+		arrows(x0=0.5, x1=length(sel)-sep+0.5, y0=sep+0.5, y1=sep+0.5, length=0, ...)
 	if (side == 3)
-		arrows(x0=sep+0.5, x1=sep+0.5, y0=length(sep), y1=length(sep) - sep, length=0, ...)
+		arrows(x0=sep+0.5, x1=sep+0.5, y0=length(sel)+0.5, y1=length(sel)-sep+0.5, length=0, ...)
 	if (side == 4)
-		arrows(x0=length(sep), x1=length(sep)-sep, y0=sep+0.5, y1=sep+0.5, lenght=0, ...)
+		arrows(x0=length(sel)+0.5, x1=length(sel)-sep+0.5, y0=sep+0.5, y1=sep+0.5, length=0, ...)
 }
 
 pdf("fig4B.pdf", width=panel.width, height=panel.height)
@@ -63,9 +63,9 @@ pdf("fig4B.pdf", width=panel.width, height=panel.height)
 	plot.axis(2, rev(sel.before.dom[-1]), line=-1)
 	lines.sep(2, rev(sel.before.dom[-1]), col=col.sep)
 	plot.axis(3, sel.after.dom[-1], line=-3.6)
-	lines.sep(3, sel.after.dom[-1], col=col.sep)
+	lines.sep(3, sel.after.dom[-1], col=makeTransparent(col.sep))
 	plot.axis(4, rev(sel.after.dom[-1]), line=-1.3)	
-	lines.sep(4, rev(sel.after.dom[-1]), col=col.sep)
+	lines.sep(4, rev(sel.after.dom[-1]), col=makeTransparent(col.sep))
 
 	text(2, 2, "Before domestication", pos=4)
 	text(ng-2, ng-2, "Present", pos=2)
