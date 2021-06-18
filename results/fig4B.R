@@ -8,6 +8,7 @@ source("../src/analysis_networks.R")
 
 # Plotting correlations
 absolute <- TRUE     # absolute value for correlations? 
+col.sep="red"
 mysim <- "default"
 
 gen.dom <- selectionchange.detect(meansim.all[[mysim]])
@@ -34,6 +35,18 @@ plot.axis <- function(side, x, ...) {
 	axis(side=side, at=(1:ng)[even], label=x[even], cex.axis=cex.axis, tick=FALSE, ...)
 }
 
+lines.sep <- function(side, sel, ...) {
+	sep <- which(diff(charToRaw(toupper(sel))) != 0)
+	if (side == 1)
+		arrows(x0=sep+0.5, x1=sep+0.5, y0=0.5, y1=length(sep)-sep-1, length=0, ...)
+	if (side == 2)
+		arrows(x0=0.5, x1=length(sep)-sep-1, y0=sep+0.5, y1=sep+0.5, length=0, ...)
+	if (side == 3)
+		arrows(x0=sep+0.5, x1=sep+0.5, y0=length(sep), y1=length(sep) - sep, length=0, ...)
+	if (side == 4)
+		arrows(x0=length(sep), x1=length(sep)-sep, y0=sep+0.5, y1=sep+0.5, lenght=0, ...)
+}
+
 pdf("fig4B.pdf", width=panel.width, height=panel.height)
 	rl <- 0.25 #relative width of panel 1 (color scale) 
 	layout(t(1:2), width=c(rl, 1-rl))
@@ -46,9 +59,13 @@ pdf("fig4B.pdf", width=panel.width, height=panel.height)
 	plot.Gmat("default", c(gen.dom, gen.end), absolute=absolute, asp=1)
 	# Cosmetic adjustments that depend on the exact plot dimensions
 	plot.axis(1, sel.before.dom[-1], line=-3.9)
+	lines.sep(1, sel.before.dom[-1], col=col.sep)
 	plot.axis(2, rev(sel.before.dom[-1]), line=-1)
+	lines.sep(2, rev(sel.before.dom[-1]), col=col.sep)
 	plot.axis(3, sel.after.dom[-1], line=-3.6)
+	lines.sep(3, sel.after.dom[-1], col=col.sep)
 	plot.axis(4, rev(sel.after.dom[-1]), line=-1.3)	
+	lines.sep(4, rev(sel.after.dom[-1]), col=col.sep)
 
 	text(2, 2, "Before domestication", pos=4)
 	text(ng-2, ng-2, "Present", pos=2)
