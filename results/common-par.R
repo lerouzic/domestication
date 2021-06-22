@@ -28,6 +28,7 @@ cex.legend <- 0.8
 panel.width  <- 4
 panel.height <- 4
 mar.notitle <- c(4.5, 4.5, 0.5, 0.5)
+mar.title   <- c(4.5, 4.5, 3,   0.5)
 
 col.sel <- c(c="blue", s="blue", p="red", n="black")
 lty.sel <- c(c=1, s=1, p=2, n=3)
