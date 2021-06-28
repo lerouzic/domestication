@@ -41,7 +41,7 @@ for (mysim in scenarios) {
 	plot.var.gene(mysim, what="expression", y.factor=y.factor.expr, ylim=ylim.expr, xaxt="n", yaxt=if(firstcol) "s" else "n", ylab=if(firstcol) ylab.expr else "", xpd=NA)
 	bottleneck.plot(Ndyn.all[[mysim]], y=0.58, lwd=2)
 	selectionchange.plot(meansim.all[[mysim]], y=0.58, cex=1.5)	
-	generation.axis()
+	generation.axis(mysim=mysim)
 }
 
 dev.off()
