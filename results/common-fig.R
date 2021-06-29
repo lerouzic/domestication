@@ -214,10 +214,10 @@ plot.var.gene <- function(mysim, what=c("molecular", "expression")[1], ylim=NULL
 }
 
 
-plot.var.neutral <- function(mysims,  ylim=NULL, xlab="Generation", ylab="Molecular variance", expr.thresh=0.1, y.factor=1, ...) {
+plot.var.neutral <- function(mysims,  ylim=NULL, xlab="Generation", ylab="Molecular variance", expr.thresh=0.1, algorithm=c("lowexpr", "cleanW")[1], y.factor=1, ...) {
 	
 	for (mysim in mysims) {
-		var.data <- molec.variation.neutral.files.cache(outdir.all[[mysim]], expr.thresh=expr.thresh, mc.cores=mc.cores)[,-1]
+		var.data <- molec.variation.neutral.mean.cache(outdir.all[[mysim]], expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores)[,-1]
 		gen <- as.numeric(rownames(var.data))
 		
 		if (mysim == mysims[1]) { # not very clean
@@ -229,9 +229,9 @@ plot.var.neutral <- function(mysims,  ylim=NULL, xlab="Generation", ylab="Molecu
 }
 
 
-plot.var.neutral.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Molecular variance", expr.thresh=0.1, y.factor=1, ...) {
+plot.var.neutral.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Molecular variance", expr.thresh=0.1, algorithm=c("lowexpr", "cleanW")[1], y.factor=1, ...) {
 
-	var.data <- molec.variation.neutral.files.cache(outdir.all[[mysim]], expr.thresh=expr.thresh, mc.cores=mc.cores)[,-1]
+	var.data <- molec.variation.neutral.mean.cache(outdir.all[[mysim]], expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores)[,-1]
 	
 	gen <- as.numeric(rownames(var.data))
 	sel.change.gen <- try(selectionchange.detect(meansim.all[[mysim]]), silent=TRUE)
