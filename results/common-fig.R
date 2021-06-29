@@ -8,6 +8,7 @@ source("../src/reactnorm.R")
 source("../src/connect.R")
 source("../src/network.R")
 source("../src/evolGW.R")
+source("../src/variation.R")
 
 
 # List of user-friendly functions
