@@ -1,7 +1,7 @@
 # Number of network connections
 
 number.connections <- function(W, ...) {
-	cW <- cleanW.cache(W=W, ...)
+	cW <- cleanW(W=W, ...)
 	sum(cW != 0)
 }
 
@@ -53,7 +53,7 @@ number.connections.quantile.cache <- function(out.dir, quant=0.5, max.reps=Inf, 
 ################################################# In/Out connections
 
 inout.connections <- function(W, ...) {
-	cW <- cleanW.cache(W=W, ...)
+	cW <- cleanW(W=W, ...)
 	list(connect.in=rowSums(cW != 0), connect.out=colSums(cW != 0))
 }
 
@@ -77,8 +77,8 @@ inout.gen.cache <- function(out.dir, gen, mc.cores=1) {
 }
 
 delta.inout <- function(W, Wref) {
-	cW <- cleanW.cache(W)
-	cWref <- cleanW.cache(Wref)
+	cW <- cleanW(W)
+	cWref <- cleanW(Wref)
 	
 	c(gain=sum(cWref == 0 & cW != 0), loss=sum(cWref != 0 & cW == 0))
 }

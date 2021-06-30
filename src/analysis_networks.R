@@ -153,12 +153,6 @@ cleanW <- function(W, epsilon=connect.threshold, env=connect.env, ...) {
 	cW
 }
 
-cleanW.cache <- function(W, epsilon=connect.threshold, env=connect.env, ...) {
-	cache.fun(cleanW, W=W, epsilon=epsilon, env=env, ..., cache.subdir="Rcache-cleanW")
-}
-
-
-
 delta.Wdiff <- function(W, W.ref) {
 	# Euclidian distance line by line
 	sqrt(rowSums((W-W.ref)^2))
@@ -330,7 +324,7 @@ mean.erankG.dyn.cache <- function(out.dir, mc.cores=1) {
 
 # Returns a list of complex community objects according to several igraph algorithms
 communities <- function(W, directed=FALSE, ...) {
-	cW <- cleanW.cache(W, ...)
+	cW <- cleanW(W, ...)
 	
 	Wgraph <- igraph::graph_from_adjacency_matrix(sign(cW))
 	if (!directed) 
@@ -373,7 +367,7 @@ communities.dyn.files.cache <- function(out.dir, directed=FALSE, mc.cores=1) {
 }
 
 numconn.groups <- function(W, groups, ...) {
-	cW <- cleanW.cache(W=W, ...)
+	cW <- cleanW(W=W, ...)
 	ug <- sort(unique(groups))
 	nconn.plus <- nconn.minus <- matrix(0, ncol=length(ug), nrow=length(ug))
 	rownames(nconn.plus) <- rownames(nconn.minus) <- colnames(nconn.plus) <- colnames(nconn.minus) <- ug
