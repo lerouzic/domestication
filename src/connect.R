@@ -113,7 +113,7 @@ delta.inout.mean <- function(out.dir, deltaG=NA, mc.cores=1) {
 }
 
 delta.inout.mean.cache <- function(out.dir, deltaG=NA, mc.cores=1) {
-	cache.fun(delta.inout.mean, out.dir=out.dir, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-inout")
+	cache.fun(delta.inout.mean, out.dir=out.dir, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-inout", file.prefix=basename(out.dir))
 }
 
 delta.inout.quantile <- function(out.dir, quant=0.5, deltaG=NA, mc.cores=1) {
@@ -122,7 +122,7 @@ delta.inout.quantile <- function(out.dir, quant=0.5, deltaG=NA, mc.cores=1) {
 }
 
 delta.inout.quantile.cache <- function(out.dir, quant=0.5, deltaG=NA, mc.cores=1) {
-	cache.fun(delta.inout.quantile, out.dir=out.dir, quant=quant, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-inout")
+	cache.fun(delta.inout.quantile, out.dir=out.dir, quant=quant, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-inout", file.prefix=basename(out.dir))
 }
 
 

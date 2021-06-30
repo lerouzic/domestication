@@ -82,7 +82,7 @@ get.Ndyn <- function(repdir) {
 }
 
 get.Ndyn.cache <- function(repdir) {
-	cache.fun(get.Ndyn, repdir=repdir, cache.subdir="Rcache-Ndyn")
+	cache.fun(get.Ndyn, repdir=repdir, cache.subdir="Rcache-Ndyn", file.prefix=basename(repdir))
 }
 
 # Detects the begining and the end of the bottleneck(s?) from the dynamics of N
@@ -164,7 +164,7 @@ mean.sim <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=NULL) {
 }
 
 mean.sim.cache <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=colnames.pattern) {
-	cache.fun(mean.sim, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-means")
+	cache.fun(mean.sim, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-means", file.prefix=basename(out.dir))
 }
 
 quantile.sim <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, colnames.pattern=NULL) {
@@ -178,7 +178,7 @@ quantile.sim <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, colnames.
 }
 
 quantile.sim.cache <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, colnames.pattern=NULL) {
-	cache.fun(quantile.sim, out.dir=out.dir, quant=quant, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-quantiles")
+	cache.fun(quantile.sim, out.dir=out.dir, quant=quant, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-quantiles", file.prefix=basename(out.dir))
 }
 
 

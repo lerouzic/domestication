@@ -3,10 +3,10 @@ suppressMessages(library(digest))
 
 default.cache.dir <- "../cache/"
 
-cache.fun <- function(FUN, ..., cache.dir=default.cache.dir, cache.subdir="misc", cache.file=NULL, rds.version=2, irr.args = "mc.cores") {
+cache.fun <- function(FUN, ..., cache.dir=default.cache.dir, cache.subdir="misc", cache.file=NULL, file.prefix="", rds.version=2, irr.args = "mc.cores") {
 	if (is.null(cache.file)) {
 		args <- list(...)
-		cache.file <- paste0(digest(args[! names(args) %in% irr.args]), ".rds")
+		cache.file <- paste0(file.prefix, "-", digest(args[! names(args) %in% irr.args]), ".rds")
 	}
 	use.cache <- !is.null(cache.dir)
 	if (!use.cache) warning ("No cache dir specified. Recalculating...")

@@ -40,7 +40,7 @@ Gdiff.mean <- function(out.dir, deltaG=NA, mc.cores=1) {
 }
 
 Gdiff.mean.cache <- function(out.dir, deltaG=NA, mc.cores=1) {
-	cache.fun(Gdiff.mean, out.dir=out.dir, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-Gdiff")
+	cache.fun(Gdiff.mean, out.dir=out.dir, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-Gdiff", file.prefix=basename(out.dir))
 }
 
 Gdiff.quantile <- function(out.dir, quant=0.5, deltaG=NA, mc.cores=1) {
@@ -49,5 +49,5 @@ Gdiff.quantile <- function(out.dir, quant=0.5, deltaG=NA, mc.cores=1) {
 }
 
 Gdiff.quantile.cache <- function(out.dir, quant=0.5, deltaG=NA, mc.cores=1) {
-	cache.fun(Gdiff.quantile, out.dir=out.dir, quant=quant, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-Gdiff")
+	cache.fun(Gdiff.quantile, out.dir=out.dir, quant=quant, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-Gdiff", file.prefix=basename(out.dir))
 }

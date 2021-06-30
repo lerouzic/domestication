@@ -66,7 +66,7 @@ Wgen.files <- function(out.dir, gen) {
 }
 
 Wgen.files.cache <- function(out.dir, gen) {
-	cache.fun(Wgen.files, out.dir=out.dir, gen=gen, cache.subdir="Rcache-Wgen")
+	cache.fun(Wgen.files, out.dir=out.dir, gen=gen, cache.subdir="Rcache-Wgen", file.prefix=basename(out.dir))
 }
 
 Wlist.table <- function(out.table) {
@@ -106,7 +106,7 @@ Ggen.files <- function(out.dir, gen, mc.cores=1) {
 }
 
 Ggen.files.cache <- function(out.dir, gen, mc.cores=1) {
-	cache.fun(Ggen.files, out.dir=out.dir, gen=gen, mc.cores=mc.cores, cache.subdir="Rcache-Ggen")
+	cache.fun(Ggen.files, out.dir=out.dir, gen=gen, mc.cores=mc.cores, cache.subdir="Rcache-Ggen", file.prefix=basename(out.dir))
 }
 
 Glist.table <- function(out.table) {
@@ -187,7 +187,7 @@ mean.Wdiff.dyn <- function(out.dir, deltaG=NA, mc.cores=1) {
 }
 
 mean.Wdiff.dyn.cache <- function(out.dir, deltaG=NA, mc.cores=1) {
-	cache.fun(mean.Wdiff.dyn, out.dir=out.dir, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-Wdiff")
+	cache.fun(mean.Wdiff.dyn, out.dir=out.dir, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-Wdiff", file.prefix=basename(out.dir))
 }
 
 
@@ -221,7 +221,7 @@ mean.Gcor.dyn.files <- function(out.dir, mc.cores=1) {
 }
 
 mean.Gcor.dyn.files.cache <- function(out.dir, mc.cores=1) {
-	cache.fun(mean.Gcor.dyn.files, out.dir=out.dir, mc.cores=mc.cores, cache.subdir="Rcache-Gcor")
+	cache.fun(mean.Gcor.dyn.files, out.dir=out.dir, mc.cores=mc.cores, cache.subdir="Rcache-Gcor", file.prefix=basename(out.dir))
 }
 
 
@@ -281,7 +281,7 @@ mean.propPC.dyn <- function(out.files, PC=1, mc.cores=1) {
 }
 
 mean.propPC.dyn.cache <- function(out.dir, PC=1, mc.cores=1) {
-	cache.fun(mean.propPC.dyn, out.dir=out.dir, PC=PC, mc.cores=mc.cores, cache.subdir="Rcache-propPC")
+	cache.fun(mean.propPC.dyn, out.dir=out.dir, PC=PC, mc.cores=mc.cores, cache.subdir="Rcache-propPC", file.prefix=basename(out.dir))
 }
 
 erankG.dyn <- function(out.table, mc.cores=1) {
@@ -322,7 +322,7 @@ mean.erankG.dyn <- function(out.dir, mc.cores=1) {
 }
 
 mean.erankG.dyn.cache <- function(out.dir, mc.cores=1) {
-	cache.fun(mean.erankG.dyn, out.dir=out.dir, mc.cores=mc.cores, cache.subdir="Rcache-erankG")
+	cache.fun(mean.erankG.dyn, out.dir=out.dir, mc.cores=mc.cores, cache.subdir="Rcache-erankG", file.prefix=basename(out.dir))
 }
 
 
@@ -369,7 +369,7 @@ communities.dyn.files <- function(out.dir, directed=FALSE, mc.cores=1) {
 }
 
 communities.dyn.files.cache <- function(out.dir, directed=FALSE, mc.cores=1) {
-	cache.fun(communities.dyn.files, out.dir=out.dir, directed=directed, mc.cores=mc.cores, cache.subdir="Rcache-commdyn")
+	cache.fun(communities.dyn.files, out.dir=out.dir, directed=directed, mc.cores=mc.cores, cache.subdir="Rcache-commdyn", file.prefix=basename(out.dir))
 }
 
 numconn.groups <- function(W, groups, ...) {

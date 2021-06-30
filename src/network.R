@@ -28,7 +28,7 @@ WFUN.mean <- function(out.dir, WFUN="mean", deltaG=1, mc.cores=1) {
 }
 
 WFUN.mean.cache <- function(out.dir, WFUN="mean", deltaG=1, mc.cores=1, cache.subdir=paste0("Rcache-W", WFUN)) {
-	cache.fun(WFUN.mean, out.dir=out.dir, WFUN=WFUN, deltaG=deltaG, mc.cores=mc.cores, cache.subdir=cache.subdir)
+	cache.fun(WFUN.mean, out.dir=out.dir, WFUN=WFUN, deltaG=deltaG, mc.cores=mc.cores, cache.subdir=cache.subdir, file.prefix=basename(out.dir))
 }
 
 WFUN.quantile <- function(out.dir, WFUN="mean", quant=0.5, deltaG=1, mc.cores=1) {
@@ -37,5 +37,5 @@ WFUN.quantile <- function(out.dir, WFUN="mean", quant=0.5, deltaG=1, mc.cores=1)
 }
 
 WFUN.quantile.cache <- function(out.dir, WFUN="mean", quant=0.5, deltaG=1, mc.cores=1, cache.subdir=paste0("Rcache-W", WFUN)) {
-	cache.fun(WFUN.quantile, out.dir=out.dir, WFUN=WFUN, quant=quant, deltaG=deltaG, mc.cores=mc.cores, cache.subdir=cache.subdir)
+	cache.fun(WFUN.quantile, out.dir=out.dir, WFUN=WFUN, quant=quant, deltaG=deltaG, mc.cores=mc.cores, cache.subdir=cache.subdir, file.prefix=basename(out.dir))
 }

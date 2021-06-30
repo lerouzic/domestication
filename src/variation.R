@@ -26,12 +26,13 @@ molec.variation.neutral.lowexpr <- function(out.table, expr.thresh) {
 }
 
 model.variation.neutral.cleanW <- function(out.table, expr.thresh, gen=out.table$Gen[nrow(out.table)], env=0.5) {
+	print("cleanW")
 	allvar <- colnames(out.table)[grep(colnames(out.table), pattern="VarAll")]
 	W.table <- out.table[out.table$Gen == gen, grepl(colnames(out.table), pattern="MeanAll")]
 	W <- matrix(unlist(W.table, ncol= sqrt(ncol(W.table))), byrow=TRUE)
 	cW <- cleanW(W, epsilon=expr.thresh, env=env) # or cleanW.cache? Is there any gain?
 	which.neutral <- which(t(W != cW))            # W is given by row in out.table
-	if (length(which.neutral) == 0) return NULL
+	if (length(which.neutral) == 0) return (NULL)
 	ans <- out.table[,all.var[which.neutral]]
 	rownames(ans) <- as.character(out.table[,"Gen"])
 	ans
@@ -61,5 +62,5 @@ molec.variation.neutral.mean <- function(out.dir, expr.thresh, algorithm=c("lowe
 }
 
 molec.variation.neutral.mean.cache <- function(out.dir, expr.thresh, algorithm=c("lowexpr", "cleanW")[1], mc.cores=1) {
-	cache.fun(molec.variation.neutral.files, out.dir=out.dir, expr.thresh=expr.thresh, mc.cores=mc.cores, cache.subdir="Rcache-vneutral")
+	cache.fun(molec.variation.neutral.mean, out.dir=out.dir, expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores, cache.subdir="Rcache-vneutral", file.prefix=basename(out.dir))
 }

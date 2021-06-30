@@ -21,7 +21,7 @@ relvfit.mean <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=NUL
 }
 
 relvfit.mean.cache <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=NULL)
-	cache.fun(relvfit.mean, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-relvfit")
+	cache.fun(relvfit.mean, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-relvfit", file.prefix=basename(out.dir))
 
 relvfit.quantile <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, colnames.pattern=NULL) {
 	data <- relvfit.dir(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=NULL)
@@ -29,4 +29,4 @@ relvfit.quantile <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, colna
 }
 
 relvfit.quantile.cache <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, colnames.pattern=NULL)
-	cache.fun(relvfit.quantile, out.dir=out.dir, quant=quant, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-relvfit")
+	cache.fun(relvfit.quantile, out.dir=out.dir, quant=quant, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-relvfit", file.prefix=basename(out.dir) )
