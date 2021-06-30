@@ -158,66 +158,6 @@ cleanW.cache <- function(W, epsilon=connect.threshold, env=connect.env, ...) {
 }
 
 
-inout.connections <- function(W, ...) {
-	cW <- cleanW.cache(W=W, ...)
-	list(connect.in=rowSums(cW != 0), connect.out=colSums(cW != 0))
-}
-
-# in/out connections at a specific generation
-inout.gen <- function(out.dir, gen, mc.cores=1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
-	ans <- mclapply(out.files, function(ff) {
-		tt <- read.table(ff, header=TRUE)
-		if (!gen %in% tt$Gen) return(NA)
-		W <- tt[tt[,"Gen"] == gen, grepl(colnames(tt), pattern="MeanAll")]
-		rm(tt); gc()
-		W <- matrix(unlist(W), ncol=sqrt(length(W)), byrow=TRUE)
-		inout.connections(W)
-	}, mc.cores=mc.cores)
-	ans[!sapply(ans, function(x) length(x) < 2 || is.na(x))]
-}
-
-inout.gen.cache <- function(out.dir, gen, mc.cores=1) {
-	cache.fun(inout.gen, out.dir=out.dir, gen=gen, mc.cores=mc.cores, cache.subdir="Rcache-inout")
-}
-
-delta.inout <- function(W, Wref) {
-	cW <- cleanW.cache(W)
-	cWref <- cleanW.cache(Wref)
-	
-	c(gain=sum(cWref == 0 & cW != 0), loss=sum(cWref != 0 & cW == 0))
-}
-
-# Returns two columns: one with the gains, 
-delta.inout.dyn <- function(out.table, deltaG=1, mc.cores=1) {
-	gen <- out.table[,"Gen"]
-	seqgen <- seq(1, length(gen), length.out=min(length(gen), 1+gen[length(gen)] %/% deltaG))
-	listW <- Wlist.table(out.table[seqgen,])
-	
-	ans <- mclapply(1:(length(listW)-1), function(i) delta.inout(listW[[i+1]], listW[[i]]), mc.cores=mc.cores)
-	ans <- do.call(rbind, ans)
-	rownames(ans) <- as.character(gen[seqgen])[-1]
-	ans
-}
-
-mean.delta.inout.dyn <- function(out.dir, deltaG=NA, mc.cores=1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
-	ans <- mclapply(out.files, function(ff) {
-		tt <- read.table(ff, header=TRUE)
-		delta.inout.dyn(tt, deltaG, mc.cores=1)
-	}, mc.cores=mc.cores)
-	l.ans <- sapply(ans, nrow)
-	ans <- ans[l.ans == max(l.ans)] # removing incomplete data sets (ongoing simulations)
-	aa <- do.call(abind, c(ans, list(along=3)))
-	rowMeans(aa, dims=2)
-}
-
-mean.delta.inout.dyn.cache <- function(out.dir, deltaG=NA, mc.cores=1) {
-	cache.fun(mean.delta.inout.dyn, out.dir=out.dir, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-dinout")
-}
-
 
 delta.Wdiff <- function(W, W.ref) {
 	# Euclidian distance line by line
@@ -251,46 +191,6 @@ mean.Wdiff.dyn.cache <- function(out.dir, deltaG=NA, mc.cores=1) {
 }
 
 
-delta.Gdiff <- function(G, G.ref) {
-	# A bit of cleaning is necessary : first generation and "environmental" gene can mess up the vcov
-	if (any(!is.finite(G)) || any(!is.finite(G.ref))) return(NA)
-	diag(G)[diag(G) < 1e-8] <- 1e-8
-	diag(G.ref)[diag(G.ref) < 1e-8] <- 1e-8
-	# covtransf is defined in common-precalc.R, it turns vcov into distance matrices
-	mt <- try(mantel.rtest(covtransf(G), covtransf(G.ref), nrepet=1)$obs)
-	if (class(mt) == "try-error") mt <- 1
-	1 - mt
-}
-
-delta.Gdiff.dyn <- function(out.table, deltaG=NA, mc.cores=1) {
-	gen <- out.table[,"Gen"]
-	seqgen <- seq(1, length(gen), length.out=min(length(gen), 1+gen[length(gen)] %/% deltaG))
-	listG <- Glist.table(out.table[seqgen,])
-	
-	ans <- mclapply(1:(length(listG)-1), function(i) delta.Gdiff(listG[[i+1]], listG[[i]]), mc.cores=mc.cores)
-	ans <- do.call(c, ans)
-	names(ans) <- as.character(gen[seqgen])[-1]
-	ans	
-}
-
-mean.Gdiff.dyn <- function(out.dir, deltaG=NA, mc.cores=1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
-	ans <- mclapply(out.files, function(ff) {
-		tt <- read.table(ff, header=TRUE)
-		delta.Gdiff.dyn(tt, deltaG, mc.cores=1)
-	}, mc.cores=mc.cores)
-
-	ansl <- sapply(ans, length)
-	ans <- ans[ansl == max(ansl)]
-	aa <- do.call(rbind, ans)
-	colMeans(aa, na.rm=TRUE)
-}
-
-mean.Gdiff.dyn.cache <- function(out.dir, deltaG=NA, mc.cores=1) {
-	cache.fun(mean.Gdiff.dyn, out.dir=out.dir, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-Gdiff")
-}
-
 Gcor.dyn <- function(out.table) {
 	.meancor <- function(G) {
 		diag(G)[diag(G) < 1e-12] <- 1e-12 # Prevent numerical errors 
@@ -322,33 +222,6 @@ mean.Gcor.dyn.files <- function(out.dir, mc.cores=1) {
 
 mean.Gcor.dyn.files.cache <- function(out.dir, mc.cores=1) {
 	cache.fun(mean.Gcor.dyn.files, out.dir=out.dir, mc.cores=mc.cores, cache.subdir="Rcache-Gcor")
-}
-
-WFUN.dyn <- function(out.table, WFUN="mean", deltaG=1) {
-	gen <- out.table[,"Gen"]
-	seqgen <- seq(1, length(gen), length.out=min(length(gen), 1+gen[length(gen)] %/% deltaG))
-	listW <- Wlist.table(out.table[seqgen,])
-	ww <- unlist(lapply(listW, eval(parse(text=WFUN))))
-	ww
-}
-
-WFUN.dyn.files <- function(out.dir, WFUN="mean", deltaG=1, mc.cores=1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
-	ans <- mclapply(out.files, function(ff) {
-		tt <- read.table(ff, header=TRUE)
-		wm <- WFUN.dyn(tt, WFUN=WFUN, deltaG=deltaG)
-		rm(tt)
-		wm
-	}, mc.cores=mc.cores)
-	ansl <- sapply(ans, length)
-	ans <- ans[ansl==max(ansl)]
-	aa <- do.call(rbind, ans)
-	colMeans(aa, na.rm=TRUE)
-}
-
-WFUN.dyn.files.cache <- function(out.dir, WFUN="mean", deltaG=1, mc.cores=1) {
-	cache.fun(WFUN.dyn.files, out.dir=out.dir, WFUN=WFUN, deltaG=deltaG, mc.cores=mc.cores, cache.subdir=paste0("Rcache-W", WFUN))
 }
 
 
