@@ -32,7 +32,7 @@ number.connections.dir <- function(out.dir, max.reps=Inf, mc.cores=1) {
 # Average out all network connections from a directory 
 number.connections.mean <- function(out.dir, max.reps=Inf, mc.cores=1) {
 	data <- number.connections.dir(out.dir, max.reps, mc.cores=mc.cores)
-	colMeans(do.call(rbind, nn), na.rm=TRUE)
+	colMeans(do.call(rbind, data), na.rm=TRUE)
 }
 
 number.connections.mean.cache <- function(out.dir, max.reps=Inf, mc.cores=1) {
