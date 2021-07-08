@@ -37,11 +37,11 @@ for (mysim in scenarios) {
 	bottleneck.plot(Ndyn.all[[mysim]], y=1, lwd=2)
 	selectionchange.plot(meansim.all[[mysim]], y=1, cex=1.5)	
 
-	plot.var.gene(mysim, what="molecular", y.factor=y.factor.molec, ylim=ylim.molec, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.molec else "", xpd=if(firstcol) NA else FALSE)
+	plot.var.neutral(mysim, show.quantiles=TRUE, algorithm=neutral.algo, y.factor=y.factor.molec, ylim=ylim.molec, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.molec else "", xpd=if(firstcol) NA else FALSE)
 	bottleneck.plot(Ndyn.all[[mysim]], y=1, lwd=2)
 	selectionchange.plot(meansim.all[[mysim]], y=1, cex=1.5)	
 
-	plot.var.gene(mysim, what="expression", y.factor=y.factor.expr, ylim=ylim.expr, xaxt="n", yaxt=if(firstcol) "s" else "n", ylab=if(firstcol) ylab.expr else "", xpd=NA)
+	plot.var(mysim, what="expression", show.quantiles=TRUE, y.factor=y.factor.expr, ylim=ylim.expr, xaxt="n", yaxt=if(firstcol) "s" else "n", ylab=if(firstcol) ylab.expr else "", xpd=NA)
 	bottleneck.plot(Ndyn.all[[mysim]], y=0.58, lwd=2)
 	selectionchange.plot(meansim.all[[mysim]], y=0.58, cex=1.5)	
 	generation.axis(mysim=mysim)	

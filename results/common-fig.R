@@ -151,7 +151,7 @@ plot.fitness <- function(mysims, show.quantiles=FALSE, ylab="Fitness", xlab="Gen
 
 # Variances
 
-plot.var <- function(mysims, what=c("molecular", "expression")[1], ylim=NULL, xlab="Generation", ylab=NULL, y.factor=1, ...) {
+plot.var <- function(mysims, what=c("molecular", "expression")[1], ylim=NULL, xlab="Generation", ylab=NULL, y.factor=1, show.quantiles=FALSE, ...) {
 	if (what == "molecular") {
 		var.data <- sapply(mysims, function(mysim) molec.variation(meansim.all[[mysim]])[,-1], USE.NAMES=TRUE, simplify=FALSE)
 		if (is.null(ylab)) ylab <- "Molecular variance"
@@ -169,9 +169,20 @@ plot.var <- function(mysims, what=c("molecular", "expression")[1], ylim=NULL, xl
 	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
 	
 	for (mysim in mysims) {
+		col <- if (mysim %in% names(col.sce)) col.sce[mysim] else "black"
+		lty <- if (mysim %in% names(lty.sce)) lty.sce[mysim] else 1
 		yy <- rowMeans(var.data[[mysim]]*y.factor)
 		my.yy <- mov.avg(yy, gen, size=window.avg)
-		lines(as.numeric(names(my.yy)), my.yy, lty=lty.sce[mysim], col=col.sce[mysim])
+		lines(as.numeric(names(my.yy)), my.yy, lty=lty, col=col)
+		
+		if (show.quantiles) {
+			yy.q1 <- apply(var.data[[mysim]]*y.factor, 1, quantile, prob=quantiles[1])
+			yy.q2 <- apply(var.data[[mysim]]*y.factor, 1, quantile, prob=quantiles[2])
+			my.yy.q1 <- mov.avg(yy.q1, gen, size=window.avg)
+			my.yy.q2 <- mov.avg(yy.q2, gen, size=window.avg)
+			xx <- as.numeric(names(my.yy))
+			polygon(c(xx, rev(xx)), c(my.yy.q1, rev(my.yy.q2)), col=makeTransparent(col), border=NA)
+		}
 	}
 }
 
@@ -214,17 +225,24 @@ plot.var.gene <- function(mysim, what=c("molecular", "expression")[1], ylim=NULL
 }
 
 
-plot.var.neutral <- function(mysims,  ylim=NULL, xlab="Generation", ylab="Molecular variance", expr.thresh=0.1, algorithm=c("lowexpr", "cleanW")[1], y.factor=1, ...) {
+plot.var.neutral <- function(mysims,  ylim=NULL, xlab="Generation", ylab="Molecular variance", expr.thresh=0.1, algorithm=c("lowexpr", "cleanW")[1], y.factor=1, show.quantiles=FALSE, ...) {
 	
 	for (mysim in mysims) {
-		var.data <- molec.variation.neutral.mean.cache(outdir.all[[mysim]], expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores)[,-1]
+		var.data <- molec.variation.neutral.all.mean.cache(outdir.all[[mysim]], expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores)[,-1]
 		gen <- as.numeric(rownames(var.data))
+		col <- if (mysim %in% col.sce) col.sce[mysim] else "black"
+		lty <- if (mysim %in% lty.sce) lty.sce[mysim] else 1
 		
 		if (mysim == mysims[1]) { # not very clean
 			if (is.null(ylim)) ylim <- c(0, y.factor*max(unlist(var.data)))
 			plot(NULL, xlim=c(first.gen(mysim), max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
 		}
-		lines(gen, y.factor*rowMeans(var.data), lty=lty.sce[mysim], col=col.sce[mysim])
+		lines(gen, y.factor*rowMeans(var.data), lty=lty, col=col)
+		if (show.quantiles) {
+			q1 <- molec.variation.neutral.all.quantile.cache(outdir.all[[mysim]], quant=quantiles[1], expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores)[,-1]
+			q2 <- molec.variation.neutral.all.quantile.cache(outdir.all[[mysim]], quant=quantiles[2], expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores)[,-1]
+			polygon(c(gen, rev(gen)), c(y.factor*rowMeans(q1), rev(y.factor*rowMeans(q2))), border=NA, col=makeTransparent(col))
+		}
 	}
 }
 

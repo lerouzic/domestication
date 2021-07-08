@@ -39,6 +39,8 @@ col.algo <- c( # modularity algorithms
 	walktrap="tomato", 
 	fastgreedy="darkolivegreen",
 	labelprop="lightblue")
+
+neutral.algo <- "cleanW"
 	
 col.gl <- c(Gain="deeppink", Loss="seagreen4")
 col.cor <- c("red", "white", "black") # for correlations -1, 0, 1

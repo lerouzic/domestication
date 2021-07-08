@@ -15,6 +15,34 @@ molec.variation <- function(out.table) {
 	t(apply(out.table[,allvar], 1, function(x) { rowMeans(matrix(x, ncol=n.genes, byrow=TRUE)) }))
 }
 
+molec.variation.dir <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern="VarAll") {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	tt <- results.table(out.files, mc.cores, max.reps, colnames.pattern)
+	ans <- lapply(tt, molec.variation)
+	rm(tt)
+	gc()
+	return(ans)
+}
+
+molec.variation.mean <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern="VarAll") {
+	data <- molec.variation.dir(out.dir, max.reps, mc.cores, colnames.pattern)
+	colMeans(do.call(rbind, data))
+}
+
+molec.variation.mean.cache <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern="VarAll")
+	cache.fun(molec.variation.mean, out.dir=out.dir, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-molvar", file.prefix=basename(out.dir))
+
+molec.variation.quantile <- function(quant=0.5, max.reps=Inf, mc.cores=1, colnames.pattern="VarAll") {
+	data <- molec.variation.dir(out.dir, max.reps, mc.cores, colnames.pattern)
+	apply(do.call(rbind, data), 2, quantile, prob=quant)
+}
+
+molec.variation.quantile.cache <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, colnames.pattern="VarAll")
+	cache.fun(molec.variation.quantile, out.dir=out.dir, quand=quant, max.reps=max.reps, mc.cores=mc.cores, colnames.pattern=colnames.pattern, cache.subdir="Rcache-molvar", file.prefix=basename(out.dir))
+
+# Molecular (approximately) neutral variation
+
 molec.variation.neutral.lowexpr <- function(out.table, expr.thresh) {
 	allvar <- colnames(out.table)[grep(colnames(out.table), pattern="VarAll")]
 	avg.expr <- colMeans(out.table[,grepl(colnames(out.table), pattern="MPhen")])[-1]
@@ -55,12 +83,40 @@ molec.variation.neutral.dir <- function(out.dir, expr.thresh, algorithm=c("lowex
 	ans
 }
 
-molec.variation.neutral.mean <- function(out.dir, expr.thresh, algorithm=c("lowexpr", "cleanW")[1], mc.cores=1) {
+# Mean for each gene
+
+molec.variation.neutral.gene.mean <- function(out.dir, expr.thresh, algorithm=c("lowexpr", "cleanW")[1], mc.cores=1) {
 	data <- molec.variation.neutral.dir(out.dir=out.dir, expr.thresh=expr.thresh, mc.cores=mc.cores)
 	arr <- do.call(abind, c(data, list(along=3)))
 	rowMeans(arr, dims=2)
 }
 
-molec.variation.neutral.mean.cache <- function(out.dir, expr.thresh, algorithm=c("lowexpr", "cleanW")[1], mc.cores=1) {
-	cache.fun(molec.variation.neutral.mean, out.dir=out.dir, expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores, cache.subdir="Rcache-vneutral", file.prefix=basename(out.dir))
+molec.variation.neutral.gene.mean.cache <- function(out.dir, expr.thresh, algorithm=c("lowexpr", "cleanW")[1], mc.cores=1) {
+	cache.fun(molec.variation.neutral.gene.mean, out.dir=out.dir, expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores, cache.subdir="Rcache-vmgneutral", file.prefix=basename(out.dir))
+}
+
+
+# Mean of all genes
+
+molec.variation.neutral.all.mean <- function(out.dir, expr.thresh, algorithm=c("lowexpr", "cleanW")[1], mc.cores=1) {
+	data <- molec.variation.neutral.dir(out.dir=out.dir, expr.thresh=expr.thresh, mc.cores=mc.cores)
+	browser()
+	arr <- do.call(cbind, lapply(data, function(dd) if (is.null(dd)) NULL else rowMeans(dd)))
+	rowMeans(arr)
+}
+
+molec.variation.neutral.all.mean.cache <- function(out.dir, expr.thresh, algorithm=c("lowexpr", "cleanW")[1], mc.cores=1) {
+	cache.fun(molec.variation.neutral.all.mean, out.dir=out.dir, expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores, cache.subdir="Rcache-vmaneutral", file.prefix=basename(out.dir))
+}
+
+# Quantiles of all genes
+
+molec.variation.neutral.all.quantile <- function(out.dir, quant=0.5, expr.thresh, algorithm=c("lowexpr", "cleanW")[1], mc.cores=1) {
+	data <- molec.variation.neutral.dir(out.dir=out.dir, expr.thresh=expr.thresh, mc.cores=mc.cores)
+	arr <- do.call(cbind, lapply(data, function(dd) if (is.null(dd)) NULL else rowMeans(dd)))
+	apply(arr, 1, quantile, prob=quant)
+}
+
+molec.variation.neutral.all.quantile.cache <- function(out.dir, quant=0.5, expr.thresh, algorithm=c("lowexpr", "cleanW")[1], mc.cores=1) {
+	cache.fun(molec.variation.neutral.all.quantile, out.dir=out.dir, quant=quant, expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores, cache.subdir="Rcache-vqaneutral", file.prefix=basename(out.dir))
 }
