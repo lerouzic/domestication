@@ -20,8 +20,7 @@ number.connections.dyn <- function(out.table) {
 }
 
 number.connections.dir <- function(out.dir, max.reps=Inf, mc.cores=1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir)
 	tt <- results.table(out.files, mc.cores, max.reps)
 	ans <- mclapply(tt, number.connections.dyn, mc.cores=mc.cores)
 	rm(tt)
@@ -59,8 +58,7 @@ inout.connections <- function(W, ...) {
 
 # in/out connections at a specific generation
 inout.gen <- function(out.dir, gen, mc.cores=1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir)
 	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		if (!gen %in% tt$Gen) return(NA)
@@ -96,8 +94,7 @@ delta.inout.dyn <- function(out.table, deltaG=1, mc.cores=1) {
 }
 
 delta.inout.dir <- function(out.dir, deltaG=NA, mc.cores=1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir)
 	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		delta.inout.dyn(tt, deltaG, mc.cores=1)

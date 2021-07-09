@@ -22,8 +22,7 @@ Gdiff.dyn <- function(out.table, deltaG=NA, mc.cores=1) {
 }
 
 Gdiff.dir <- function(out.dir, deltaG=NA, mc.cores=1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir)
 	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		Gdiff.dyn(tt, deltaG, mc.cores=1)

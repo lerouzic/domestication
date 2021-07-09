@@ -6,8 +6,7 @@ relvfit <- function(out.table) {
 }
 
 relvfit.dir <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=NULL) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir)
 	tt <- results.table(out.files, mc.cores, max.reps, colnames.pattern=colnames.pattern)
 	ans <- lapply(tt, relvfit)
 	rm(tt)

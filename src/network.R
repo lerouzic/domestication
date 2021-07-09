@@ -9,8 +9,7 @@ WFUN.dyn <- function(out.table, WFUN="mean", deltaG=1) {
 }
 
 WFUN.dir <- function(out.dir, WFUN="mean", deltaG=1, mc.cores=1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir)
 	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		wm <- WFUN.dyn(tt, WFUN=WFUN, deltaG=deltaG)

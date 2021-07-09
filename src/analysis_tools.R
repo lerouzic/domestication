@@ -161,8 +161,7 @@ results.table <- function(out.files, mc.cores=1, max.reps=length(out.files), ver
 
 # Average out all data tables from a directory
 mean.sim <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=NULL) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir)
 	tt <- results.table(out.files, mc.cores, max.reps, colnames.pattern=colnames.pattern)
 	ans <- replicate.mean(tt)
 	rm(tt)
@@ -175,8 +174,7 @@ mean.sim.cache <- function(out.dir, max.reps=Inf, mc.cores=1, colnames.pattern=c
 }
 
 quantile.sim <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, colnames.pattern=NULL) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir)
 	tt <- results.table(out.files, mc.cores, max.reps, colnames.pattern=colnames.pattern)
 	ans <- replicate.quantile(tt, quant)
 	rm(tt)
@@ -191,8 +189,7 @@ quantile.sim.cache <- function(out.dir, quant=0.5, max.reps=Inf, mc.cores=1, col
 
 # variance of all data tables from a directory
 var.sim <- function(out.dir, max.reps=Inf, mc.cores=detectCores()-1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir)
 	tt <- results.table(out.files, mc.cores, max.reps)
 	ans <- replicate.var(tt)
 	rm(tt)

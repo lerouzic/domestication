@@ -53,8 +53,7 @@ model.M2 <- function(W, S0=rep(a, nrow(W)), a=0.2, env=0.5, steps=20, measure=4,
 # Extraction of W and G matrices from files
 
 Wgen.files <- function(out.dir, gen) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir) 
 	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		if (!gen %in% tt[,"Gen"]) return(NULL)
@@ -81,8 +80,7 @@ Wlist.table <- function(out.table) {
 }
 
 Wlist.files <- function(out.dir) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir) 
 	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		Wlist.table(tt)
@@ -91,8 +89,7 @@ Wlist.files <- function(out.dir) {
 }
 
 Ggen.files <- function(out.dir, gen, mc.cores=1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir) 
 	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		if (!gen %in% tt[,"Gen"]) return(NULL)
@@ -121,8 +118,7 @@ Glist.table <- function(out.table) {
 }
 
 Glist.files <- function(out.dir) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir) 
 	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		gl <- Glist.table(tt)
@@ -169,8 +165,7 @@ delta.Wdiff.dyn <- function(out.table, deltaG=NA, mc.cores=1) {
 }
 
 mean.Wdiff.dyn <- function(out.dir, deltaG=NA, mc.cores=1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir)
 	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		delta.Wdiff.dyn(tt, deltaG, mc.cores=1)
@@ -198,8 +193,7 @@ Gcor.dyn <- function(out.table) {
 
 
 mean.Gcor.dyn.files <- function(out.dir, mc.cores=1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir)
 	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		gc <- Gcor.dyn(tt)
@@ -262,8 +256,7 @@ propPC.dyn <- function(out.table, PC=1, mc.cores=1) {
 }
 
 mean.propPC.dyn <- function(out.files, PC=1, mc.cores=1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir)
 	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		propPC.dyn(tt, PC=PC, mc.cores=1)
@@ -303,8 +296,7 @@ erankG.dyn <- function(out.table, mc.cores=1) {
 
 
 mean.erankG.dyn <- function(out.dir, mc.cores=1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir)
 	ans <- mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		erankG.dyn(tt, mc.cores=1)
@@ -352,8 +344,7 @@ communities.dyn <- function(out.table, directed=FALSE, mc.cores=1) {
 }
 
 communities.dyn.files <- function(out.dir, directed=FALSE, mc.cores=1) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir)
 	 mclapply(out.files, function(ff) {
 		tt <- read.table(ff, header=TRUE)
 		cc <- communities.dyn(tt, directed=directed, mc.cores=1)

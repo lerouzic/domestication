@@ -22,8 +22,7 @@ reaction.norm.dyn <- function(out.table, window.size=floor(nrow(out.table)/100),
 
 # Average out all reaction norms from a directory (use FUN=abs to get the absolute value of the norm)
 reaction.norm.dir <- function(out.dir, max.reps=Inf, FUN.to.apply=identity, mc.cores=1, sliding=TRUE, window.size=10) {
-	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
-	out.files <- list.files(pattern="out.*", path=out.reps, full.names=TRUE)
+	out.files <- out.files(out.dir)
 	tt <- results.table(out.files, mc.cores, max.reps)
 	nn <- mclapply(tt, reaction.norm.dyn, window.size=window.size, sliding=sliding, mc.cores=mc.cores)
 	ans <- lapply(nn, FUN.to.apply)
