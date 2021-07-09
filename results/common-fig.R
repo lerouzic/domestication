@@ -224,6 +224,27 @@ plot.var.gene <- function(mysim, what=c("molecular", "expression")[1], ylim=NULL
 		}
 }
 
+plot.var.pheno <- function(mysims,  ylim=NULL, xlab="Generation", ylab="Expression variance", y.factor=1, show.quantiles=FALSE, ...) {
+	for (mysim in mysims) {
+		var.data <- pheno.variation.mean.cache(outdir.all[[mysim]], mc.cores=mc.cores)[,-1]
+		gen <- as.numeric(rownames(var.data))
+		col <- if (mysim %in% col.sce) col.sce[mysim] else "black"
+		lty <- if (mysim %in% lty.sce) lty.sce[mysim] else 1
+		
+		if (mysim == mysims[1]) { # not very clean
+			if (is.null(ylim)) ylim <- c(0, y.factor*max(unlist(var.data)))
+			plot(NULL, xlim=c(first.gen(mysim), max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
+		}
+		lines(gen, y.factor*rowMeans(var.data), lty=lty, col=col)
+		if (show.quantiles) {
+			q1 <- pheno.variation.quantile.cache(outdir.all[[mysim]], quant=quantiles[1], mc.cores=mc.cores)[,-1]
+			q2 <- pheno.variation.quantile.cache(outdir.all[[mysim]], quant=quantiles[2], mc.cores=mc.cores)[,-1]
+			polygon(c(gen, rev(gen)), c(y.factor*rowMeans(q1), rev(y.factor*rowMeans(q2))), border=NA, col=makeTransparent(col))
+		}
+	}
+}
+
+
 
 plot.var.neutral <- function(mysims,  ylim=NULL, xlab="Generation", ylab="Molecular variance", expr.thresh=0.1, algorithm=c("lowexpr", "cleanW")[1], y.factor=1, show.quantiles=FALSE, ...) {
 	
