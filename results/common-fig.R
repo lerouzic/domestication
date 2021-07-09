@@ -139,11 +139,13 @@ plot.fitness <- function(mysims, show.quantiles=FALSE, ylab="Fitness", xlab="Gen
 
 	for (mysim in mysims) {
 		mfit <- meansim.all[[mysim]][,"MFit"]
+		mfit[mfit < ylim[1]] <- ylim[1] # Avoids problems on log scales
 		lines(gen, mfit, lty=if(is.null(lty)) lty.sce[mysim] else lty)
 		if (show.quantiles) {
 			q1 <- quantile.sim.cache(outdir.all[[mysim]], quant=quantiles[1], mc.cores=mc.cores)[,"MFit"]
 			q2 <- quantile.sim.cache(outdir.all[[mysim]], quant=quantiles[2], mc.cores=mc.cores)[,"MFit"]
-			
+			q1[q1 < ylim[1]] <- ylim[1]
+			q2[q2 < ylim[1]] <- ylim[1]
 			polygon(c(gen, rev(gen)), c(q1, rev(q2)), col=makeTransparent("black"), border=NA)
 		}
 	}
@@ -226,20 +228,19 @@ plot.var.gene <- function(mysim, what=c("molecular", "expression")[1], ylim=NULL
 
 plot.var.pheno <- function(mysims,  ylim=NULL, xlab="Generation", ylab="Expression variance", y.factor=1, show.quantiles=FALSE, ...) {
 	for (mysim in mysims) {
-		var.data <- pheno.variation.mean.cache(outdir.all[[mysim]], mc.cores=mc.cores)[,-1]
-		gen <- as.numeric(rownames(var.data))
-		col <- if (mysim %in% col.sce) col.sce[mysim] else "black"
-		lty <- if (mysim %in% lty.sce) lty.sce[mysim] else 1
-		
+		var.data <- pheno.variation.mean.cache(outdir.all[[mysim]], mc.cores=mc.cores)
+		gen <- as.numeric(names(var.data))
+		col <- if (mysim %in% names(col.sce)) col.sce[mysim] else "black"
+		lty <- if (mysim %in% names(lty.sce)) lty.sce[mysim] else 1
 		if (mysim == mysims[1]) { # not very clean
 			if (is.null(ylim)) ylim <- c(0, y.factor*max(unlist(var.data)))
 			plot(NULL, xlim=c(first.gen(mysim), max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
 		}
-		lines(gen, y.factor*rowMeans(var.data), lty=lty, col=col)
+		lines(gen, y.factor*var.data, lty=lty, col=col)
 		if (show.quantiles) {
-			q1 <- pheno.variation.quantile.cache(outdir.all[[mysim]], quant=quantiles[1], mc.cores=mc.cores)[,-1]
-			q2 <- pheno.variation.quantile.cache(outdir.all[[mysim]], quant=quantiles[2], mc.cores=mc.cores)[,-1]
-			polygon(c(gen, rev(gen)), c(y.factor*rowMeans(q1), rev(y.factor*rowMeans(q2))), border=NA, col=makeTransparent(col))
+			q1 <- pheno.variation.quantile.cache(outdir.all[[mysim]], quant=quantiles[1], mc.cores=mc.cores)
+			q2 <- pheno.variation.quantile.cache(outdir.all[[mysim]], quant=quantiles[2], mc.cores=mc.cores)
+			polygon(c(gen, rev(gen)), c(y.factor*q1, rev(y.factor*q2)), border=NA, col=makeTransparent(col))
 		}
 	}
 }
@@ -249,20 +250,20 @@ plot.var.pheno <- function(mysims,  ylim=NULL, xlab="Generation", ylab="Expressi
 plot.var.neutral <- function(mysims,  ylim=NULL, xlab="Generation", ylab="Molecular variance", expr.thresh=0.1, algorithm=c("lowexpr", "cleanW")[1], y.factor=1, show.quantiles=FALSE, ...) {
 	
 	for (mysim in mysims) {
-		var.data <- molec.variation.neutral.all.mean.cache(outdir.all[[mysim]], expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores)[,-1]
-		gen <- as.numeric(rownames(var.data))
-		col <- if (mysim %in% col.sce) col.sce[mysim] else "black"
-		lty <- if (mysim %in% lty.sce) lty.sce[mysim] else 1
+		var.data <- molec.variation.neutral.all.mean.cache(outdir.all[[mysim]], expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores)
+		gen <- as.numeric(names(var.data))
+		col <- if (mysim %in% names(col.sce)) col.sce[mysim] else "black"
+		lty <- if (mysim %in% names(lty.sce)) lty.sce[mysim] else 1
 		
 		if (mysim == mysims[1]) { # not very clean
 			if (is.null(ylim)) ylim <- c(0, y.factor*max(unlist(var.data)))
 			plot(NULL, xlim=c(first.gen(mysim), max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
 		}
-		lines(gen, y.factor*rowMeans(var.data), lty=lty, col=col)
+		lines(gen, y.factor*var.data, lty=lty, col=col)
 		if (show.quantiles) {
-			q1 <- molec.variation.neutral.all.quantile.cache(outdir.all[[mysim]], quant=quantiles[1], expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores)[,-1]
-			q2 <- molec.variation.neutral.all.quantile.cache(outdir.all[[mysim]], quant=quantiles[2], expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores)[,-1]
-			polygon(c(gen, rev(gen)), c(y.factor*rowMeans(q1), rev(y.factor*rowMeans(q2))), border=NA, col=makeTransparent(col))
+			q1 <- molec.variation.neutral.all.quantile.cache(outdir.all[[mysim]], quant=quantiles[1], expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores)
+			q2 <- molec.variation.neutral.all.quantile.cache(outdir.all[[mysim]], quant=quantiles[2], expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores)
+			polygon(c(gen, rev(gen)), c(y.factor*q1, rev(y.factor*q2)), border=NA, col=makeTransparent(col))
 		}
 	}
 }
@@ -270,8 +271,7 @@ plot.var.neutral <- function(mysims,  ylim=NULL, xlab="Generation", ylab="Molecu
 
 plot.var.neutral.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Molecular variance", expr.thresh=0.1, algorithm=c("lowexpr", "cleanW")[1], y.factor=1, ...) {
 
-	var.data <- molec.variation.neutral.mean.cache(outdir.all[[mysim]], expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores)[,-1]
-	
+	var.data <- molec.variation.neutral.gene.mean.cache(outdir.all[[mysim]], expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores)[,-1]
 	gen <- as.numeric(rownames(var.data))
 	sel.change.gen <- try(selectionchange.detect(meansim.all[[mysim]]), silent=TRUE)
 	if (class(sel.change.gen) == "try-error") sel.change.gen <- max(gen)

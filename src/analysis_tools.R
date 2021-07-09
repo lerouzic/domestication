@@ -7,6 +7,11 @@ library(parallel)
 source("../src/makeparam_functions.R") # dubious path management...
 source("../src/cache.R")
 
+out.files <- function(out.dir) {
+	out.reps <- list.dirs(out.dir, full.names=TRUE, recursive=FALSE)
+	out.files <- paste0(out.reps, "/out-", sub(basename(out.reps), pattern="-", replacement=""), ".txt")
+	out.files[file.exists(out.files)]
+}
 
 # Moving average (generation numbers as names)
 mov.avg <- function(x, gen=1:length(x), size=1, min.gen=0) {
@@ -140,6 +145,8 @@ results.table <- function(out.files, mc.cores=1, max.reps=length(out.files), ver
 	tt <- mclapply(out.files[1:(min(max.reps, length(out.files)))], function(ff) { 
 		ans <- try(read.table(ff, header=TRUE))
 		if (class(ans) == "try-error") return(numeric(0))
+		if ("Gen" %in% colnames(ans))
+			rownames(ans) <- as.character(ans$Gen)
 		if (!is.null(colnames.pattern))
 			ans <- ans[,grepl(pattern=colnames.pattern, colnames(ans))]
 		return(ans)

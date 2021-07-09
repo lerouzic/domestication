@@ -13,9 +13,9 @@ pdf("fig3A.pdf", width=panel.width, height=panel.height)
 	ylab <- "Molecular variance"
 	y.factor <- c('(""%*% 10^{-4})' = 10000)
 	if (y.factor != 1) ylab <- parse(text=paste0('"', ylab, ' "*', names(y.factor)))
-	ylim <- c(0, 1.5e-4)*y.factor
+	ylim <- c(0, 1.1e-4)*y.factor
 	
-	plot.var.neutral(scenarios, xaxt="n", ylab=ylab, ylim=ylim, y.factor=y.factor, expr.thresh=expr.thresh, algorithm=neutral.algo)
+	plot.var.neutral.gene(scenarios[1], xaxt="n", ylab=ylab, ylim=ylim, y.factor=y.factor, expr.thresh=expr.thresh, algorithm=neutral.algo)
 	
 	bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
 	selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)

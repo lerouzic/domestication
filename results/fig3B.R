@@ -14,7 +14,7 @@ pdf(file="fig3B.pdf", height=panel.height, width=panel.width)
 	if (y.factor != 1) ylab <- parse(text=paste0('"', ylab, ' "*', names(y.factor)))
 	ylim <- c(0, 0.7e-3)*y.factor
 	
-	plot.var.pheno(scenarios, what="expression", y.factor=y.factor, ylab=ylab, ylim=ylim, xaxt="n", max.reps=10)
+	plot.var.pheno(scenarios, y.factor=y.factor, ylab=ylab, ylim=ylim, xaxt="n")
 	
 	generation.axis()
 	bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
