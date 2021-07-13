@@ -129,9 +129,13 @@ selectionchange.detect <- function(out.table) {
 }
 
 # Adds the bottleneck mark in a figure
-bottleneck.plot <- function(Ndyn, y=0, code=3, angle=90, length=0.05, ...) {
+bottleneck.plot <- function(Ndyn, y=0, code=3, angle=90, length=0.05, style="arrows", ...) {
 	bttl <- bottleneck.detect(Ndyn)
-	arrows(x0=bttl$begin, x1=bttl$end, y0=y, code=code, angle=angle, length=length, ...)
+	if (style == "arrows") {
+		arrows(x0=bttl$begin, x1=bttl$end, y0=y, code=code, angle=angle, length=length, ...)
+	} else if (style == "vlines") {
+		abline(v=c(bttl$begin, bttl$end), ...)
+	}
 }
 
 # Adds the selection mark in a figure

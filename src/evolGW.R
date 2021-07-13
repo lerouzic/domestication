@@ -1,4 +1,6 @@
 
+######## Evolution of the G matrix
+
 Gdiff <- function(G, G.ref) {
 	# A bit of cleaning is necessary : first generation and "environmental" gene can mess up the vcov
 	if (any(!is.finite(G)) || any(!is.finite(G.ref))) return(NA)
@@ -49,4 +51,50 @@ Gdiff.quantile <- function(out.dir, quant=0.5, deltaG=NA, mc.cores=1) {
 
 Gdiff.quantile.cache <- function(out.dir, quant=0.5, deltaG=NA, mc.cores=1) {
 	cache.fun(Gdiff.quantile, out.dir=out.dir, quant=quant, deltaG=deltaG, mc.cores=mc.cores, cache.subdir="Rcache-Gdiff", file.prefix=basename(out.dir))
+}
+
+# Evolution of the average genetic correlation
+
+Gcor.dyn <- function(out.table) {
+	.meancor <- function(G) {
+		diag(G)[diag(G) < 1e-12] <- 1e-12 # Prevent numerical errors 
+		C <- cov2cor(G)
+		diag(C) <- NA # We don't want to count the diagonal when computing the mean
+		mean(abs(C), na.rm=TRUE)
+	}
+	Glist <- Glist.table(out.table)
+	sapply(Glist, .meancor)
+}
+
+
+Gcor.dir <- function(out.dir, mc.cores=1) {
+	out.files <- out.files(out.dir)
+	ans <- mclapply(out.files, function(ff) {
+		tt <- read.table(ff, header=TRUE)
+		gc <- Gcor.dyn(tt)
+		rm(tt)
+		gc
+	}, mc.cores=mc.cores)
+	
+	ansl <- sapply(ans, length)
+	ans <- ans[ansl==max(ansl)]
+	ans
+}
+
+Gcor.mean <- function(out.dir, mc.cores=1) {
+	data <- Gcor.dir(out.dir, mc.cores)
+	colMeans(do.call(rbind, data), na.rm=TRUE)
+}
+
+Gcor.mean.cache <- function(out.dir, mc.cores=1) {
+	cache.fun(Gcor.mean, out.dir=out.dir, mc.cores=mc.cores, cache.subdir="Rcache-Gcor", file.prefix=basename(out.dir))
+}
+
+Gcor.quantile <- function(out.dir, quant=0.5, mc.cores=1) {
+	data <- Gcor.dir(out.dir, mc.cores)
+	apply(do.call(rbind, data), 2, quantile, prob=quant, na.rm=TRUE)
+}
+
+Gcor.quantile.cache <- function(out.dir, quant=0.5, mc.cores=1) {
+	cache.fun(Gcor.quantile, out.dir=out.dir, quant=quant, mc.cores=mc.cores, cache.subdir="Rcache-Gcor", file.prefix=basename(out.dir))
 }

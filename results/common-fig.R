@@ -128,7 +128,7 @@ plot.N <- function(mysim, ylab="Population size", xlab="Generations", ylim=c(0, 
 		Ne.ref <- min(my.Ne[1], my.Ne[length(my.Ne)])
 		gen.bottle <- range(which(my.Ne < 0.90*Ne.ref))
 		Ne.bottle <- 1/(mean(1/my.Ne[gen.bottle[1]:gen.bottle[2]]))
-		text(x=mean(as.numeric(names(my.Ne[gen.bottle]))), y=min(nn), paste0("Ne =\n", round(Ne.bottle)), pos=3)
+		text(x=mean(as.numeric(names(my.Ne[gen.bottle]))), y=min(nn), paste0("Ne =\n", round(Ne.bottle)), pos=if (diff(as.numeric(names(my.Ne[gen.bottle]))) < 1000) 4 else 3)
 	}
 }
 
@@ -689,17 +689,23 @@ plot.GPC <- function(mysims, PC=1, xlab="Generation", ylab="Proportion of total 
 	}	
 }
 
-plot.Gcor <- function(mysims, xlab="Generations", ylab="Genetic correlations", ylim=NULL, ...) {
-	ggc <- lapply(setNames(nm=mysims), function(mysim) mean.Gcor.dyn.files.cache(outdir.all[[mysim]], mc.cores=mc.cores))
+plot.Gcor <- function(mysims, xlab="Generations", ylab="Genetic correlations", ylim=NULL, show.quantiles=FALSE, ...) {
 	
-	gen <- as.numeric(names(ggc[[1]]))
+	gen <- as.numeric(names(Gcor.mean.cache(outdir.all[[mysims[1]]], mc.cores=mc.cores)))
 	
 	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 	
 	for (mysim in mysims) {
-		gc <- ggc[[mysim]]
-		
-		lines(gen, gc, lty=lty.sce[mysim], col=col.sce[mysim])
+		gc <- Gcor.mean.cache(outdir.all[[mysim]], mc.cores=mc.cores)
+		col <- if (mysim %in% names(col.sce)) col.sce[mysim] else "black"
+		lty <- if (mysim %in% names(lty.sce)) lty.sce[mysim] else 1
+		lines(gen, gc, lty=lty, col=col)
+		if (show.quantiles) {
+			q1 <- Gcor.quantile.cache(outdir.all[[mysim]], quant=quantiles[1], mc.cores=mc.cores)
+			q2 <- Gcor.quantile.cache(outdir.all[[mysim]], quant=quantiles[2], mc.cores=mc.cores)
+			
+			polygon(c(gen, rev(gen)), c(q1, rev(q2)), border=NA, col=makeTransparent(col))
+		}
 	}
 }
 
