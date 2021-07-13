@@ -180,38 +180,6 @@ mean.Wdiff.dyn.cache <- function(out.dir, deltaG=NA, mc.cores=1) {
 }
 
 
-Gcor.dyn <- function(out.table) {
-	.meancor <- function(G) {
-		diag(G)[diag(G) < 1e-12] <- 1e-12 # Prevent numerical errors 
-		C <- cov2cor(G)
-		diag(C) <- NA # We don't want to count the diagonal when computing the mean
-		mean(abs(C), na.rm=TRUE)
-	}
-	Glist <- Glist.table(out.table)
-	sapply(Glist, .meancor)
-}
-
-
-mean.Gcor.dyn.files <- function(out.dir, mc.cores=1) {
-	out.files <- out.files(out.dir)
-	ans <- mclapply(out.files, function(ff) {
-		tt <- read.table(ff, header=TRUE)
-		gc <- Gcor.dyn(tt)
-		rm(tt)
-		gc
-	}, mc.cores=mc.cores)
-	
-	ansl <- sapply(ans, length)
-	ans <- ans[ansl==max(ansl)]
-	aa <- do.call(rbind, ans)
-	
-	colMeans(aa, na.rm=TRUE)
-}
-
-mean.Gcor.dyn.files.cache <- function(out.dir, mc.cores=1) {
-	cache.fun(mean.Gcor.dyn.files, out.dir=out.dir, mc.cores=mc.cores, cache.subdir="Rcache-Gcor", file.prefix=basename(out.dir))
-}
-
 
 #~ netf.dyn <- function(out.table, what, directed=TRUE, deltaG=NA) {
 #~ 	gen <- out.table[,"Gen"]
