@@ -1,26 +1,19 @@
 #!/usr/bin/env Rscript
 
-source("../src/analysis_tools.R")
+# Figure: evolution of the reaction norm
 
-source("./common-fig.R")
+source("common-fig.R")
 
-scenarios <- c("default", "nobot", "noselc")
-
-pdf(file="fig3B.pdf", height=panel.height, width=panel.width)
+pdf("fig3B.pdf", width=panel.width, height=panel.height)
 	par(mar=mar.notitle)
+	plot.norm(c("default", "nobot"), xlab="Generation", ylab="|reaction norm|", xaxt="n")
 	
-	y.factor <- c('(""%*% 10^{-3})' = 1000)
-	ylab <- "Expression variance"
-	if (y.factor != 1) ylab <- parse(text=paste0('"', ylab, ' "*', names(y.factor)))
-	ylim <- c(0, 0.7e-3)*y.factor
-	
-	plot.var.pheno(scenarios, y.factor=y.factor, ylab=ylab, ylim=ylim, xaxt="n")
-	
-	generation.axis()
 	bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
 	selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
+	generation.axis()
 	
-	legend(x="topright",legend = legname(scenarios), lty=lty.sce[scenarios], col=col.sce[scenarios], bty="n", cex=cex.legend)
+	legend("topright", pch=22, col=col.sel[c("p","n","s")], pt.bg=col.sel[c("p","n","s")], legend=c("Plastic->Plastic", "Plastic->Neutral", "Plastic->Stable"), bty="n", cex=cex.legend)
+	legend("topleft", lty=lty.sce[c("default","nobot")], col="darkgray", legend=legname(c("default", "nobot")), bty="n", cex=cex.legend)
+	
 	subpanel("B")
-
 dev.off()

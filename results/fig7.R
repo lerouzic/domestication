@@ -22,7 +22,7 @@ ylim.norm    <- c(0,1.2)
 ylim.inout.gainloss <- c(-25,25)
 ylim.Gcor   <- c(0,0.6)
 
-pdf("fig6.pdf", width=2*length(scenarios), height = 2*4)
+pdf("fig7.pdf", width=2*length(scenarios), height = 2*4)
 
 layout(matrix(1:(6*length(scenarios)), ncol=length(scenarios), byrow=FALSE))
 par(mar=c(0.5, 0.5, 0.5, 0.5), oma=c(4, 4, 3, 0))

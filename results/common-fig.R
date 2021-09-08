@@ -303,7 +303,7 @@ plot.evol <- function(mysims, ylim=NULL, xlab="Generation", ylab="Evolutionary c
 	
 	gen <-  as.numeric(meansim.all[[mysims[1]]][,"Gen"]) # Just for the x scaling
 	
-	plot(NULL, xlim=c(first.gen(mysim), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
+	plot(NULL, xlim=c(first.gen(mysims[[1]]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
 	
 	for (mysim in mysims) {
 		ev.genes <- mean.Wdiff.dyn.cache(outdir.all[[mysim]], deltaG, mc.cores=mc.cores)[,-1]
