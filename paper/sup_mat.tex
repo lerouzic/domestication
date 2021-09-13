@@ -1,0 +1,153 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage{graphicx}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{nopageno}
+
+\usepackage{times}
+
+\renewcommand*{\thesection}{Supplementary~Figure~S\arabic{section}.}
+
+\begin{document}
+
+\begin{center}
+\vspace{2cm}
+
+
+{\Huge\textsc Supplementary figures and tables from}
+
+\vspace{1cm}
+
+{\LARGE Gene network simulations provide testable predictions for the molecular domestication syndrome}
+
+\vspace{1cm}
+
+{\LARGE Ewen Burban, Maud I.\ Tenaillon, Arnaud Le~Rouzic}
+
+\end{center}
+
+\vspace{3cm}
+
+\section{}
+
+\begin{center}
+\includegraphics{../results/figS1}
+\end{center}
+
+Illustration of the fitness function around an optimal expression of $\theta=0.5$, for two strengths of selection ($s=10$, the default simulations, and $s=50$, the strong selection setting).  
+
+\clearpage
+
+\section{}
+
+\vspace{2cm}
+
+\begin{center}
+\begin{tabular}{ccccc}
+ & Before domestication & \multicolumn{3}{c}{After domestication} \\ \hline
+ & & Plastic & Stable & Non-selected \\ \hline
+ Plastic (p) & 6 & 2 & 2 & 2 \\
+ Stable (s)  & 6 & 0 & 4 & 2 \\
+ Non-selected (n) & 12 & 0 & 4 & 8 \\ \hline
+ Total            & 24 & 2 & 10 & 12 
+\end{tabular}
+
+\vspace{2cm}
+
+\includegraphics{../results/figS2}
+\end{center}
+
+\vspace{2cm}
+
+Description of the selection switch.Top: summary table of the selection switch. Three categories of genes were considered: “stable” (s), which optimum does not change throughout the simulation (except at the onset of domestication for half of them), “plastic” (p), which optimum tracks the environmental signal (with a +1 correlation for half the genes, and a -1 correlation for the other half), and “non-selected” genes (n), which expression is not part of the fitness function. Capital letters on the right indicate genes which status changed during the domestication process. The total number of selected genes (12 out of 24) remains the same before and after domestication. Bottom: illustration of the variation of gene expression optima from a single simulation. The figure indicates the expression of the sensor gene (first line, e), and the optimal expression for all other genes (light: low expression, dark: strong expression). White stands for unselected genes, and capital letters for genes which status changed. 
+
+\clearpage
+
+\section{}
+
+\begin{center}
+\includegraphics[width=\textwidth]{../results/figS3}
+\end{center}
+
+Evolution of simulated networks. 
+A : At the individual ($k$) level, we simulated a network of 24 genes (transcription factors) regulated in cis (cis-sites). 
+Allelic states at these  sites constitute the genotype of an individual ($G_k$). Together with an environmental cue ($E$) that regulate some of the genes (plastic genes), those sites determine a matrix of gene interactions that determines the phenotype of $k$ ($P_k$), a vector of expression profiles for each of the 24 genes. 
+Individual fitness ($w_k$) in a multivariate landscape is determined by the stability of the network, by the distance to the selection target ($\theta$) for “stable” genes, and the environment ($E$). 
+B : At the population level, $k$ individuals are submitted to mutations of cis-sites that affect $G_k$, as well as reproduction and selection at each generation in a fluctuating environment ($E$). At the time of domestication, the selection switch modifies the selection target and mimicks evolution towards phenotypic stability while the bottleneck translates into a shrink in population size.
+
+\clearpage
+
+\section{}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../results/figS4}
+\end{center}
+
+The left column (A) stands for the default parameter set. B: “No new mutations”: the response to domestication relied only on the standing genetic variation (mutation rate set to 0 at the onset of domestication); C: “Strong selection”: the selection coefficient was set to 50 instead of 10 (as illustrated in Figure S1); D: “Strong bottleneck”: the strength of the bottleneck was 10 times stronger (350 individuals instead of 3500). First row; Census and effective population sizes, second row: Average fitness, third row: Molecular variance, fourth row: Expression variance, fifth row: Average reaction norms, sixth row: Number of gained and lost connections, seventh row: Number of clusters, eight row: Evolution of the G matrix. 
+
+\clearpage
+
+\section{}
+
+\begin{center}
+\includegraphics[width=\textwidth]{../results/figS5}
+\end{center}
+
+Sensitivity to variations in the model parameters.The left column (A) represents the default parameter set. B: “Less selected genes”: the network still contained 24 genes, but only 6 (instead of 12) evolved under selection, with the same proportion of plastic, stable, and non-selected genes; C: “Large network”: 48 genes (+ environment) were considered in the simulation, with 24 genes under selection. D: “Same number of plastic genes”: Domestication was not associated with less selection on plasticity; 6 genes are still selected for plasticity during the domestication process, but these were not the same as the plastic genes before domestication. E: “Plastic genes unchanged”: the six plastic genes after domestication were the same as the ones before domestication. Rows stand for the same parameters as in fig S4. 
+
+\clearpage
+
+\section{}
+
+\vspace{2cm}
+
+\begin{center}
+\includegraphics[width=0.4\textwidth]{../results/figS6A}
+\includegraphics[width=0.4\textwidth]{../results/figS6B}
+\end{center}
+
+\vspace{2cm}
+
+Evolution of the genetic coexpression structure. (A) The evolution of the genetic (G) covariance matrix of all gene expressions was tracked by measuring the distance between G every 500 generations (details in the methods section). (B) Genetic correlations before (generation -9000) and after (generation 0) domestication were compared between all pairs of genes. The color code indicates the category of the genes compared: blue for stable/constant, red for plastic, black for non-selected, and intermediate colors for comparisons between genes of different categories. Circles denotes correlations between genes from the same category, triangles from different categories. The x-axis was slightly jittered for clarity. 
+
+
+\clearpage
+
+\section{}
+
+\vspace{2cm}
+
+\begin{center}
+\includegraphics[width=0.4\textwidth]{../results/figS7A}
+\includegraphics[width=0.4\textwidth]{../results/figS7B}
+\end{center}
+
+\vspace{2cm}
+
+A: Evolution of the average number of strong connections in different evolutionary scenarios. B: Evolution of the numbers of connections to (number of regulators of the target gene) and from (number of genes regulated by the target gene) each type of gene during domestication in the default simulation (bottleneck and selection switch). The “no selection switch” scenario (open circles) is indicated as a control. 
+
+\clearpage
+
+\section{}
+
+\vspace{2cm}
+
+\begin{center}
+\includegraphics[width=\textwidth]{../results/figS8}
+\end{center}
+
+\vspace{2cm}
+
+Summary of the topological changes in the network. The figure displays the location of the “strong” connections in the network, based on the effect of regulation on gene expression (details in the “methods” section). Three categories of genes are represented: non-selected (N), plastic (P), stable (S), and (E) stands for the gene that is directly reflecting the environment. Subscripts indicate the number of genes for each category.  The left panel indicates the frequency of connections between each gene category (i.e. the number of strong connections divided by the theoretical maximum) before domestication. Right: Network at the end of the simulations. Numbers stand for the differences compared to the left panel. In both panels, connections between genes from the same category are indicated as curved arrows. Red arrows stand for negative (inhibition) effects, black arrows for positive (activation) effects. Connection frequencies less than 5\% are omitted for clarity.
+
+\clearpage
+
+\section{}
+
+\begin{center}
+\includegraphics[width=\textwidth]{../results/figS9}
+\end{center}
+
+Sensitivity of simulation results to modelling choices. A: Default simulations (maize scenario). B: Short development (8 time steps instead of 16 for the Default case). C: Long development (24 time steps instead of 16). D: The network stability was assessed over the two last time steps (instead of 4). E: there was no selection on network stability. Rows stand for the same indicators as in figure S4. 
+
+\end{document}
