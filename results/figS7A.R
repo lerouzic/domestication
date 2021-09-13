@@ -1,21 +1,24 @@
 #!/usr/bin/env Rscript
 
-# Figure: Evolution of genetic variance-covariance
+# Figure: evolution of the network complexity (number of connections)
 
 source("./common-fig.R")
+
 source("../src/analysis_networks.R")
 
-scenarios <- c("default","nobot","noselc")
+scenarios <- c("default", "nobot", "noselc")
 
 pdf("figS7A.pdf", width=panel.width, height=panel.height)
 	par(mar=mar.notitle)
 
-	plot.Gdiff(scenarios, deltaG=deltaG, xaxt="n", ylim=c(0,0.6))
+	plot.nconn(scenarios, xaxt="n", ylim=c(40,60))
 	
 	generation.axis()
-	bottleneck.plot(Ndyn.all[["default"]], y=0, lwd=2)
-	selectionchange.plot(meansim.all[["default"]], y=0, cex=1.5)
+	bottleneck.plot(Ndyn.all[["default"]], y=58, lwd=2)
+	selectionchange.plot(meansim.all[["default"]], y=58, cex=1.5)
 	
-	legend(x="topright",legend = legname(scenarios), lty=lty.sce[scenarios], col=col.sce[scenarios], bty="n", cex=cex.legend)
+	legend("bottomright", lty=lty.sce[scenarios], col=col.sce[scenarios], legend=legname(scenarios), bty="n", cex=cex.legend)
+	
 	subpanel("A")
+
 dev.off()

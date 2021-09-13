@@ -94,7 +94,7 @@ dyn.plot <- function(W, env=env.default, main="", gene.names=TRUE) {
 	for (i in 1:nrow(W)) {
 		lines(x=0:(ncol(mm$full)-1), mm$full[i,], col=col.genes[i], lwd=2)
 		if (gene.names) 
-			text(ncol(mm$full)-1, mm$full[i,ncol(mm$full)], rownames(W)[i], col=col.genes[i], pos=4)
+			text(ncol(mm$full)-1.2, mm$full[i,ncol(mm$full)], rownames(W)[i], col=col.genes[i], pos=4)
 	}
 }
 

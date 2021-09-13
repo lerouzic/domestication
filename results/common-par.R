@@ -61,7 +61,11 @@ legname <- function(nn) {
 		cstplast="Plastic genes unchanged", 
 		africe  ="African rice",
 		pemil   ="Pearl millet",
-		tomato  ="Tomato")
+		tomato  ="Tomato",
+		step8   ="Short development\n(8 steps)", 
+		step24  ="Long development\n(24 steps)", 
+		stab2   ="Network stability\nover 2 time steps", 
+		nostab  ="No selection on\nnetwork stability")
 		
 	ifelse(nn %in% names(legn), legn[nn], nn)
 }

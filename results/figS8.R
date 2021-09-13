@@ -1,48 +1,40 @@
 #!/usr/bin/env Rscript
 
+# Figure H: gene networks before/after domestication
+
 source("./common-fig.R")
 
-scenarios <- c("default","nomut","strongsel","strongbot")
+source("../src/analysis_networks.R")
 
-y.factor.molec <- c('(""%*% 10^{-4})' = 10000)
-y.factor.expr  <- c('(""%*% 10^{-3})' = 1000)
+mysim <- "default"
 
-ylab.N       <- "Population size"
-ylab.fitness <- "Average fitness"
-ylab.molec   <- parse(text=paste0('"', "Molecular variance", ' "*', names(y.factor.molec)))
-ylab.expr    <- parse(text=paste0('"', "Expression variance", ' "*', names(y.factor.expr)))
+genselchange <- selectionchange.detect(meansim.all[[mysim]])
 
-ylim.N       <- c(0, 22000)
-ylim.fitness <- c(1e-3, 1)
-ylim.molec   <- c(0, y.factor.molec*1.1e-4)
-ylim.expr    <- c(0, y.factor.expr*0.6e-3)
+Wlist.before.dom <- Wgen.files.cache(outdir.all[[mysim]], gen=genselchange)
+Wlist.after.dom  <- Wgen.files.cache(outdir.all[[mysim]], gen=meansim.all[[mysim]][nrow(meansim.all[[mysim]]),"Gen"])
 
-pdf("figS8.pdf", width=2*length(scenarios), height = 2*4)
+segreg <- selectionregime.detect(meansim.all[[mysim]])
+sel.before.dom <- sapply(strsplit(segreg, ""), "[",1)
+sel.after.dom <- sapply(strsplit(segreg, ""), "[",2)
+sel.before.dom[sel.before.dom == "c"] <- "s" # constant and stable should be the same
+sel.after.dom[sel.after.dom == "c"] <- "s"
+sel.before.dom[1] <- sel.after.dom[1] <- "e" # The algorithm cannot know that the first guy is environment
 
-layout(matrix(1:(4*length(scenarios)), ncol=length(scenarios), byrow=FALSE))
-par(mar=c(0.5, 0.5, 0.5, 0.5), oma=c(5, 4, 3, 0))
+numconn.before.dom <- mean.numconn.groups(Wlist.before.dom, sel.before.dom, mc.cores=mc.cores)
+numconn.after.dom  <- mean.numconn.groups(Wlist.after.dom,  sel.after.dom,  mc.cores=mc.cores)
 
-for (mysim in scenarios) {
-	firstcol <- mysim == scenarios[1]
+# Complex name tags (including the number of genes)
+cn <- colnames(numconn.before.dom$plus)
+group.names.before.dom <- setNames(cn, paste0(toupper(cn), "[", table(sel.before.dom)[cn], "]"))
+group.names.after.dom  <- setNames(cn, paste0(toupper(cn), "[", table(sel.after.dom)[cn],  "]"))
+
+pdf("figS8.pdf", width=2*panel.width, height=panel.height)
+	layout(t(1:2))
 	
-	plot.N(mysim, show.quantiles=TRUE, ylim=ylim.N, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.N else "", xpd=if(firstcol) NA else FALSE)
-	bottleneck.plot(Ndyn.all[[mysim]], y=22000, lwd=2)
-	selectionchange.plot(meansim.all[[mysim]], y=22000, cex=1.5)
-	title(paste0(LETTERS[which(mysim == scenarios)], ": ",legname(mysim)), xpd=NA, line=2)
+	plot.numconn.groups(numconn.before.dom, group.names=group.names.before.dom, thresh=0.05)
+	title("Before domestication")
 	
-	plot.fitness(mysim, show.quantiles=TRUE, ylim=ylim.fitness, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.fitness else "", xpd=if(firstcol) NA else FALSE, lty=1, log="y")
-	bottleneck.plot(Ndyn.all[[mysim]], y=1, lwd=2)
-	selectionchange.plot(meansim.all[[mysim]], y=1, cex=1.5)	
-
-	plot.var.neutral(mysim, show.quantiles=TRUE, algorithm=neutral.algo, y.factor=y.factor.molec, ylim=ylim.molec, xaxt="n", yaxt=if(firstcol) "s" else "n", xlab="", ylab=if(firstcol) ylab.molec else "", xpd=if(firstcol) NA else FALSE)
-	bottleneck.plot(Ndyn.all[[mysim]], y=1, lwd=2)
-	selectionchange.plot(meansim.all[[mysim]], y=1, cex=1.5)	
-
-	plot.var(mysim, what="expression", show.quantiles=TRUE, y.factor=y.factor.expr, ylim=ylim.expr, xaxt="n", yaxt=if(firstcol) "s" else "n", ylab=if(firstcol) ylab.expr else "", xpd=NA)
-	bottleneck.plot(Ndyn.all[[mysim]], y=0.55, lwd=2)
-	selectionchange.plot(meansim.all[[mysim]], y=0.55, cex=1.5)	
-	generation.axis(mysim=mysim)	
-}
-
+	plot.numconn.groups(numconn.after.dom, numconn.ref=numconn.before.dom, group.names=group.names.after.dom, thresh=0.02)
+	title("Present")
+	
 dev.off()
-

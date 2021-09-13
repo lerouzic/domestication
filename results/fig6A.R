@@ -11,11 +11,11 @@ scenarios <- c("default", "nobot", "noselc")
 pdf("fig6A.pdf", width=panel.width, height=panel.height)
 	par(mar=mar.notitle)
 	
-	plot.nconn(scenarios, ylim=c(20, 60), xaxt="n")
+	plot.inout.gainloss(scenarios, show.quantiles=TRUE, deltaG=deltaG, ylim=c(-25,25), xaxt="n")
 
 	generation.axis()
-	bottleneck.plot(Ndyn.all[["default"]], y=40, lwd=2)
-	selectionchange.plot(meansim.all[["default"]], y=40, cex=1.5)
+	bottleneck.plot(Ndyn.all[["default"]], y=-25, lwd=2)
+	selectionchange.plot(meansim.all[["default"]], y=-25, cex=1.5)
 
 	legend("bottomright", lty=lty.sce[scenarios], col=col.sce[scenarios], legend=legname(scenarios), cex=cex.legend, bty="n")
 

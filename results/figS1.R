@@ -1,24 +1,18 @@
 #!/usr/bin/env Rscript
 
-# Dynamics of the effective pop size
+source("./common-par.R")
 
-source("./common-fig.R")
+s <- c(blue=10, red=50)
+theta <- 0.5
 
-mysims <- c("default", "africe", "pemil", "tomato")
-
-pdf("figS1.pdf", width=length(mysims)*panel.width, height=panel.height)
-	layout(t(seq_along(mysims)))
-	par(mar=c(mar.title), cex=1)
+pdf("figS1.pdf", width=panel.width, height=panel.height)
+	par(mar=mar.notitle)
 	
-	for (mysim in mysims) {
-		first <- mysim == mysims[1]
-		plot.N(mysim, xaxt="n", xlab="Generation", ylim=c(0,22000), ylab=if(first) "Population size" else "", main=if (mysim == "default") "Maize" else legname(mysim))
-
-		generation.axis(mysim=mysim)
-		bottleneck.plot(Ndyn.all[[mysim]], y=1, lwd=2)
-		selectionchange.plot(meansim.all[[mysim]], y=1, cex=1.5)
-		if (first)
-			legend("bottomright", lty=1, col=c("black","blue"), legend=c("N", expression(N[e])), cex=cex.legend, bty="n")
+	plot(NULL, xlab="Gene expression", ylab="Fitness", xlim=c(0,1), ylim=c(0,1))
+	
+	for (ns in names(s)) {
+		curve(exp(-s[ns]*(x-theta)^2), add=TRUE, xlim=c(0,1),lty=1, col=ns) 
 	}
 	
+	legend("topright", lty=1, col=names(s), legend=paste0("s=", s), cex=cex.legend, bty="n")
 dev.off()

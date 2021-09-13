@@ -20,7 +20,7 @@ ylim.molec   <- c(0, y.factor.molec*1.1e-4)
 ylim.expr    <- c(0, y.factor.expr*0.6e-3)
 ylim.norm    <- c(0,1.2)
 ylim.inout.gainloss <- c(-25,25)
-ylim.Gcor   <- c(0,0.6)
+ylim.Gcor   <- c(0,0.75)
 
 pdf("fig7.pdf", width=2*length(scenarios), height = 2*4)
 
