@@ -441,10 +441,11 @@ plot.inout.change <- function(mysim, mysim.ref=NULL, regimes=c("s","p","n"), xla
 		y0=sapply(both.sel, function(nn) mean(mean.before.dom$connect.out[-1][substr(selpattern.all[[mysim]],1,1)==substr(nn,1,1)])),
 		y1=y1,
 		col="darkgray", length=0.1)
-	points(
-		x=sapply(regimes, function(nn) mean(mean.after.ref$connect.in[-1][selpattern.all[[mysim.ref]]==nn])),
-		y=sapply(regimes, function(nn) mean(mean.after.ref$connect.out[-1][selpattern.all[[mysim.ref]]==nn])), 
-		pch=1, col=col.sel[regimes], cex=2)
+	if(!is.null(mysim.ref))
+		points(
+			x=sapply(regimes, function(nn) mean(mean.after.ref$connect.in[-1][selpattern.all[[mysim.ref]]==nn])),
+			y=sapply(regimes, function(nn) mean(mean.after.ref$connect.out[-1][selpattern.all[[mysim.ref]]==nn])), 
+			pch=1, col=col.sel[regimes], cex=2)
 }
 
 plot.inout.gainloss <- function(mysims, deltaG=1, xlab="Generation", ylab="Nb connections", ylim=NULL, lty=NULL, show.quantiles=FALSE, ...) {
