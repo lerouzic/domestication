@@ -21,45 +21,64 @@ source("../src/variation.R")
 #        add a properly formatted x axis for generations (don't forget to plot with xaxt="n")
 ### subpanel(x)       :
 #        add a subpanel caption to the top-left corner
+### avgcol(c1,c2)             : helper function, computes the average between two colors
+### lighten.col(col,factor)   : helper function, lighten a color
+### makeTransparent(col,alpha): helper function, makes a color transparent
+#
+# Data plots
+#
 ### plot.N(x)         :
 #        dynamics of census and effective population sizes for simulation x
+#        used in fig7, figS4, figS5, figS9
 ### plot.fitness(x)   :
 #        dynamics of average fitness for simulation x
-### plot.var(v, what)       :
-#        dynamics of variance for a set of simulations v
-#        what can be "molecular" or "expression"
-### plot.var.gene(x, what)  :
-#        dynamics of variance for simulation x, one color per gene group
-#        what can be "molecular" or "expression"
+#        used in fig2, figS4, figS5, figS9
+### plot.var(v, what)  
+### plot.var.pheno(v)       :
+#        dynamics of expression variance for a set of simulations v
+#        (in the figures, what is always "expression")
+#        plot.var used in fig7, figS4, figS5, figS9
+#        plot.var.pheno in fig4B
 ### plot.var.neutral(v):
 #        dynamics of the molecular variance, focusing on quasi-neutral sites
-### plot.var.neutral.gene(x):
-#        the same, focusing on a single simulation and splitting according to gene selection regime
+#        used in fig4A, fig7, figS4, figS5, figS9
+### plot.evol(v):
+#        evolutionary change (evolution speed of the genotype)
+#		 used in fig3A
 ### plot.norm(v)      :
 #        dynamics of the absolute value of reaction norms for plastic genes for simulations v
+#        used in fig3B; fig7, figS4, figS5, figS9
 ### plot.nconn(v)     :
 #        dynamics of the number of connections for simulations v
+#        used in figS7A
 ### plot.inout.change(x, x.ref):
 #        plots the number of in vs. out connections before and after domestication.
 #        if x.ref is provided, adds a reference simulation (e.g. no domestication)
+#        used in figS7B
 ### plot.inout.gainloss(v, deltaG):
 #        dynamics of the number of gained or lost connections every deltaG generations
+#        used in fig6A, fig7, figS4, figS5, figS9
 ### plot.network.feature(v, what):
 #        dynamics of some network properties (what) for a set of simulations v
-#        available so far: what="nbconn" | "modularity"
+#        available so far: what="clusters"
+#        used in fig6B, figS4, figS5, figS9
 ### plot.numconn.groups(nc, nc.ref):
 #        plots the number of connections between different groups of genes. Requires a complex 
 #        object, nc, calculated by mean.numconn.groups. Can also accept correlation groups.
 #        if a reference is provided, the plot features the delta with the ref network.
+#        used in figS8
 ### plot.Gdiff(v, deltaG):
 #        dynamics of the speed of evolution for the G matrix (difference in G matrix every deltaG generations) 
-### plot.GPC(v)       :
-#        dynamics of the part of the genetic variance explained by the first PC
+#        used in figS4, figS5, figS6A, figS9
+### plot.Gcor(v, deltaG):
+#        dynamics of the average genetic correlation
+#        used in fig5A, fig7
 ### plot.Gmat(x, gen) :
-#        average genetic correlation matrix at generation gen
+### plot.Gmat.all(x, gen) :
 ### plot.Gmat.legend():
-#        color scale corresponding to plot.Gmat
-#      
+#        average genetic correlation matrix at generation gen
+#        used in fig5B, figS6B
+  
 
 first.gen <- function(mysim) {
 	all.gen <- as.numeric(names(Ndyn.all[[mysim]]))
@@ -188,43 +207,6 @@ plot.var <- function(mysims, what=c("molecular", "expression")[1], ylim=NULL, xl
 	}
 }
 
-plot.var.gene <- function(mysim, what=c("molecular", "expression")[1], ylim=NULL, xlab="Generation", ylab=NULL, y.factor=1, ...) {
-	if (what == "molecular") {
-		var.data <- molec.variation(meansim.all[[mysim]])[,-1]
-		if (is.null(ylab)) ylab <- "Molecular variance"
-	} else if (what == "expression") {
-		var.data <- pheno.variation(meansim.all[[mysim]])[,-1]
-		if (is.null(ylab)) ylab <- "Expression variance"
-	} else {
-		stop("plot.var: what= ", what, " is not a valid option.")
-	}
-	
-	gen <- as.numeric(meansim.all[[mysim]][,"Gen"])
-
-	sel.change.gen <- try(selectionchange.detect(meansim.all[[mysim]]), silent=TRUE)
-	if (class(sel.change.gen) == "try-error") sel.change.gen <- max(gen)
-	sel.pattern <- selpattern.all[[mysim]]
-	sel.pattern[sel.pattern == "cc"] <- "ss" # No need to distinguish constant and stable?
-	sel.before <- substr(sel.pattern, 1, 1)
-
-	if (is.null(ylim)) ylim <- c(0, y.factor*max(var.data))
-
-	plot(NULL, xlim=c(first.gen(mysim[1]), max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
-	
-	for (cc in unique(sel.before)) {
-		yy <- (rowMeans(var.data[,sel.before==cc])*y.factor)[gen <= sel.change.gen]
-		my.yy <- mov.avg(yy, gen[gen <= sel.change.gen], size=window.avg, min.gen=0)
-		lines(as.numeric(names(my.yy)), my.yy, lty=1, col=col.sel[cc])
-	}
-	if (sel.change.gen < max(gen))
-		for (cc in unique(sel.pattern)) {
-			yy <- (rowMeans(var.data[,sel.pattern==cc,drop=FALSE])*y.factor)[gen > sel.change.gen]
-			my.yy <- mov.avg(yy, gen[gen > sel.change.gen], size=window.avg, min.gen=0)
-			mysel.before <- substr(cc, 1, 1)
-			mysel.after  <- substr(cc, 2, 2)
-			lines(as.numeric(names(my.yy)), my.yy, lty=lty.sel[mysel.after], col=col.sel[mysel.before])
-		}
-}
 
 plot.var.pheno <- function(mysims,  ylim=NULL, xlab="Generation", ylab="Expression variance", y.factor=1, show.quantiles=FALSE, ...) {
 	for (mysim in mysims) {
@@ -269,35 +251,6 @@ plot.var.neutral <- function(mysims,  ylim=NULL, xlab="Generation", ylab="Molecu
 }
 
 
-plot.var.neutral.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Molecular variance", expr.thresh=0.1, algorithm=c("lowexpr", "cleanW")[1], y.factor=1, ...) {
-
-	var.data <- molec.variation.neutral.gene.mean.cache(outdir.all[[mysim]], expr.thresh=expr.thresh, algorithm=algorithm, mc.cores=mc.cores)[,-1]
-	gen <- as.numeric(rownames(var.data))
-	sel.change.gen <- try(selectionchange.detect(meansim.all[[mysim]]), silent=TRUE)
-	if (class(sel.change.gen) == "try-error") sel.change.gen <- max(gen)
-	sel.pattern <- selpattern.all[[mysim]]
-	sel.pattern[sel.pattern == "cc"] <- "ss" # No need to distinguish constant and stable?
-	sel.before <- substr(sel.pattern, 1, 1)
-		
-	if (is.null(ylim)) ylim <- c(0, y.factor*max(var.data))
-
-	plot(NULL, xlim=c(first.gen(mysim), max(gen)), ylim=ylim, ylab=ylab, xlab=xlab, ...)
-	
-	for (cc in unique(sel.before)) {
-		yy <- (rowMeans(var.data[,sel.before==cc])*y.factor)[gen <= sel.change.gen]
-		my.yy <- mov.avg(yy, gen[gen <= sel.change.gen], size=window.avg, min.gen=0)
-		lines(as.numeric(names(my.yy)), my.yy, lty=1, col=col.sel[cc])
-	}
-	if (sel.change.gen < max(gen))
-		for (cc in unique(sel.pattern)) {
-			yy <- (rowMeans(var.data[,sel.pattern==cc,drop=FALSE])*y.factor)[gen >= sel.change.gen]
-			my.yy <- mov.avg(yy, gen[gen >= sel.change.gen], size=window.avg, min.gen=0)
-			mysel.before <- substr(cc, 1, 1)
-			mysel.after  <- substr(cc, 2, 2)
-			lines(as.numeric(names(my.yy)), my.yy, lty=lty.sel[mysel.after], col=col.sel[mysel.before])
-		}
-}
-
 
 plot.evol <- function(mysims, ylim=NULL, xlab="Generation", ylab="Evolutionary change", ...) {
 	
@@ -312,35 +265,6 @@ plot.evol <- function(mysims, ylim=NULL, xlab="Generation", ylab="Evolutionary c
 	}
 }
 
-
-plot.evol.gene <- function(mysim, ylim=NULL, xlab="Generation", ylab="Evolutionary change", ...) {
-	
-	ev.genes <- mean.Wdiff.dyn.cache(outdir.all[[mysim]], deltaG, mc.cores=mc.cores)[,-1]
-
-	gen <- as.numeric(rownames(ev.genes))
-	sel.change.gen <- try(selectionchange.detect(meansim.all[[mysim]]), silent=TRUE)
-	if (class(sel.change.gen) == "try-error") sel.change.gen <- max(gen)
-	sel.pattern <- selpattern.all[[mysim]]
-	sel.pattern[sel.pattern == "cc"] <- "ss" # No need to distinguish constant and stable?
-	sel.before <- substr(sel.pattern, 1, 1)
-	
-	if(is.null(ylim)) ylim <- c(0, max(ev.genes))
-	plot(NULL, xlim=c(first.gen(mysim), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
-	
-	for (cc in unique(sel.before)) {
-		yy <- (rowMeans(ev.genes[,sel.before==cc,drop=FALSE]))[gen <= sel.change.gen]
-		my.yy <- mov.avg(yy, gen[gen <= sel.change.gen], size=window.avg, min.gen=0)
-		lines(as.numeric(names(my.yy)), my.yy, col=1, lty=lty.sel[cc])
-	}
-	if (sel.change.gen < max(gen))
-		for (cc in unique(sel.pattern)) {
-			yy <- (rowMeans(ev.genes[,sel.pattern==cc,drop=FALSE]))[gen >= sel.change.gen]
-			my.yy <- mov.avg(yy, gen[gen >= sel.change.gen], size=window.avg, min.gen=0)
-			mysel.before <- substr(cc, 1, 1)
-			mysel.after  <- substr(cc, 2, 2)
-			lines(as.numeric(names(my.yy)), my.yy, col=col.sel[mysel.after], lty=lty.sel[mysel.before])
-		}
-}
 
 # Reaction norm, several simulations possible
 plot.norm <- function(mysims, ylim=c(0, 1.2), xlab="Generation", ylab="|Reaction norm|", lty=NULL, show.quantiles=FALSE, ...) {
@@ -676,20 +600,6 @@ plot.Gdiff <- function(mysims, show.quantiles=FALSE, deltaG=1, xlab="Generation"
 	}
 }
 
-plot.GPC <- function(mysims, PC=1, xlab="Generation", ylab="Proportion of total variance", ylim=c(0,1), ...) {
-	gpc <- sapply(mysims, function(mysim) {
-		mean.propPC.dyn.cache(outdir.all[[mysim]], PC, mc.cores=mc.cores)
-	}, USE.NAMES=TRUE, simplify=FALSE)
-	
-	gen <-as.numeric(names(gpc[[1]]))
-			
-	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
-	
-	for (mysim in mysims) {
-		lines(gen, gpc[[mysim]], lty=lty.sce[mysim], col=col.sce[mysim])
-	}	
-}
-
 plot.Gcor <- function(mysims, xlab="Generations", ylab="Genetic correlations", ylim=NULL, show.quantiles=FALSE, ...) {
 	
 	gen <- as.numeric(names(Gcor.mean.cache(outdir.all[[mysims[1]]], mc.cores=mc.cores)))
@@ -708,34 +618,6 @@ plot.Gcor <- function(mysims, xlab="Generations", ylab="Genetic correlations", y
 			polygon(c(gen, rev(gen)), c(q1, rev(q2)), border=NA, col=makeTransparent(col))
 		}
 	}
-}
-
-plot.WFUN <- function(mysims, WFUN="mean", deltaG=1, xlab="Generation", ylab="FUN(regulation effect)", ylim=c(0,1), col=NULL, lty=NULL, ...) {
-	wm <- sapply(mysims, function(mysim) {
-		WFUN.dyn.files.cache(outdir.all[[mysim]], WFUN=WFUN, deltaG=deltaG, mc.cores=mc.cores)
-	}, USE.NAMES=TRUE, simplify=FALSE)
-
-	gen <-as.numeric(names(wm[[1]]))
-
-	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
-	
-	for (mysim in mysims) {
-		lines(gen, wm[[mysim]], lty=if(is.null(lty)) lty.sce[mysim] else lty, col=if(is.null(col)) col.sce[mysim] else col)
-	}
-}
-
-plot.Grank <- function(mysims, xlab="Generation", ylab="Effective rank of G", ylim=NULL, ...) {
-	gr <- sapply(mysims, function(mysim) {
-		mean.erankG.dyn.cache(outdir.all[[mysim]], mc.cores=mc.cores)
-	}, USE.NAMES=TRUE, simplify=FALSE)	
-	
-	gen <-as.numeric(names(gr[[1]]))
-	if (is.null(ylim)) ylim <- c(0, max(unlist(gr)))
-	plot(NULL, xlim=c(first.gen(mysims[1]), max(gen)), ylim=ylim, xlab=xlab, ylab=ylab, ...)
-	
-	for (mysim in mysims) {
-		lines(gen, gr[[mysim]], lty=lty.sce[mysim], col=col.sce[mysim])
-	}		
 }
 
 plot.Gmat <- function(mysim, gen, absolute=TRUE, cols=NULL, ...) {
