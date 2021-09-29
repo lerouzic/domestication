@@ -5,6 +5,7 @@ Gene network &amp; Domestication project, involving Ewen Burban, Maud Tenaillon,
 This directory contains all the material to run and analyse the simulations.
 
 Structure of the sub-directories:
+
 * **param**: parameter files for the simulations
 * **src**  : R helper source files for various calculations + symbolic link to the C++ simulation software
 * **run**  : Rscripts for running simulations
@@ -12,20 +13,22 @@ Structure of the sub-directories:
 * **cache**: cache directory, contains the simulation results (cache/sim*) + results of heavy calculations when generating figures (cache/Rcache*)
 
 Dependencies 
+
 * The simulation program Simul_Prog and its dependencies
 * A recent version of R (> 3.4)
 * The following R libraries:
-** parallel
-** digest
-** ade4
-** igraph
-** Rcpp
-** inline
+    - parallel
+    - digest
+    - ade4
+    - igraph
+    - Rcpp
+    - inline
 
 ## Launching simulations
-
-`cd run`
-`Rscript ./make_sims.R`
+```
+cd run
+Rscript ./make_sims.R
+```
 
 This will generate (i) a  series of parameter files in ../cache, and (ii) a file ./xxx-launch.sh in the current directory. 
 
