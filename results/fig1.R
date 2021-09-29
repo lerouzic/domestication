@@ -9,7 +9,7 @@ env.default <- 0.5
 env.alt     <- 0.8
 col.lim <- c(-0.5, 0.5)
 
-net.plot <- function(W, xlim=c(-0.2, 1.2), ylim=c(-0.2, 1.2), col=c("black", "white", "black"), text.cex=1.6, shft=0.2, bold=numeric(0)) {
+net.plot <- function(W, xlim=c(-0.2, 1.2), ylim=c(-0.2, 1.2), col=c("black", "white", "black"), text.cex=1.6, shft=0.2, bold=numeric(0), font.caption=rep(1,ncol(W))) {
 	opar <- par(mar=c(3,1,1,1))
 	stopifnot(ncol(W) == 4, nrow(W) == 4)
 	rr <- colorRamp(col)
@@ -21,7 +21,7 @@ net.plot <- function(W, xlim=c(-0.2, 1.2), ylim=c(-0.2, 1.2), col=c("black", "wh
 	coords.genes <- cbind(c(0, 1, 1, 0), c(1, 1, 0, 0))
 	rownames(coords.genes) <- rownames(W)
 	
-	text(x=coords.genes[,1], y=coords.genes[,2], rownames(coords.genes), col=col.genes, cex=text.cex)
+	text(x=coords.genes[,1], y=coords.genes[,2], rownames(coords.genes), col=col.genes, cex=text.cex, font=font.caption)
 	
 	for (i in 1:nrow(W)) {
 		for (j in 1:ncol(W)) {
@@ -43,7 +43,7 @@ net.plot <- function(W, xlim=c(-0.2, 1.2), ylim=c(-0.2, 1.2), col=c("black", "wh
 	par(mar=opar)
 }
 
-W.plot <- function(W, xlim=c(-0.2, 1.2), ylim=c(-0.2, 1.2), col=c("black", "black", "black"), cex.text=1.6, main="", bold=numeric(0), brackets=TRUE, show.zeros=FALSE, first.line=FALSE) {
+W.plot <- function(W, xlim=c(-0.2, 1.2), ylim=c(-0.2, 1.2), col=c("black", "black", "black"), cex.text=1.6, main="", bold=numeric(0), bold.caption=numeric(0), brackets=TRUE, show.zeros=FALSE, first.line=FALSE) {
 	stopifnot(ncol(W) == 4, nrow(W) == 4)
 	rr <- colorRamp(col)
 	plot(NULL, xlim=xlim, ylim=ylim, axes=FALSE, xlab="", ylab="", main=main)
@@ -81,7 +81,7 @@ W.plot <- function(W, xlim=c(-0.2, 1.2), ylim=c(-0.2, 1.2), col=c("black", "blac
 	for (i in 1:nrow(W))
 		axis(2, at=rev(seq(0, 1, length.out=nrow(W)))[i], labels=rownames(W)[i], tick=FALSE, lty=0, cex.axis=cex.text, col.axis=col.genes[i+if(first.line) 0 else 1], las=2)
 	for (j in 1:ncol(W))
-		axis(3, at=seq(0, 1, length.out=ncol(W))[j], labels=colnames(W)[j], tick=FALSE, lty=0, cex.axis=cex.text, col.axis=col.genes[j])
+		axis(3, at=seq(0, 1, length.out=ncol(W))[j], labels=colnames(W)[j], tick=FALSE, lty=0, cex.axis=cex.text, col.axis=col.genes[j], font.axis=if(j %in% bold.caption) 2 else 1 )
 }
 
 dyn.plot <- function(W, env=env.default, main="", gene.names=TRUE) {
@@ -142,7 +142,7 @@ rownames(W.before) <- rownames(W.after) <- colnames(W.before) <- colnames(W.afte
       
 
 pdf("fig1.pdf", width=12, height=9)
-layout(matrix(c(1:5,0,6:11), byrow=TRUE, ncol=4), widths=c(0.2,0.2,0.4,0.1))
+layout(matrix(c(1:12), byrow=TRUE, ncol=4), widths=c(0.2,0.2,0.4,0.1))
 
 par(cex=0.8, oma=c(0, 5, 0, 0))
 
@@ -152,13 +152,14 @@ net.plot(W.before)
 dyn.plot(W.before, env=env.default)
 fit.plot(thetas, ylab="", yaxt="n", phen=model.M2(W.before, env=env.default)$mean)
 
-plot(NULL,xlim=0:1, ylim=0:1,axes=FALSE,ann=FALSE)
-mtext(side=2, text="Environment\nchange", line=4, cex=2)
+W.plot(W.before, bold.caption=1)
+mtext(side=2, text="Environment\nchange", line=4, cex=2, col="darkgreen")
+net.plot(W.before, font.caption=c(2,1,1,1))
 dyn.plot(W.before, env=env.alt)
 fit.plot(thetas, ylab="", yaxt="n", phen=model.M2(W.before, env=env.alt)$mean)
 
 W.plot(W.after, bold=which(W.before != W.after))
-mtext(side=2, text="Mutant\nNetwork", line=4, cex=2)
+mtext(side=2, text="Mutant\nNetwork", line=4, cex=2, col="red")
 
 net.plot(W.after, bold=which(W.before != W.after))
 dyn.plot(W.after, env=env.default)
